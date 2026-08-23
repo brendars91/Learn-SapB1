@@ -9,7 +9,7 @@ export const I18N = {
     question: 'Pregunta', next: 'Siguiente', finish: 'Terminar', correct: 'Decisión sólida', incorrect: 'Revisa el razonamiento',
     level: 'Nivel', allLevels: 'Todos los niveles', allTracks: 'Todas las rutas', status: 'Estado', newStatus: 'Nueva', learningStatus: 'En práctica', masteredStatus: 'Dominada',
     objective: 'Objetivo', concept: 'Concepto', practice: 'Práctica', verify: 'Verificación', risk: 'Riesgo', evidence: 'Evidencia',
-    learnMode: 'Entender', proveSkill: 'Demostrar dominio', mindsetLabel: 'Mentalidad', tipsLabel: 'Tips de experto', pitfallLabel: 'Trampa típica',
+    learnMode: 'Entender', proveSkill: 'Demostrar dominio', mindsetLabel: 'Mentalidad', tipsLabel: 'Tips de experto', pitfallLabel: 'Trampa típica', anchorLabel: 'El ancla', pathLabel: 'Ruta en pantalla', exampleLabel: 'Ejemplo trabajado', coverTitle: 'Learn-SapB1', coverSub: 'El laboratorio para dominar SAP Business One como un consultor senior: entender los documentos, razonar las decisiones y verificar antes de actuar.',
     seniorLabel: 'Cómo razona un senior', whyOptions: 'Por qué cada opción', hintLabel: 'Pista', commitPrinciple: '¿Qué principio aplicas?',
     diagramLabel: 'Mapa visual', checklistLabel: 'Verificación paso a paso', showHint: 'Ver pista', stepDecide: 'Decide', stepCommit: 'Principio', stepReveal: 'Razonamiento',
     markPractice: 'Registrar práctica', challenge: 'Resolver reto', reveal: 'Ver explicación', choose: 'Selecciona la mejor decisión',
@@ -38,7 +38,7 @@ export const I18N = {
     question: 'Question', next: 'Next', finish: 'Finish', correct: 'Sound decision', incorrect: 'Review the reasoning',
     level: 'Level', allLevels: 'All levels', allTracks: 'All paths', status: 'Status', newStatus: 'New', learningStatus: 'Practising', masteredStatus: 'Mastered',
     objective: 'Objective', concept: 'Concept', practice: 'Practice', verify: 'Verification', risk: 'Risk', evidence: 'Evidence',
-    learnMode: 'Understand', proveSkill: 'Prove mastery', mindsetLabel: 'Mindset', tipsLabel: 'Expert tips', pitfallLabel: 'Common trap',
+    learnMode: 'Understand', proveSkill: 'Prove mastery', mindsetLabel: 'Mindset', tipsLabel: 'Expert tips', pitfallLabel: 'Common trap', anchorLabel: 'The anchor', pathLabel: 'Screen route', exampleLabel: 'Worked example', coverTitle: 'Learn-SapB1', coverSub: 'The lab to master SAP Business One as a senior consultant: understand the documents, reason the decisions, verify before acting.',
     seniorLabel: 'How a senior reasons', whyOptions: 'Why each option', hintLabel: 'Hint', commitPrinciple: 'Which principle applies?',
     diagramLabel: 'Visual map', checklistLabel: 'Step-by-step verification', showHint: 'Show hint', stepDecide: 'Decide', stepCommit: 'Principle', stepReveal: 'Reasoning',
     markPractice: 'Record practice', challenge: 'Solve challenge', reveal: 'Show explanation', choose: 'Choose the best decision',
@@ -67,7 +67,7 @@ export const I18N = {
     question: 'Frage', next: 'Weiter', finish: 'Abschließen', correct: 'Solide Entscheidung', incorrect: 'Begründung prüfen',
     level: 'Stufe', allLevels: 'Alle Stufen', allTracks: 'Alle Pfade', status: 'Status', newStatus: 'Neu', learningStatus: 'In Übung', masteredStatus: 'Beherrscht',
     objective: 'Ziel', concept: 'Konzept', practice: 'Übung', verify: 'Prüfung', risk: 'Risiko', evidence: 'Nachweis',
-    learnMode: 'Verstehen', proveSkill: 'Beherrschung nachweisen', mindsetLabel: 'Mentales Modell', tipsLabel: 'Expertentipps', pitfallLabel: 'Typische Falle',
+    learnMode: 'Verstehen', proveSkill: 'Beherrschung nachweisen', mindsetLabel: 'Mentales Modell', tipsLabel: 'Expertentipps', pitfallLabel: 'Typische Falle', anchorLabel: 'Der Anker', pathLabel: 'Bildschirmroute', exampleLabel: 'Durchgerechnetes Beispiel', coverTitle: 'Learn-SapB1', coverSub: 'Das Labor zur Beherrschung von SAP Business One wie ein Senior-Berater: Dokumente verstehen, Entscheidungen begründen, vor dem Handeln prüfen.',
     seniorLabel: 'Wie ein Senior denkt', whyOptions: 'Warum jede Option', hintLabel: 'Hinweis', commitPrinciple: 'Welches Prinzip gilt?',
     diagramLabel: 'Visuelle Karte', checklistLabel: 'Schrittweise Prüfung', showHint: 'Hinweis zeigen', stepDecide: 'Entscheiden', stepCommit: 'Prinzip', stepReveal: 'Begründung',
     markPractice: 'Übung speichern', challenge: 'Aufgabe lösen', reveal: 'Erklärung zeigen', choose: 'Wähle die beste Entscheidung',
@@ -113,7 +113,9 @@ const RISK_BY_LEVEL = [1, 2, 2, 2, 3, 3, 2, 3, 3];
 
 // Constructor DSL de skill. Cada spec se autoriza a mano: t=título, o=objetivo, c=concepto,
 // m=mentalidad, p=práctica, v=verificación, vs=checklist visual, r=riesgo, tips=expert tips,
-// pf=trampa junior, d=diagrama {k:arquetipo, cap:título, n:[nodos]}, a=assessment.
+// pf=trampa junior, d=diagrama {k:arquetipo, cap:título, n:[nodos]}, a=assessment,
+// an=ancla mnemotécnica {g:glifo, es/en:analogía}, pa=ruta en pantalla [módulo›pantalla›acción],
+// ex=ejemplo trabajado {q:pregunta, rows:[[debe,haber,importe]...] opcional, show:[líneas con cifras], a:respuesta}.
 export function sk(level, index, spec) {
   const id = `SYN-SK-L${level}-${String(index + 1).padStart(2, '0')}`;
   return {
@@ -121,6 +123,7 @@ export function sk(level, index, spec) {
     objective: spec.o, concept: spec.c, mindset: spec.m, practice: spec.p,
     verify: spec.v, verifySteps: spec.vs, risk: spec.r,
     tips: spec.tips, pitfall: spec.pf, diagram: spec.d,
+    anchor: spec.an, path: spec.pa, example: spec.ex,
     assessment: {
       prompt: spec.a.prompt ?? spec.a.p, optionsText: spec.a.opts, correct: spec.a.correct ?? 0,
       safe: [true, true, false], rationale: spec.a.why,

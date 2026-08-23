@@ -6,9 +6,17 @@ import { L2 } from './content/l2.mjs';
 import { L3, L4 } from './content/l34.mjs';
 import { L5, L6 } from './content/l56.mjs';
 import { L7, L8 } from './content/l78.mjs';
+import { DEEP } from './content/deep.mjs';
 
 export { I18N, translate, EVIDENCE, PROCESS_STEPS, LEVELS };
-export const SKILLS = [...L0, ...L1, ...L2, ...L3, ...L4, ...L5, ...L6, ...L7, ...L8];
+const BASE_SKILLS = [...L0, ...L1, ...L2, ...L3, ...L4, ...L5, ...L6, ...L7, ...L8];
+// Enriquecer cada skill con su ancla, ruta de pantalla y ejemplo trabajado.
+export const SKILLS = BASE_SKILLS.map(s => {
+  const deep = DEEP[s.id];
+  if (!deep) return s;
+  const [g, anchorEs, anchorEn, path, ex] = deep;
+  return { ...s, anchor: { g, es: anchorEs, en: anchorEn }, path, example: ex ? { q: ex.q, show: ex.show, a: { es: ex.a, en: ex.a } } : undefined };
+});
 
 export const CASES = [
   decision('SYN-CASE-01', 0, {
