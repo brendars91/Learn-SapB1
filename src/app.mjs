@@ -338,11 +338,17 @@ function renderHome(state) {
   const nextSkill = recommendNext(SKILLS, state.progress, new Date(), { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
   const boss = BOSSES[state.bossIndex];
   return `<div class="sbl-stack">
-    <div class="viz-grid">
-      <div class="card viz-stat"><span class="text-muted">${t(state, 'mastery')}</span><span class="viz-stat-value">${stats.percent}%</span><span class="text-small">${stats.mastered}/72</span></div>
-      <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
-      <div class="card viz-stat"><span class="text-muted">${t(state, 'dueReview')}</span><span class="viz-stat-value">${stats.due}</span><span class="text-small">${t(state, 'localOnly')}</span></div>
-    </div>
+    <section class="sbl-cover">
+      <span class="sbl-kicker">SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS</span>
+      <h1>${t(state, 'coverTitle')}</h1>
+      <p class="sbl-sub">${t(state, 'coverSub')}</p>
+      <span class="sbl-rule-orn" aria-hidden="true">❦</span>
+      <div class="viz-grid">
+        <div class="card viz-stat"><span class="text-muted">${t(state, 'mastery')}</span><span class="viz-stat-value">${stats.percent}%</span><span class="text-small">${stats.mastered}/72</span></div>
+        <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
+        <div class="card viz-stat"><span class="text-muted">${t(state, 'dueReview')}</span><span class="viz-stat-value">${stats.due}</span><span class="text-small">${t(state, 'localOnly')}</span></div>
+      </div>
+    </section>
     ${renderHeatmap(state)}
     <section class="card sbl-stack"><span class="viz-badge">${t(state, 'recommended')}</span><h2>${local(nextSkill.title, state.locale)}</h2><p>${local(nextSkill.objective, state.locale)}</p><div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${t(state, 'begin')}</button></div></section>
     <section class="sbl-stack" aria-labelledby="boss-title"><h2 id="boss-title">${t(state, 'bossTitle')}</h2><div class="sbl-toolbar">${BOSSES.map(item => `<button type="button" class="btn${item.level === state.bossIndex ? ' btn-primary' : ''}" data-action="select-boss" data-index="${item.level}" aria-pressed="${item.level === state.bossIndex}">${t(state, 'level')} ${item.level}</button>`).join('')}</div>${renderDecision(state, boss, 'boss')}</section>
@@ -360,14 +366,22 @@ function renderLearnMode(state, skill) {
   const record = state.progress[skill.id] || {};
   const tips = (skill.tips?.[state.locale] || []).map(tip => `<li>${escapeHtml(tip)}</li>`).join('');
   const steps = (skill.verifySteps || []).map((s, i) => `<li><span class="sbl-step-n">${i + 1}</span><span>${local(s, state.locale)}</span></li>`).join('');
+  const an = skill.anchor;
+  const pathHtml = (skill.path || []).length ? `<div class="sbl-detail-grid__full"><h4>${t(state, 'pathLabel')}</h4><div class="sbl-path">${skill.path.map((crumb, i) => `${i ? '<span class="sep">›</span>' : ''}<span class="crumb">${escapeHtml(crumb)}</span>`).join('')}</div></div>` : '';
+  const ex = skill.example;
+  const exHtml = ex ? `<div class="sbl-example"><h4>${t(state, 'exampleLabel')}</h4><p><strong>${escapeHtml(local(ex.q, state.locale) || ex.q)}</strong></p><pre class="sbl-figure">${(ex.show || []).map(l => escapeHtml(l)).join('\n')}</pre>${ex.a ? `<p class="text-small"><em>${escapeHtml(local(ex.a, state.locale) || ex.a)}</em></p>` : ''}</div>` : '';
+  const anHtml = an ? `<div class="sbl-anchor"><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
   return `<div class="sbl-learn">
+    ${anHtml}
     ${svgDiagram(skill.diagram, state.locale)}
+    ${pathHtml}
     <div class="sbl-detail-grid">
       <section><h3>${t(state, 'mindsetLabel')}</h3><p class="sbl-mindset">${local(skill.mindset, state.locale)}</p></section>
       <section><h3>${t(state, 'concept')}</h3><p>${local(skill.concept, state.locale)}</p></section>
       <section><h3>${t(state, 'objective')}</h3><p>${local(skill.objective, state.locale)}</p></section>
       <section><h3>${t(state, 'practice')}</h3><p>${local(skill.practice, state.locale)}</p></section>
     </div>
+    ${exHtml}
     <div class="sbl-tips"><h4>${t(state, 'tipsLabel')}</h4><ul>${tips}</ul></div>
     <div class="sbl-answer-feedback" data-correct="false"><strong>${t(state, 'pitfallLabel')}</strong><p>${local(skill.pitfall, state.locale)}</p></div>
     <div class="sbl-checklist"><h4>${t(state, 'checklistLabel')}</h4><ol class="sbl-steps">${steps}</ol></div>

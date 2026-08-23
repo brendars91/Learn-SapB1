@@ -24,12 +24,13 @@ const l2 = await readFile(path.join(projectRoot, 'src/content/l2.mjs'), 'utf8');
 const l34 = await readFile(path.join(projectRoot, 'src/content/l34.mjs'), 'utf8');
 const l56 = await readFile(path.join(projectRoot, 'src/content/l56.mjs'), 'utf8');
 const l78 = await readFile(path.join(projectRoot, 'src/content/l78.mjs'), 'utf8');
+const deep = await readFile(path.join(projectRoot, 'src/content/deep.mjs'), 'utf8');
 
 const strip = source => source
   .replace(/^import[^;]+;\s*$/gm, '')
   .replace(/^export\s+/gm, '');
 
-const contentBundle = [base, l0, l1, l2, l34, l56, l78, contentSource].map(strip).join('\n\n');
+const contentBundle = [base, l0, l1, l2, l34, l56, l78, deep, contentSource].map(strip).join('\n\n');
 const runtime = [contentBundle, strip(domainSource), strip(appSource)].join('\n\n');
 
 const fragment = `${shell.trim()}\n<style>\n${styles.trim()}\n</style>\n<script>\n(() => {\n'use strict';\n${runtime}\nconst sapB1LabRoot = document.getElementById('sap-b1-mastery-lab');\nmountSapB1Lab(sapB1LabRoot);\n})();\n</script>\n`;
@@ -41,8 +42,8 @@ const standalone = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Learn-SapB1 — Learn SAP Business One Visually</title>
 <style>
-  :root { color-scheme: dark; }
-  body { margin: 0; min-height: 100vh; background: #070d18; color: #e8edf7; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  :root { color-scheme: light; }
+  body { margin: 0; min-height: 100vh; background: #efe7d5; color: #1f1a13; font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif; }
   .page { max-width: 1180px; margin: 0 auto; padding: clamp(.6rem, 2vw, 1.4rem); }
 </style>
 </head>
