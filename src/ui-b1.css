@@ -1,0 +1,108 @@
+/* ============================================================
+   ui-b1.css — Mockups fieles de ventanas SAP Business One.
+   Replica el cliente clásico: chrome gris perla, titlebar azul
+   corporativa, campos amarillos editables / blancos de sistema,
+   tabs de carpeta, grid con footer de totales, barra de estado.
+   ============================================================ */
+
+.b1 {
+  --b1-chrome: #ece9e2;
+  --b1-chrome-dark: #d8d4cb;
+  --b1-title: #1a3a6b;
+  --b1-yellow: #fdf3c9;
+  --b1-yellow-act: #ffe98a;
+  --b1-sys: #ffffff;
+  --b1-lock: #e6e2d9;
+  --b1-ink: #1f1a13;
+  --b1-line: #b8b2a6;
+  --b1-gridline: #ddd8cd;
+  --b1-num: #0d3b66;
+  --b1-tab-active: #f6f3ec;
+  margin: 0 0 1.1rem;
+  border: 1px solid var(--b1-line);
+  box-shadow: 2px 2px 0 rgba(31, 26, 19, .12);
+  background: var(--b1-chrome);
+  font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+  font-size: 12.5px;
+  color: var(--b1-ink);
+}
+
+.b1-titlebar {
+  display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(180deg, #2c4f86, var(--b1-title));
+  color: #fff; padding: 4px 8px; font-size: 12px; font-weight: 600;
+  letter-spacing: .2px;
+}
+.b1-ticon { opacity: .85; }
+.b1-ttext { flex: 1; }
+.b1-tctrl span { margin-left: 8px; opacity: .85; cursor: default; }
+
+.b1-menubar {
+  display: flex; gap: 14px; padding: 3px 10px;
+  background: var(--b1-chrome); border-bottom: 1px solid var(--b1-line);
+  font-size: 11.5px; color: #444;
+}
+.b1-menubar span:hover { background: var(--b1-chrome-dark); }
+
+.b1-toolbar {
+  display: flex; align-items: center; gap: 2px; padding: 4px 8px;
+  border-bottom: 1px solid var(--b1-line); background: #f4f1ea;
+}
+.b1-tbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 20px; padding: 0 4px;
+  border: 1px solid transparent; border-radius: 2px; font-size: 11px; line-height: 1;
+}
+.b1-tbtn:hover { border-color: var(--b1-line); background: #fff; }
+.b1-toolbar-sep { width: 1px; height: 16px; background: var(--b1-line); margin: 0 4px; }
+
+.b1-body { padding: 10px 10px 8px; background: var(--b1-chrome); }
+
+.b1-tabs { display: flex; gap: 2px; margin-bottom: 8px; }
+.b1-tab {
+  padding: 4px 12px; font-size: 11.5px;
+  background: var(--b1-chrome-dark); border: 1px solid var(--b1-line); border-bottom: none;
+  border-radius: 4px 4px 0 0; color: #555;
+}
+.b1-tab.is-active { background: var(--b1-tab-active); color: var(--b1-ink); font-weight: 600; position: relative; top: 1px; }
+
+.b1-header { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px 14px; margin-bottom: 10px; }
+.b1-field { display: contents; }
+.b1-flabel { font-size: 11px; color: #555; display: block; margin-bottom: 1px; }
+.b1-fvalue {
+  display: inline-block; min-width: 60px; min-height: 18px; padding: 2px 6px;
+  border: 1px solid var(--b1-line); background: var(--b1-sys); font-size: 12px;
+}
+.b1-in { background: var(--b1-yellow); }
+.b1-in:hover { background: var(--b1-yellow-act); }
+.b1-sys { background: var(--b1-sys); }
+.b1-lock { background: var(--b1-lock); color: #777; }
+
+.b1-grid { border: 1px solid var(--b1-line); background: #fff; overflow-x: auto; }
+.b1-grid-head, .b1-grid-row {
+  display: grid; grid-template-columns: repeat(var(--cols, 4), minmax(70px, 1fr));
+}
+.b1-grid-head {
+  background: var(--b1-chrome-dark); font-size: 11px; font-weight: 600; color: #444;
+  border-bottom: 1px solid var(--b1-line);
+}
+.b1-h, .b1-c { padding: 3px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.b1-grid-row { border-bottom: 1px solid var(--b1-gridline); font-size: 12px; }
+.b1-grid-row:nth-child(even) { background: #faf8f3; }
+.b1-c.is-num, .b1-h.is-num { text-align: right; font-variant-numeric: tabular-nums; }
+.b1-c.is-num { color: var(--b1-num); font-weight: 600; }
+
+.b1-totals { margin-top: 6px; border-top: 2px solid var(--b1-ink); padding-top: 6px; max-width: 320px; margin-left: auto; }
+.b1-total-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+.b1-total-row:last-child { font-weight: 700; font-size: 13px; }
+.b1-total-val { font-variant-numeric: tabular-numbers; }
+
+.b1-status {
+  display: flex; gap: 12px; margin-top: 8px; padding: 3px 8px;
+  border-top: 1px solid var(--b1-ink); font-size: 11px; color: #444;
+}
+.b1 figcaption {
+  padding: 8px 10px; font-size: 11.5px; color: #555;
+  border-top: 1px solid var(--b1-line); background: #f4f1ea;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-style: italic;
+}

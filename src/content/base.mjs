@@ -3,7 +3,7 @@ export const I18N = {
   es: {
     appLabel: 'Laboratorio de dominio SAP Business One', navHome: 'Misión', navMap: 'Mapa', navCases: 'Casos', navIncidents: 'Incidentes', navSimulator: 'Cadena', navAI: 'Lab de IA', navReview: 'Repaso', navEvidence: 'Fuentes',
     language: 'Idioma', track: 'Ruta', trackFunctional: 'Funcional', trackTechnical: 'Técnica + IA', trackDual: 'Doble ruta',
-    startDiagnostic: 'Iniciar diagnóstico', resume: 'Continuar', reset: 'Reiniciar progreso', export: 'Exportar', import: 'Importar',
+    startDiagnostic: 'Iniciar diagnóstico', resume: 'Continuar', reset: 'Reiniciar progreso', export: 'Exportar progreso', import: 'Importar progreso',
     mastery: 'Dominio', dueReview: 'Repasos', skillsExplored: 'Competencias', recommended: 'Siguiente misión', begin: 'Comenzar',
     diagnosticTitle: 'Diagnóstico adaptativo', diagnosticIntro: 'Seis decisiones para calibrar tu punto de entrada. No concede dominio automático.',
     question: 'Pregunta', next: 'Siguiente', finish: 'Terminar', correct: 'Decisión sólida', incorrect: 'Revisa el razonamiento',
@@ -32,7 +32,7 @@ export const I18N = {
   en: {
     appLabel: 'SAP Business One mastery lab', navHome: 'Mission', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'AI Lab', navReview: 'Review', navEvidence: 'Sources',
     language: 'Language', track: 'Path', trackFunctional: 'Functional', trackTechnical: 'Technical + AI', trackDual: 'Dual path',
-    startDiagnostic: 'Start diagnostic', resume: 'Continue', reset: 'Reset progress', export: 'Export', import: 'Import',
+    startDiagnostic: 'Start diagnostic', resume: 'Continue', reset: 'Reset progress', export: 'Export progress', import: 'Import progress',
     mastery: 'Mastery', dueReview: 'Reviews', skillsExplored: 'Skills', recommended: 'Next mission', begin: 'Begin',
     diagnosticTitle: 'Adaptive diagnostic', diagnosticIntro: 'Six decisions calibrate your entry point. It does not grant automatic mastery.',
     question: 'Question', next: 'Next', finish: 'Finish', correct: 'Sound decision', incorrect: 'Review the reasoning',
@@ -61,7 +61,7 @@ export const I18N = {
   de: {
     appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Mission', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'KI-Labor', navReview: 'Wiederholen', navEvidence: 'Quellen',
     language: 'Sprache', track: 'Lernpfad', trackFunctional: 'Funktional', trackTechnical: 'Technik + KI', trackDual: 'Doppelpfad',
-    startDiagnostic: 'Diagnose starten', resume: 'Fortsetzen', reset: 'Fortschritt löschen', export: 'Exportieren', import: 'Importieren',
+    startDiagnostic: 'Diagnose starten', resume: 'Fortsetzen', reset: 'Fortschritt löschen', export: 'Fortschritt exportieren', import: 'Fortschritt importieren',
     mastery: 'Beherrschung', dueReview: 'Wiederholungen', skillsExplored: 'Kompetenzen', recommended: 'Nächste Mission', begin: 'Starten',
     diagnosticTitle: 'Adaptive Diagnose', diagnosticIntro: 'Sechs Entscheidungen bestimmen den Einstieg. Sie vergeben keine automatische Beherrschung.',
     question: 'Frage', next: 'Weiter', finish: 'Abschließen', correct: 'Solide Entscheidung', incorrect: 'Begründung prüfen',

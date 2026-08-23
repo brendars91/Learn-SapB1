@@ -362,6 +362,36 @@ function skillStatus(state, skill) {
   return t(state, 'newStatus');
 }
 
+
+// —— Masterclass: pantalla B1 real + configuración + E2E + war story + best practices ——
+function renderMasterclass(state, skill) {
+  const mc = MASTERCLASS[skill.id];
+  if (!mc) return '';
+  const L = state.locale;
+  const loc = v => v?.[L] ?? v?.en ?? v?.es ?? '';
+  const screen = b1Window(mc.screen, L);
+  const cfg = (mc.cfg || []).map(c => `<li>${escapeHtml(loc(c))}</li>`).join('');
+  const e2e = (mc.e2e || []).map(step => `<li>${escapeHtml(loc(step))}</li>`).join('');
+  const bp = (mc.bp || []).map(b => `<li>${escapeHtml(loc(b))}</li>`).join('');
+  const war = mc.war;
+  const warHtml = war ? `<div class="sbl-war" data-correct="false">
+    <h4>⚠️ ${escapeHtml(loc(war.q))}</h4>
+    <p class="war-line"><strong>Síntoma</strong> ${(war.sympt || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
+    <p class="war-line"><strong>Causa raíz</strong> ${(war.root || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
+    <p class="war-line"><strong>Resolución</strong> ${(war.fix || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
+  </div>` : '';
+  return `<section class="sbl-masterclass" aria-label="Masterclass">
+    <h3 class="mc-title">🎓 Masterclass</h3>
+    ${screen}
+    <div class="mc-grid">
+      <div class="mc-block"><h4>⚙️ Configuración exacta</h4><ul>${cfg}</ul></div>
+      <div class="mc-block"><h4>🔗 Proceso end-to-end</h4><ol>${e2e}</ol></div>
+    </div>
+    ${warHtml}
+    <div class="mc-block mc-bp"><h4>🏆 Buenas prácticas senior</h4><ul>${bp}</ul></div>
+  </section>`;
+}
+
 function renderLearnMode(state, skill) {
   const record = state.progress[skill.id] || {};
   const tips = (skill.tips?.[state.locale] || []).map(tip => `<li>${escapeHtml(tip)}</li>`).join('');
@@ -374,6 +404,7 @@ function renderLearnMode(state, skill) {
   return `<div class="sbl-learn">
     ${anHtml}
     ${svgDiagram(skill.diagram, state.locale)}
+    ${renderMasterclass(state, skill)}
     ${pathHtml}
     <div class="sbl-detail-grid">
       <section><h3>${t(state, 'mindsetLabel')}</h3><p class="sbl-mindset">${local(skill.mindset, state.locale)}</p></section>
