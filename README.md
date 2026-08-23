@@ -22,7 +22,7 @@ Herramienta de estudio **personal, offline y sin cuentas** para aprender SAP Bus
 
 **Opción 1 (recomendada):** pulsa [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/sap-b1-mastery-lab/) — funciona directamente en el navegador, sin instalación.
 
-**Opción 2:** descarga [`SAP-Business-One-Mastery-Lab-Standalone.html`](SAP-Business-One-Mastery-Lab-Standalone.html) y ábrelo con doble clic en cualquier navegador moderno. Todo el contenido, estilos y lógica viven dentro del único archivo HTML (<1 MiB). No requiere servidor, cuenta, clave API ni conexión.
+**Opción 2:** descarga [`index.html`](index.html) y ábrelo con doble clic en cualquier navegador moderno. Todo el contenido, estilos y lógica viven dentro del único archivo HTML (<1 MiB). No requiere servidor, cuenta, clave API ni conexión.
 
 ### Qué contiene
 
@@ -90,7 +90,7 @@ A **personal, offline, account-free** study environment to master SAP Business O
 
 **Option 1 (recommended):** click [**OPEN THE APP**](https://brendars91.github.io/sap-b1-mastery-lab/) — runs straight in the browser.
 
-**Option 2:** download [`SAP-Business-One-Mastery-Lab-Standalone.html`](SAP-Business-One-Mastery-Lab-Standalone.html) and double-click it. Everything lives in a single <1 MiB HTML file: no server, account, API key, or network needed.
+**Option 2:** download [`index.html`](index.html) and double-click it. Everything lives in a single <1 MiB HTML file: no server, account, API key, or network needed.
 
 ### What's inside
 
