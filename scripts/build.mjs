@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const outDir = '/tmp/b1lab/out';
+const outDir = path.join(projectRoot, 'dist');
 const fragmentPath = path.join(outDir, 'sap-b1-mastery-lab.html');
 const standalonePath = path.join(outDir, 'SAP-Business-One-Mastery-Lab-Standalone.html');
 
