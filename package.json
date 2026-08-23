@@ -1,0 +1,11 @@
+{
+  "name": "sap-b1-mastery-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "build": "node scripts/build.mjs",
+    "sanitize:standalone": "node scripts/sanitize-standalone.mjs"
+  }
+}

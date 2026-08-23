@@ -1,0 +1,612 @@
+// app.mjs v2 — Motor entender-primero con visualizaciones SVG y evaluación 4 pasos.
+import { I18N, LEVELS, SKILLS, CASES, INCIDENTS, BOSSES, EVIDENCE, DIAGNOSTIC, PROCESS_STEPS, translate } from './content.mjs';
+import { calculateMastery, recommendNext, scanSensitiveInput, lintPrompt, validateProgressImport, nextReviewDate } from './domain.mjs';
+
+const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
+const VIEWS = ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'review', 'evidence'];
+
+export function escapeHtml(value = '') {
+  return String(value).replace(/[&<>"']/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[character]);
+}
+
+export function createInitialState(saved = {}) {
+  const locale = ['es', 'en', 'de'].includes(saved.locale) ? saved.locale : 'es';
+  const track = ['functional', 'technical', 'dual'].includes(saved.track) ? saved.track : 'dual';
+  return {
+    locale, track,
+    view: VIEWS.includes(saved.view) ? saved.view : 'home',
+    progress: saved.progress && typeof saved.progress === 'object' ? structuredClone(saved.progress) : {},
+    diagnosticIndex: Number(saved.diagnosticIndex) || 0,
+    diagnosticScore: Number(saved.diagnosticScore) || 0,
+    diagnosticCompleted: Boolean(saved.diagnosticCompleted),
+    diagnosticFeedback: null,
+    recommendedLevel: Number.isInteger(saved.recommendedLevel) ? saved.recommendedLevel : 0,
+    selectedSkillId: saved.selectedSkillId || 'SYN-SK-L0-01',
+    skillMode: saved.skillMode === 'prove' ? 'prove' : 'learn',
+    assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false,
+    levelFilter: saved.levelFilter ?? 'all',
+    trackFilter: saved.trackFilter || 'all',
+    assessmentResult: null,
+    caseIndex: Number(saved.caseIndex) || 0,
+    incidentIndex: Number(saved.incidentIndex) || 0,
+    bossIndex: Number(saved.bossIndex) || 0,
+    process: saved.process || 'sales',
+    processStep: Number(saved.processStep) || 0,
+    promptDraft: '', promptResult: null,
+    toast: ''
+  };
+}
+
+function updateSkill(progress, skillId, change) {
+  return { ...progress, [skillId]: { ...(progress[skillId] || {}), ...change } };
+}
+
+export function reduceState(state, action) {
+  switch (action.type) {
+    case 'SET_LOCALE': return ['es', 'en', 'de'].includes(action.locale) ? { ...state, locale: action.locale, toast: '' } : state;
+    case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
+    case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
+    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, toast: '' };
+    case 'SET_SKILL_MODE': return { ...state, skillMode: action.mode === 'prove' ? 'prove' : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null };
+    case 'ANSWER_STEP_DECIDE': return { ...state, assessmentChoice: action.index, assessmentStep: Math.max(state.assessmentStep, 1) };
+    case 'ANSWER_STEP_PRINCIPLE': return { ...state, assessmentPrinciple: action.index, assessmentStep: Math.max(state.assessmentStep, 2) };
+    case 'REVEAL_REASONING': return { ...state, assessmentShown: true, assessmentStep: 3 };
+    case 'SET_LEVEL_FILTER': return { ...state, levelFilter: action.value, toast: '' };
+    case 'SET_TRACK_FILTER': return { ...state, trackFilter: action.value, toast: '' };
+    case 'ANSWER_DIAGNOSTIC':
+      if (state.diagnosticFeedback) return state;
+      return { ...state, diagnosticScore: state.diagnosticScore + (action.correct ? 1 : 0), diagnosticFeedback: { correct: action.correct } };
+    case 'NEXT_DIAGNOSTIC': {
+      const last = state.diagnosticIndex >= DIAGNOSTIC.length - 1;
+      const score = state.diagnosticScore;
+      return last
+        ? { ...state, diagnosticCompleted: true, recommendedLevel: Math.min(8, Math.floor(score * 1.5)), diagnosticFeedback: null, toast: '' }
+        : { ...state, diagnosticIndex: state.diagnosticIndex + 1, diagnosticFeedback: null, toast: '' };
+    }
+    case 'PRACTISE_SKILL': {
+      const now = new Date(action.now || Date.now());
+      const existing = state.progress[action.skillId] || {};
+      const dimensions = { knowledge: Math.max(existing.knowledge || 0, 60), application: Math.max(existing.application || 0, 50), verification: Math.max(existing.verification || 0, 40), risk: Math.max(existing.risk || 0, 50) };
+      const mastery = calculateMastery(dimensions);
+      return { ...state, progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: mastery.score, mastered: mastery.mastered, explored: true, streak: existing.streak || 0, lastPractised: now.toISOString(), nextReview: nextReviewDate(existing.streak || 0, now) }), toast: 'practice-recorded' };
+    }
+    case 'ASSESS_SKILL': {
+      const now = new Date(action.now || Date.now());
+      const existing = state.progress[action.skillId] || {};
+      const increment = (field, amount) => Math.min(100, (Number(existing[field]) || 0) + amount);
+      const dimensions = action.correct
+        ? { knowledge: increment('knowledge', 10), application: increment('application', 15), verification: increment('verification', 20), risk: increment('risk', 15) }
+        : { knowledge: increment('knowledge', 5), application: Number(existing.application) || 0, verification: Number(existing.verification) || 0, risk: Number(existing.risk) || 0 };
+      const safetyGatePassed = action.safetyGatePassed !== false;
+      const mastery = calculateMastery(dimensions, safetyGatePassed);
+      const streak = action.correct ? (existing.streak || 0) + 1 : 0;
+      const correctAttempts = action.correct ? (existing.correctAttempts || 0) + 1 : (existing.correctAttempts || 0);
+      const principleBonus = action.principleCorrect ? 5 : 0;
+      if (principleBonus) { dimensions.verification = Math.min(100, dimensions.verification + principleBonus); }
+      return {
+        ...state,
+        progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: mastery.score, mastered: action.correct && mastery.mastered, explored: true, streak, correctAttempts, safetyGatePassed, lastPractised: now.toISOString(), nextReview: nextReviewDate(streak, now) }),
+        assessmentResult: { kind: 'skill', correct: action.correct, safetyGatePassed, principleCorrect: action.principleCorrect }
+      };
+    }
+    case 'CLEAR_SKILL_ASSESSMENT': return { ...state, assessmentResult: null, assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false };
+    case 'ANSWER_DECISION': return { ...state, assessmentResult: { kind: action.kind, correct: action.correct, rationale: action.rationale } };
+    case 'NEXT_DECISION': {
+      const key = action.kind === 'case' ? 'caseIndex' : action.kind === 'incident' ? 'incidentIndex' : 'bossIndex';
+      const length = action.kind === 'case' ? CASES.length : action.kind === 'incident' ? INCIDENTS.length : BOSSES.length;
+      return { ...state, [key]: (state[key] + 1) % length, assessmentResult: null };
+    }
+    case 'SELECT_BOSS': return { ...state, bossIndex: Math.max(0, Math.min(8, Number(action.index) || 0)), assessmentResult: null };
+    case 'SELECT_PROCESS': return Object.hasOwn(PROCESS_STEPS, action.process) ? { ...state, process: action.process, processStep: 0 } : state;
+    case 'SELECT_PROCESS_STEP': return { ...state, processStep: Math.max(0, Number(action.index) || 0) };
+    case 'PROMPT_RESULT': return { ...state, promptDraft: action.prompt, promptResult: action.result };
+    case 'IMPORT_STATE': return { ...createInitialState(action.value), toast: 'import-ok' };
+    case 'RESET': return { ...createInitialState(), toast: 'reset-ok' };
+    case 'CLEAR_TOAST': return { ...state, toast: '' };
+    default: return state;
+  }
+}
+
+export function serializeProgress(state, exportedAt = new Date().toISOString()) {
+  const progress = {};
+  for (const [skillId, record] of Object.entries(state.progress || {})) {
+    if (!/^SYN-SK-L[0-8]-0[1-8]$/.test(skillId) || !record || typeof record !== 'object') continue;
+    progress[skillId] = Object.fromEntries(Object.entries(record).filter(([key, value]) =>
+      ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'lastPractised', 'nextReview'].includes(key)
+      && ['number', 'boolean', 'string'].includes(typeof value)));
+  }
+  return {
+    schemaVersion: 1, classification: 'synthetic-progress',
+    locale: state.locale, track: state.track, progress,
+    settings: {
+      diagnosticCompleted: Boolean(state.diagnosticCompleted),
+      diagnosticScore: Number(state.diagnosticScore) || 0,
+      recommendedLevel: Number(state.recommendedLevel) || 0,
+      selectedSkillId: state.selectedSkillId
+    },
+    exportedAt
+  };
+}
+
+function t(state, key) { return escapeHtml(translate(state.locale, key)); }
+function local(value, locale) { return escapeHtml(value?.[locale] ?? value?.es ?? ''); }
+
+function navButton(state, view, key) {
+  const selected = state.view === view;
+  return `<button type="button" class="btn${selected ? ' btn-primary' : ''}" data-action="nav" data-view="${view}" aria-pressed="${selected}">${t(state, key)}</button>`;
+}
+
+// ─── Diagramas SVG por arquetipo ─────────────────────────────────────────────
+function svgDiagram(diagram, locale) {
+  if (!diagram) return '';
+  const nodes = diagram.n || [];
+  const kind = diagram.k;
+  const cap = local(diagram.cap, locale);
+  const theme = { stroke: 'var(--sbl-accent, #4aa3ff)', dim: 'var(--sbl-dim, #8a93a6)' };
+  const box = (x, y, w, h, title, sub, hl) => `
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="${hl ? 'rgba(74,163,255,0.16)' : 'rgba(255,255,255,0.05)'}" stroke="${hl ? theme.stroke : 'rgba(255,255,255,0.22)'}"/>
+    <text x="${x + w / 2}" y="${y + h / 2 - 6}" text-anchor="middle" font-size="13" font-weight="600" fill="var(--sbl-ink, #e8edf7)">${escapeHtml(title)}</text>
+    ${sub ? `<text x="${x + w / 2}" y="${y + h / 2 + 12}" text-anchor="middle" font-size="10.5" fill="${theme.dim}">${escapeHtml(sub)}</text>` : ''}`;
+  const arrow = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${theme.stroke}" stroke-width="1.6" marker-end="url(#sblArrow)"/>`;
+  let body = '';
+  if (kind === 'chain') {
+    const n = Math.min(nodes.length, 5), w = 128, gap = 34, x0 = 18, y = 30;
+    body = nodes.slice(0, n).map((node, i) => box(x0 + i * (w + gap), y, w, 54, local(node.t, locale), local(node.s, locale), i === 0)).join('')
+      + nodes.slice(0, n - 1).map((_, i) => arrow(x0 + i * (w + gap) + w + 3, y + 27, x0 + (i + 1) * (w + gap) - 4, y + 27)).join('');
+    return wrap(140 + 0, n * (w + gap) + 20, cap, body);
+  }
+  if (kind === 'tree') {
+    const n = Math.min(nodes.length, 4), w = 130, y0 = 22, cx = 300;
+    body = box(cx - w / 2, y0, w, 46, local(nodes[0].t, locale), local(nodes[0].s, locale), true)
+      + nodes.slice(1, n).map((node, i) => {
+        const x = 24 + i * (150), y = y0 + 84;
+        return arrow(cx, y0 + 46 + 2, x + w / 2, y - 3) + box(x, y, w, 46, local(node.t, locale), local(node.s, locale));
+      }).join('');
+    return wrap(160, 640, cap, body);
+  }
+  if (kind === 'hub') {
+    const cx = 300, cy = 84, r = 44;
+    body = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="rgba(74,163,255,0.16)" stroke="${theme.stroke}" stroke-width="1.6"/>
+      <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--sbl-ink, #e8edf7)">${escapeHtml(local(nodes[nodes.length - 1]?.t || nodes[0].t, locale))}</text>
+      <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="10" fill="${theme.dim}">${escapeHtml(local(nodes[nodes.length - 1]?.s || '', locale))}</text>`
+      + nodes.slice(0, 4).map((node, i) => {
+        const angle = (Math.PI * 2 * i) / Math.min(nodes.length - 1, 4) - Math.PI / 2;
+        const x = cx + Math.cos(angle) * 175 - 60, y = cy + Math.sin(angle) * 74 - 20;
+        return `<line x1="${cx + Math.cos(angle) * (r + 3)}" y1="${cy + Math.sin(angle) * (r + 3)}" x2="${x + 60}" y2="${y + 20}" stroke="rgba(74,163,255,0.5)" stroke-width="1.3"/>` + box(x, y, 120, 42, local(node.t, locale), local(node.s, locale));
+      }).join('');
+    return wrap(190, 600, cap, body);
+  }
+  if (kind === 'timeline') {
+    const n = Math.min(nodes.length, 4), w = 132, y = 62;
+    body = `<line x1="18" y1="${y}" x2="${18 + n * (w + 26)}" y2="${y}" stroke="rgba(74,163,255,0.45)" stroke-width="2"/>`
+      + nodes.slice(0, n).map((node, i) => {
+        const x = 18 + i * (w + 26) + (w - 24) / 2;
+        return `<circle cx="${x + 12}" cy="${y}" r="7" fill="var(--sbl-accent, #4aa3ff)"/>` + box(18 + i * (w + 26), y + 18, w, 50, local(node.t, locale), local(node.s, locale), i === n - 1);
+      }).join('');
+    return wrap(140, 18 + n * (w + 26) + 10, cap, body);
+  }
+  if (kind === 'layers') {
+    const n = Math.min(nodes.length, 4), h = 40, gap = 12, y0 = 20;
+    body = nodes.slice(0, n).map((node, i) => {
+      const w = 480 - i * 60, x = (600 - w) / 2;
+      return box(x, y0 + i * (h + gap), w, h, local(node.t, locale), local(node.s, locale), i === n - 1);
+    }).join('');
+    return wrap(y0 + n * (h + gap) + 10, 600, cap, body);
+  }
+  if (kind === 'matrix') {
+    const n = Math.min(nodes.length, 4), w = 136, h = 52;
+    body = nodes.slice(0, n).map((node, i) => {
+      const col = i % 2, row = Math.floor(i / 2);
+      return box(30 + col * (w + 16), 20 + row * (h + 14), w, h, local(node.t, locale), local(node.s, locale), row === 0 && col === 0);
+    }).join('');
+    const rows = Math.ceil(n / 2);
+    return wrap(20 + rows * (h + 14) + 8, 600, cap, body);
+  }
+  if (kind === 'split') {
+    const n = Math.min(nodes.length, 3), w = 158;
+    body = box(600 / 2 - w / 2, 18, w, 44, local(nodes[0].t, locale), local(nodes[0].s, locale), true)
+      + nodes.slice(1, n).map((node, i) => {
+        const x = 40 + i * 190, y = 96;
+        return arrow(300, 62, x + w / 2, y - 3) + box(x, y, w, 44, local(node.t, locale), local(node.s, locale));
+      }).join('');
+    return wrap(150, 600, cap, body);
+  }
+  if (kind === 'gauge') {
+    const n = Math.min(nodes.length, 4);
+    body = `<line x1="30" y1="52" x2="570" y2="52" stroke="rgba(255,255,255,0.14)" stroke-width="8" stroke-linecap="round" stroke-dasharray="2 10"/>`
+      + nodes.slice(0, n).map((node, i) => {
+        const x = 60 + i * 160;
+        const last = i === n - 1;
+        return `<circle cx="${x}" cy="52" r="${last ? 10 : 7}" fill="${last ? 'var(--sbl-gold, #ffc857)' : 'var(--sbl-accent, #4aa3ff)'}"/>`
+          + `<text x="${x}" y="30" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--sbl-ink, #e8edf7)">${escapeHtml(local(node.t, locale))}</text>`
+          + `<text x="${x}" y="80" text-anchor="middle" font-size="10" fill="${theme.dim}">${escapeHtml(local(node.s, locale))}</text>`;
+      }).join('');
+    return wrap(100, 600, cap, body);
+  }
+  return '';
+}
+function wrap(h, w, cap, body) {
+  return `<figure class="sbl-diagram" role="img" aria-label="${escapeHtml(cap)}"><svg viewBox="0 0 ${Math.max(w, 320)} ${h + 14}" preserveAspectRatio="xMidYMin meet"><defs><marker id="sblArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--sbl-accent, #4aa3ff)"/></marker></defs>${body}</svg><figcaption>${escapeHtml(cap)}</figcaption></figure>`;
+}
+
+// ─── Radar de dominio (4 dimensiones) ────────────────────────────────────────
+function svgRadar(record, state) {
+  const dims = [['knowledge', 'dimensionKnowledge'], ['application', 'dimensionApplication'], ['verification', 'dimensionVerification'], ['risk', 'dimensionRisk']];
+  const cx = 84, cy = 80, R = 58;
+  const pt = (i, r) => { const a = (Math.PI * 2 * i) / 4 - Math.PI / 2; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; };
+  const rings = [0.33, 0.66, 1].map(f => `<polygon points="${dims.map((_, i) => pt(i, R * f).join(',')).join(' ')}" fill="none" stroke="rgba(255,255,255,0.14)"/>`).join('');
+  const spokes = dims.map((_, i) => { const [x, y] = pt(i, R); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,0.14)"/>`; }).join('');
+  const vals = dims.map(([f]) => Math.max(0, Math.min(100, Number(record?.[f]) || 0)) / 100);
+  const poly = `<polygon points="${vals.map((v, i) => pt(i, R * v).join(',')).join(' ')}" fill="rgba(74,163,255,0.28)" stroke="var(--sbl-accent, #4aa3ff)" stroke-width="1.8"/>`;
+  const labels = dims.map(([f, key], i) => { const [x, y] = pt(i, R + 17); return `<text x="${x}" y="${y}" text-anchor="middle" font-size="9.5" fill="var(--sbl-dim, #8a93a6)">${escapeHtml(translate(state.locale, key).slice(0, 12))}</text>`; }).join('');
+  return `<svg class="sbl-radar" viewBox="0 0 168 164" role="img" aria-label="${t(state, 'radarLabel')}">${rings}${spokes}${poly}${labels}</svg>`;
+}
+
+// ─── Heatmap de dominio por nivel ────────────────────────────────────────────
+function renderHeatmap(state) {
+  const cells = LEVELS.map(level => {
+    const levelSkills = SKILLS.filter(s => s.level === level.id);
+    const mastered = levelSkills.filter(s => state.progress[s.id]?.mastered).length;
+    const pct = Math.round((mastered / levelSkills.length) * 100);
+    const heat = pct === 0 ? ' sbl-heat-0' : pct < 34 ? ' sbl-heat-1' : pct < 67 ? ' sbl-heat-2' : pct < 100 ? ' sbl-heat-3' : ' sbl-heat-4';
+    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${escapeHtml(local(level.title, state.locale))}: ${pct}%" aria-label="${escapeHtml(local(level.title, state.locale))} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${escapeHtml(local(level.title, state.locale).slice(0, 14))}</span></button>`;
+  }).join('');
+  return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><div class="sbl-heatmap">${cells}</div></section>`;
+}
+
+function renderChrome(state) {
+  return `<div class="sbl-stack">
+    <div class="sbl-topline">
+      <div class="sbl-statusline"><span class="viz-badge">${t(state, 'noNetwork')}</span><span class="text-small">${t(state, 'syntheticNotice')}</span></div>
+      <div class="viz-controls">
+        <label class="form-label">${t(state, 'language')}<select class="form-select" data-action="locale">
+          <option value="es"${state.locale === 'es' ? ' selected' : ''}>Español</option><option value="en"${state.locale === 'en' ? ' selected' : ''}>English</option><option value="de"${state.locale === 'de' ? ' selected' : ''}>Deutsch</option>
+        </select></label>
+        <label class="form-label">${t(state, 'track')}<select class="form-select" data-action="track">
+          <option value="functional"${state.track === 'functional' ? ' selected' : ''}>${t(state, 'trackFunctional')}</option>
+          <option value="technical"${state.track === 'technical' ? ' selected' : ''}>${t(state, 'trackTechnical')}</option>
+          <option value="dual"${state.track === 'dual' ? ' selected' : ''}>${t(state, 'trackDual')}</option>
+        </select></label>
+      </div>
+    </div>
+    <nav class="sbl-nav" aria-label="${escapeHtml(I18N[state.locale].appLabel)}">
+      ${navButton(state, 'home', 'navHome')}${navButton(state, 'map', 'navMap')}${navButton(state, 'cases', 'navCases')}${navButton(state, 'incidents', 'navIncidents')}${navButton(state, 'simulator', 'navSimulator')}${navButton(state, 'ai', 'navAI')}${navButton(state, 'review', 'navReview')}${navButton(state, 'evidence', 'navEvidence')}
+    </nav>`;
+}
+
+function renderFeedback(state, entry) {
+  if (!state.assessmentResult) return '';
+  const correct = state.assessmentResult.correct;
+  return `<div class="sbl-answer-feedback" data-correct="${correct}"><strong>${correct ? t(state, 'correct') : t(state, 'incorrect')}</strong><p>${local(entry.rationale, state.locale)}</p></div>`;
+}
+
+function renderSeniorPanel(state, entry) {
+  const steps = entry.seniorSteps || [];
+  if (!steps.length) return '';
+  const items = steps.map((s, i) => `<li><span class="sbl-step-n">${i + 1}</span><span>${local(s, state.locale)}</span></li>`).join('');
+  return `<div class="sbl-senior"><h4>${t(state, 'seniorLabel')}</h4><ol class="sbl-steps">${items}</ol></div>`;
+}
+
+function renderDistractorPanel(state, entry) {
+  const dw = entry.distractorWhy;
+  if (!dw || !Array.isArray(dw.es)) return '';
+  const items = (dw[state.locale] || dw.es).map((txt, i) => `<li>${escapeHtml(txt)}</li>`).join('');
+  return `<div class="sbl-distractors"><h4>${t(state, 'whyOptions')}</h4><ul>${items}</ul></div>`;
+}
+
+function renderDecision(state, entry, kind) {
+  const answered = state.assessmentResult?.kind === kind;
+  return `<section class="card sbl-stack" aria-labelledby="decision-title">
+    <div class="sbl-card-head"><span class="viz-badge">${escapeHtml(entry.id)}</span><span class="text-small">${t(state, 'level')} ${entry.level}</span></div>
+    <h2 id="decision-title">${local(entry.prompt, state.locale)}</h2>
+    <p class="text-muted">${t(state, 'choose')}</p>
+    <div class="sbl-choice-list">${entry.optionsText[state.locale].map((option, index) => `<button type="button" class="btn${index === entry.correct && answered ? ' btn-primary' : ''}" data-action="answer-decision" data-kind="${kind}" data-correct="${index === entry.correct}" data-rationale="${escapeHtml(entry.rationale[state.locale])}"${answered ? ' disabled' : ''}>${escapeHtml(option)}</button>`).join('')}</div>
+    ${answered ? renderFeedback(state, entry) : ''}
+    ${answered ? renderSeniorPanel(state, entry) : ''}
+    ${answered ? renderDistractorPanel(state, entry) : ''}
+    ${answered ? `<div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="next-decision" data-kind="${kind}">${t(state, 'next')}</button></div>` : ''}
+  </section>`;
+}
+
+function renderDiagnostic(state) {
+  const entry = DIAGNOSTIC[state.diagnosticIndex];
+  const answered = Boolean(state.diagnosticFeedback);
+  const percent = Math.round((state.diagnosticIndex / DIAGNOSTIC.length) * 100);
+  return `<section class="card sbl-stack" aria-labelledby="diagnostic-title">
+    <div><span class="viz-badge">${t(state, 'question')} ${state.diagnosticIndex + 1}/${DIAGNOSTIC.length}</span></div>
+    <h2 id="diagnostic-title">${t(state, 'diagnosticTitle')}</h2><p>${t(state, 'diagnosticIntro')}</p>
+    <div class="sbl-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><div class="sbl-progress-fill" style="width:${percent}%"></div></div>
+    <h3>${local(entry.prompt, state.locale)}</h3>
+    <div class="sbl-choice-list">${entry.optionsText[state.locale].map((option, index) => `<button type="button" class="btn" data-action="answer-diagnostic" data-correct="${index === entry.correct}"${answered ? ' disabled' : ''}>${escapeHtml(option)}</button>`).join('')}</div>
+    ${answered ? `<div class="sbl-answer-feedback" data-correct="${state.diagnosticFeedback.correct}"><strong>${state.diagnosticFeedback.correct ? t(state, 'correct') : t(state, 'incorrect')}</strong><p>${local(entry.rationale, state.locale)}</p></div><button type="button" class="btn btn-primary" data-action="next-diagnostic">${state.diagnosticIndex === DIAGNOSTIC.length - 1 ? t(state, 'finish') : t(state, 'next')}</button>` : ''}
+  </section>`;
+}
+
+function progressStats(state) {
+  const records = Object.values(state.progress);
+  const explored = records.filter(record => record.explored).length;
+  const mastered = records.filter(record => record.mastered).length;
+  const due = records.filter(record => record.nextReview && new Date(record.nextReview) <= new Date()).length;
+  return { explored, mastered, due, percent: Math.round((mastered / SKILLS.length) * 100) };
+}
+
+function renderHome(state) {
+  if (!state.diagnosticCompleted) return renderDiagnostic(state);
+  const stats = progressStats(state);
+  const nextSkill = recommendNext(SKILLS, state.progress, new Date(), { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
+  const boss = BOSSES[state.bossIndex];
+  return `<div class="sbl-stack">
+    <div class="viz-grid">
+      <div class="card viz-stat"><span class="text-muted">${t(state, 'mastery')}</span><span class="viz-stat-value">${stats.percent}%</span><span class="text-small">${stats.mastered}/72</span></div>
+      <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
+      <div class="card viz-stat"><span class="text-muted">${t(state, 'dueReview')}</span><span class="viz-stat-value">${stats.due}</span><span class="text-small">${t(state, 'localOnly')}</span></div>
+    </div>
+    ${renderHeatmap(state)}
+    <section class="card sbl-stack"><span class="viz-badge">${t(state, 'recommended')}</span><h2>${local(nextSkill.title, state.locale)}</h2><p>${local(nextSkill.objective, state.locale)}</p><div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${t(state, 'begin')}</button></div></section>
+    <section class="sbl-stack" aria-labelledby="boss-title"><h2 id="boss-title">${t(state, 'bossTitle')}</h2><div class="sbl-toolbar">${BOSSES.map(item => `<button type="button" class="btn${item.level === state.bossIndex ? ' btn-primary' : ''}" data-action="select-boss" data-index="${item.level}" aria-pressed="${item.level === state.bossIndex}">${t(state, 'level')} ${item.level}</button>`).join('')}</div>${renderDecision(state, boss, 'boss')}</section>
+  </div>`;
+}
+
+function skillStatus(state, skill) {
+  const record = state.progress[skill.id];
+  if (record?.mastered) return t(state, 'masteredStatus');
+  if (record?.explored) return t(state, 'learningStatus');
+  return t(state, 'newStatus');
+}
+
+function renderLearnMode(state, skill) {
+  const record = state.progress[skill.id] || {};
+  const tips = (skill.tips?.[state.locale] || []).map(tip => `<li>${escapeHtml(tip)}</li>`).join('');
+  const steps = (skill.verifySteps || []).map((s, i) => `<li><span class="sbl-step-n">${i + 1}</span><span>${local(s, state.locale)}</span></li>`).join('');
+  return `<div class="sbl-learn">
+    ${svgDiagram(skill.diagram, state.locale)}
+    <div class="sbl-detail-grid">
+      <section><h3>${t(state, 'mindsetLabel')}</h3><p class="sbl-mindset">${local(skill.mindset, state.locale)}</p></section>
+      <section><h3>${t(state, 'concept')}</h3><p>${local(skill.concept, state.locale)}</p></section>
+      <section><h3>${t(state, 'objective')}</h3><p>${local(skill.objective, state.locale)}</p></section>
+      <section><h3>${t(state, 'practice')}</h3><p>${local(skill.practice, state.locale)}</p></section>
+    </div>
+    <div class="sbl-tips"><h4>${t(state, 'tipsLabel')}</h4><ul>${tips}</ul></div>
+    <div class="sbl-answer-feedback" data-correct="false"><strong>${t(state, 'pitfallLabel')}</strong><p>${local(skill.pitfall, state.locale)}</p></div>
+    <div class="sbl-checklist"><h4>${t(state, 'checklistLabel')}</h4><ol class="sbl-steps">${steps}</ol></div>
+    <div class="sbl-actions">
+      <button type="button" class="btn" data-action="practise-skill" data-skill="${skill.id}">${t(state, 'markPractice')}</button>
+      <button type="button" class="btn btn-primary" data-action="set-skill-mode" data-mode="prove">${t(state, 'proveSkill')}</button>
+    </div>
+    <div class="sbl-radar-row">${svgRadar(record, state)}<div class="sbl-stack"><span class="viz-badge">${skillStatus(state, skill)} · ${record.mastery || 0}%</span><span class="text-small">${local(LEVELS[skill.level].title, state.locale)}</span></div></div>
+  </div>`;
+}
+
+function renderProveMode(state, skill) {
+  const challenge = skill.assessment;
+  const step = state.assessmentStep;
+  const choice = state.assessmentChoice;
+  const principle = state.assessmentPrinciple;
+  const shown = state.assessmentShown;
+  const finished = Boolean(state.assessmentResult);
+  const correct = choice === challenge.correct;
+  const principleCorrect = principle === challenge.principleCorrect;
+  const hint = challenge.hints?.[state.locale] || '';
+  return `<div class="sbl-prove">
+    <ol class="sbl-phase" aria-label="progress">
+      <li class="${step >= 0 ? 'is-on' : ''}">${t(state, 'stepDecide')}</li>
+      <li class="${step >= 1 ? 'is-on' : ''}">${t(state, 'stepCommit')}</li>
+      <li class="${step >= 2 ? 'is-on' : ''}">${t(state, 'stepReveal')}</li>
+    </ol>
+    ${step === 0 ? `
+      <h3>${local(challenge.prompt, state.locale)}</h3>
+      ${hint ? `<div class="sbl-hint"><strong>${t(state, 'hintLabel')}:</strong> ${escapeHtml(hint)}</div>` : ''}
+      <div class="sbl-choice-list">${challenge.optionsText[state.locale].map((option, index) => `<button type="button" class="btn" data-action="step-decide" data-index="${index}">${escapeHtml(option)}</button>`).join('')}</div>` : ''}
+    ${step === 1 && challenge.principles ? `
+      <h3>${t(state, 'commitPrinciple')}</h3>
+      <div class="sbl-choice-list">${challenge.principles.map((p, index) => `<button type="button" class="btn" data-action="step-principle" data-index="${index}">${local(p, state.locale)}</button>`).join('')}</div>` : ''}
+    ${step >= 2 ? `
+      ${!finished ? `<button type="button" class="btn btn-primary" data-action="reveal-reasoning" data-skill="${skill.id}" data-correct="${correct}" data-safety="${challenge.safe[choice] ?? true}" data-principle="${principleCorrect}">${t(state, 'stepReveal')}</button>` : ''}
+      ${shown || finished ? `
+        <div class="sbl-answer-feedback" data-correct="${correct}"><strong>${correct ? t(state, 'correct') : t(state, 'incorrect')}</strong>${principleCorrect ? ` <span class="viz-badge">+${t(state, "stepCommit")}</span>` : ''}<p>${local(challenge.why || challenge.rationale, state.locale)}</p></div>
+        ${renderSeniorPanel(state, challenge)}
+        ${renderDistractorPanel(state, { distractorWhy: challenge.distractorWhy })}
+        <button type="button" class="btn" data-action="clear-skill-assessment">${t(state, 'next')}</button>` : ''}` : ''}
+  </div>`;
+}
+
+function renderSkillDetail(state, skill) {
+  const record = state.progress[skill.id] || {};
+  const mode = state.skillMode;
+  return `<article class="card sbl-stack" aria-labelledby="skill-title">
+    <div class="sbl-card-head"><span class="viz-badge">${escapeHtml(skill.id)}</span>
+      <div class="sbl-mode-toggle" role="tablist">
+        <button type="button" class="btn${mode === 'learn' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="learn" aria-pressed="${mode === 'learn'}">${t(state, 'learnMode')}</button>
+        <button type="button" class="btn${mode === 'prove' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="prove" aria-pressed="${mode === 'prove'}">${t(state, 'proveSkill')}</button>
+      </div></div>
+    <h2 id="skill-title">${local(skill.title, state.locale)}</h2>
+    ${mode === 'learn' ? renderLearnMode(state, skill) : renderProveMode(state, skill)}
+  </article>`;
+}
+
+function renderMap(state) {
+  const selected = SKILLS.find(skill => skill.id === state.selectedSkillId) || SKILLS[0];
+  const filtered = SKILLS.filter(skill => (state.levelFilter === 'all' || String(skill.level) === String(state.levelFilter)) && (state.trackFilter === 'all' || skill.track === state.trackFilter || skill.track === 'dual'));
+  return `<div class="sbl-stack">
+    <div class="viz-controls">
+      <label class="form-label">${t(state, 'level')}<select class="form-select" data-action="level-filter"><option value="all">${t(state, 'allLevels')}</option>${LEVELS.map(level => `<option value="${level.id}"${String(state.levelFilter) === String(level.id) ? ' selected' : ''}>${level.id} · ${local(level.title, state.locale)}</option>`).join('')}</select></label>
+      <label class="form-label">${t(state, 'track')}<select class="form-select" data-action="track-filter"><option value="all">${t(state, 'allTracks')}</option><option value="functional"${state.trackFilter === 'functional' ? ' selected' : ''}>${t(state, 'trackFunctional')}</option><option value="technical"${state.trackFilter === 'technical' ? ' selected' : ''}>${t(state, 'trackTechnical')}</option><option value="dual"${state.trackFilter === 'dual' ? ' selected' : ''}>${t(state, 'trackDual')}</option></select></label>
+    </div>
+    <div class="sbl-levels">${LEVELS.filter(level => filtered.some(skill => skill.level === level.id)).map(level => `<section class="sbl-level-group" aria-labelledby="level-${level.id}"><div class="sbl-level-heading"><h2 id="level-${level.id}">${t(state, 'level')} ${level.id} · ${local(level.title, state.locale)}</h2><span class="text-small">${filtered.filter(skill => skill.level === level.id).length}/8</span></div><div class="viz-grid">${filtered.filter(skill => skill.level === level.id).map(skill => `<button type="button" class="btn viz-tile sbl-node${skill.id === selected.id ? ' is-selected' : ''}" data-action="select-skill" data-skill="${skill.id}" aria-pressed="${skill.id === selected.id}">${local(skill.title, state.locale)}<span class="sbl-node-meta text-small">${skillStatus(state, skill)}</span></button>`).join('')}</div></section>`).join('')}</div>
+    ${renderSkillDetail(state, selected)}
+  </div>`;
+}
+
+function renderSimulator(state) {
+  const keys = ['sales', 'purchase', 'finance', 'integration'];
+  const labelKeys = { sales: 'processSales', purchase: 'processPurchase', finance: 'processFinance', integration: 'processIntegration' };
+  const steps = PROCESS_STEPS[state.process];
+  const step = steps[state.processStep] || steps[0];
+  const effectRow = (label, value) => `<div class="sbl-effect"><span class="text-small">${label}</span><strong>${local(value, state.locale)}</strong></div>`;
+  return `<section class="sbl-stack" aria-labelledby="sim-title"><h2 id="sim-title">${t(state, 'simulatorTitle')}</h2><p class="text-muted">${t(state, 'chainExplorer')}</p><div class="sbl-toolbar">${keys.map(key => `<button type="button" class="btn${state.process === key ? ' btn-primary' : ''}" data-action="select-process" data-process="${key}" aria-pressed="${state.process === key}">${t(state, labelKeys[key])}</button>`).join('')}</div>
+  <div class="sbl-process" role="list">${steps.map((item, index) => `<button type="button" class="btn sbl-process-stage" data-action="select-process-step" data-index="${index}" aria-current="${index === state.processStep ? 'step' : 'false'}"><span>${index + 1}. ${local(item.labels, state.locale)}</span><span class="sbl-process-mark" aria-hidden="true"></span></button>`).join('')}</div>
+  <div class="card sbl-stack"><strong>${local(step.labels, state.locale)}</strong>
+    <div class="sbl-checks">${(step.checks?.[state.locale] || []).map(c => `<span class="viz-badge">${escapeHtml(c)}</span>`).join('')}</div>
+    <div class="sbl-effects-grid">
+      ${effectRow(t(state, 'effectStock'), step.effects.stock)}
+      ${effectRow(t(state, 'effectAccounting'), step.effects.accounting)}
+      ${effectRow(t(state, 'effectBalance'), step.effects.balance)}
+    </div>
+  </div></section>`;
+}
+
+function renderAI(state) {
+  const result = state.promptResult;
+  const defaults = {
+    es: 'ROL: mentor de aprendizaje de SAP Business One\nOBJETIVO: Explicar una acción diagnóstica segura para SYN-CASE-AI-01\nCONTEXTO: Solo evidencia sintética\n',
+    en: 'ROLE: SAP Business One learning coach\nGOAL: Explain a safe diagnostic action for SYN-CASE-AI-01\nCONTEXT: Synthetic evidence only\n',
+    de: 'ROLLE: Lerncoach für SAP Business One\nZIEL: Eine sichere Diagnoseaktion für SYN-CASE-AI-01 erklären\nKONTEXT: Nur synthetische Nachweise\n'
+  };
+  const fieldKeys = { role: 'promptFieldRole', goal: 'promptFieldGoal', context: 'promptFieldContext', evidence: 'promptFieldEvidence', uncertainty: 'promptFieldUncertainty', output: 'promptFieldOutput', humanGate: 'promptFieldHumanGate', syntheticContext: 'promptFieldSyntheticContext' };
+  const defaultPrompt = state.promptDraft || defaults[state.locale];
+  const present = Array.isArray(result?.present) ? result.present : [];
+  const fieldBar = (isOn, name) => `<span class="sbl-contract-cell${isOn ? ' is-on' : ''}">${t(state, fieldKeys[name] || name)}</span>`;
+  return `<section class="sbl-stack" aria-labelledby="ai-title"><h2 id="ai-title">${t(state, 'aiTitle')}</h2><p>${t(state, 'promptHelp')}</p><label class="form-label" for="sbl-prompt">${t(state, 'promptLabel')}</label><textarea id="sbl-prompt" class="form-control" rows="9">${escapeHtml(defaultPrompt)}</textarea><div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="analyze-prompt">${t(state, 'analyze')}</button></div>${result ? `<div class="card sbl-stack"><div class="sbl-card-head"><span class="sbl-score-ring" aria-label="${t(state, 'promptScore')} ${result.score}%">${result.score}%</span><span>${result.privacy.safe ? t(state, 'privacySafe') : t(state, 'privacyBlocked')}</span></div><div class="sbl-contract">${['role', 'goal', 'context', 'evidence', 'uncertainty', 'output', 'humanGate'].map(name => fieldBar(present.includes(name), name)).join('')}${fieldBar(present.includes('syntheticContext'), 'syntheticContext')}</div>${(result.missing || []).length ? `<p><strong>${t(state, 'missing')}:</strong> ${(result.missing || []).map(key => t(state, fieldKeys[key] || key)).join(', ')}</p>` : `<p>${t(state, 'correct')}</p>`}</div>` : ''}</section>`;
+}
+
+function renderReview(state) {
+  const now = new Date();
+  let queue = SKILLS.filter(skill => state.progress[skill.id]?.nextReview && new Date(state.progress[skill.id].nextReview) <= now);
+  if (!queue.length) queue = SKILLS.filter(skill => state.progress[skill.id]?.explored && !state.progress[skill.id]?.mastered).slice(0, 5);
+  return `<section class="sbl-stack" aria-labelledby="review-title"><h2 id="review-title">${t(state, 'reviewTitle')}</h2>${queue.length ? `<div class="sbl-review-list">${queue.map(skill => `<div class="card sbl-card-head"><div><strong>${local(skill.title, state.locale)}</strong><span class="sbl-node-meta text-small">${skillStatus(state, skill)}</span></div><button type="button" class="btn" data-action="select-skill" data-skill="${skill.id}">${t(state, 'begin')}</button></div>`).join('')}</div>` : `<p>${t(state, 'noReviews')}</p>`}</section>`;
+}
+
+function renderEvidence(state) {
+  return `<section class="sbl-stack" aria-labelledby="evidence-title"><h2 id="evidence-title">${t(state, 'evidenceTitle')}</h2><div class="table-responsive"><table class="table table-sm"><thead><tr><th>${t(state, 'sourceOfficial')}</th><th>${t(state, 'applicability')}</th><th>${t(state, 'verifiedAt')}</th><th></th></tr></thead><tbody>${EVIDENCE.map(item => `<tr><td>${escapeHtml(item.title)}</td><td>${local(item.applicability, state.locale)}</td><td class="text-nowrap">${escapeHtml(item.verifiedAt)}</td><td><a class="btn" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${t(state, 'openSource')}</a></td></tr>`).join('')}</tbody></table></div></section>`;
+}
+
+function renderView(state) {
+  switch (state.view) {
+    case 'map': return renderMap(state);
+    case 'cases': return `<div class="sbl-stack"><h2>${t(state, 'caseLabTitle')}</h2>${renderDecision(state, CASES[state.caseIndex], 'case')}</div>`;
+    case 'incidents': return `<div class="sbl-stack"><h2>${t(state, 'incidentTitle')}</h2>${renderDecision(state, INCIDENTS[state.incidentIndex], 'incident')}</div>`;
+    case 'simulator': return renderSimulator(state);
+    case 'ai': return renderAI(state);
+    case 'review': return renderReview(state);
+    case 'evidence': return renderEvidence(state);
+    default: return renderHome(state);
+  }
+}
+
+function toastText(state) {
+  const map = { 'practice-recorded': 'markPractice', 'import-ok': 'importOk', 'reset-ok': 'resetConfirm', 'import-error': 'importError', 'export-ok': 'exportOk' };
+  return state.toast ? `<div class="sbl-toast" role="status">${t(state, map[state.toast] || state.toast)}</div>` : '';
+}
+
+export function renderAppMarkup(state) {
+  return `${renderChrome(state)}<main class="sbl-main">${toastText(state)}${renderView(state)}<div class="sbl-toolbar"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(state, 'export')}</button><label class="form-label sbl-file">${t(state, 'import')}<input class="form-control" type="file" accept="application/json" data-action="import-progress"></label><button type="button" class="btn btn-ghost" data-action="reset-progress">${t(state, 'reset')}</button></div></main></div>`;
+}
+
+function loadStored() {
+  try {
+    const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if (!value) return createInitialState();
+    const validation = validateProgressImport(value);
+    if (!validation.valid) return createInitialState();
+    return createInitialState({
+      locale: value.locale, track: value.track, progress: value.progress,
+      diagnosticCompleted: value.settings?.diagnosticCompleted,
+      diagnosticScore: value.settings?.diagnosticScore,
+      recommendedLevel: value.settings?.recommendedLevel,
+      selectedSkillId: value.settings?.selectedSkillId
+    });
+  } catch { return createInitialState(); }
+}
+
+function saveStored(state) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeProgress(state))); } catch { /* local persistence is optional */ }
+}
+
+function downloadProgress(state) {
+  const blob = new Blob([JSON.stringify(serializeProgress(state), null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = 'sap-b1-mastery-progress-synthetic.json';
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+export function mountSapB1Lab(root) {
+  if (!root) throw new Error('SAP B1 lab root is required');
+  let state = loadStored();
+  const render = () => {
+    root.innerHTML = renderAppMarkup(state);
+    root.setAttribute('lang', state.locale);
+    if (globalThis.lucide?.createIcons) globalThis.lucide.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  const dispatch = action => { state = reduceState(state, action); saveStored(state); render(); };
+
+  root.addEventListener('click', event => {
+    const control = event.target.closest('[data-action]');
+    if (!control || control.disabled) return;
+    const action = control.dataset.action;
+    if (action === 'nav') dispatch({ type: 'NAVIGATE', view: control.dataset.view });
+    else if (action === 'select-skill') dispatch({ type: 'SELECT_SKILL', skillId: control.dataset.skill });
+    else if (action === 'set-skill-mode') dispatch({ type: 'SET_SKILL_MODE', mode: control.dataset.mode });
+    else if (action === 'step-decide') dispatch({ type: 'ANSWER_STEP_DECIDE', index: Number(control.dataset.index) });
+    else if (action === 'step-principle') dispatch({ type: 'ANSWER_STEP_PRINCIPLE', index: Number(control.dataset.index) });
+    else if (action === 'reveal-reasoning') {
+      const skillId = state.selectedSkillId;
+      const skill = SKILLS.find(s => s.id === skillId);
+      dispatch({ type: 'ASSESS_SKILL', skillId, correct: control.dataset.correct === 'true', safetyGatePassed: control.dataset.safety === 'true', principleCorrect: control.dataset.principle === 'true' });
+      dispatch({ type: 'REVEAL_REASONING' });
+    }
+    else if (action === 'answer-diagnostic') dispatch({ type: 'ANSWER_DIAGNOSTIC', correct: control.dataset.correct === 'true' });
+    else if (action === 'next-diagnostic') dispatch({ type: 'NEXT_DIAGNOSTIC' });
+    else if (action === 'practise-skill') dispatch({ type: 'PRACTISE_SKILL', skillId: control.dataset.skill });
+    else if (action === 'assess-skill') dispatch({ type: 'ASSESS_SKILL', skillId: control.dataset.skill, correct: control.dataset.correct === 'true', safetyGatePassed: control.dataset.safety === 'true' });
+    else if (action === 'clear-skill-assessment') dispatch({ type: 'CLEAR_SKILL_ASSESSMENT' });
+    else if (action === 'answer-decision') dispatch({ type: 'ANSWER_DECISION', kind: control.dataset.kind, correct: control.dataset.correct === 'true', rationale: control.dataset.rationale });
+    else if (action === 'next-decision') dispatch({ type: 'NEXT_DECISION', kind: control.dataset.kind });
+    else if (action === 'select-boss') dispatch({ type: 'SELECT_BOSS', index: control.dataset.index });
+    else if (action === 'select-process') dispatch({ type: 'SELECT_PROCESS', process: control.dataset.process });
+    else if (action === 'select-process-step') dispatch({ type: 'SELECT_PROCESS_STEP', index: control.dataset.index });
+    else if (action === 'set-level-filter') dispatch({ type: 'SET_LEVEL_FILTER', value: control.dataset.value });
+    else if (action === 'analyze-prompt') {
+      const prompt = root.querySelector('#sbl-prompt')?.value || '';
+      dispatch({ type: 'PROMPT_RESULT', prompt, result: lintPrompt(prompt) });
+    } else if (action === 'export-progress') {
+      downloadProgress(state); state = { ...state, toast: 'export-ok' }; render();
+    } else if (action === 'reset-progress') {
+      localStorage.removeItem(STORAGE_KEY); dispatch({ type: 'RESET' });
+    }
+  });
+
+  root.addEventListener('change', event => {
+    const control = event.target.closest('[data-action]');
+    if (!control) return;
+    if (control.dataset.action === 'locale') dispatch({ type: 'SET_LOCALE', locale: control.value });
+    else if (control.dataset.action === 'track') dispatch({ type: 'SET_TRACK', track: control.value });
+    else if (control.dataset.action === 'level-filter') dispatch({ type: 'SET_LEVEL_FILTER', value: control.value });
+    else if (control.dataset.action === 'track-filter') dispatch({ type: 'SET_TRACK_FILTER', value: control.value });
+    else if (control.dataset.action === 'import-progress' && control.files?.[0]) {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        try {
+          const value = JSON.parse(String(reader.result));
+          const validation = validateProgressImport(value);
+          if (!validation.valid) throw new Error(validation.reason);
+          dispatch({ type: 'IMPORT_STATE', value: {
+            locale: value.locale, track: value.track, progress: value.progress,
+            diagnosticCompleted: value.settings?.diagnosticCompleted,
+            diagnosticScore: value.settings?.diagnosticScore,
+            recommendedLevel: value.settings?.recommendedLevel,
+            selectedSkillId: value.settings?.selectedSkillId
+          } });
+        } catch { state = { ...state, toast: 'import-error' }; render(); }
+      });
+      reader.readAsText(control.files[0]);
+    }
+  });
+
+  render();
+  return { getState: () => structuredClone(state), dispatch };
+}

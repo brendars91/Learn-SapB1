@@ -1,0 +1,202 @@
+/* SAP B1 Mastery Lab — identidad "sala de control" v2 */
+#sap-b1-mastery-lab {
+  --sbl-bg: #0b1220;
+  --sbl-surface: #111a2c;
+  --sbl-surface-2: #16213a;
+  --sbl-ink: #e8edf7;
+  --sbl-dim: #8a93a6;
+  --sbl-accent: #4aa3ff;
+  --sbl-gold: #ffc857;
+  --sbl-green: #3ddc97;
+  --sbl-red: #ff6b7a;
+  color: var(--sbl-ink);
+  background: radial-gradient(1200px 500px at 80% -10%, rgba(74, 163, 255, 0.12), transparent 60%),
+              radial-gradient(900px 420px at 10% 110%, rgba(255, 200, 87, 0.06), transparent 55%),
+              var(--sbl-bg);
+  width: 100%;
+  border-radius: 14px;
+  padding: clamp(0.8rem, 2vw, 1.6rem);
+}
+
+#sap-b1-mastery-lab .card,
+#sap-b1-mastery-lab .viz-stat {
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015)), var(--sbl-surface);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+}
+
+#sap-b1-mastery-lab .sbl-stack { display: grid; gap: 1rem; }
+#sap-b1-mastery-lab .sbl-topline,
+#sap-b1-mastery-lab .sbl-nav,
+#sap-b1-mastery-lab .sbl-toolbar,
+#sap-b1-mastery-lab .sbl-actions,
+#sap-b1-mastery-lab .sbl-process { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; }
+#sap-b1-mastery-lab .sbl-topline { justify-content: space-between; }
+#sap-b1-mastery-lab .sbl-statusline { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+#sap-b1-mastery-lab .sbl-nav { padding-block: .25rem .75rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+#sap-b1-mastery-lab .sbl-main { display: grid; gap: 1rem; }
+#sap-b1-mastery-lab h2 { font-size: 1.22rem; letter-spacing: .01em; }
+#sap-b1-mastery-lab h3 { font-size: 1.02rem; }
+#sap-b1-mastery-lab h4 { font-size: .86rem; text-transform: uppercase; letter-spacing: .08em; color: var(--sbl-dim); }
+#sap-b1-mastery-lab .viz-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: rgba(74,163,255,0.14); color: var(--sbl-accent);
+  border: 1px solid rgba(74,163,255,0.35);
+}
+#sap-b1-mastery-lab .sbl-card-head .viz-badge { font-size: .74rem; }
+
+/* progreso */
+#sap-b1-mastery-lab .sbl-progress-track { height: .55rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; background: rgba(255,255,255,0.06); }
+#sap-b1-mastery-lab .sbl-progress-fill { height: 100%; background: linear-gradient(90deg, var(--sbl-accent), var(--sbl-gold)); transition: width .25s ease; }
+
+/* listas y grids */
+#sap-b1-mastery-lab .sbl-choice-list,
+#sap-b1-mastery-lab .sbl-detail-grid,
+#sap-b1-mastery-lab .sbl-levels,
+#sap-b1-mastery-lab .sbl-review-list { display: grid; gap: .75rem; }
+#sap-b1-mastery-lab .sbl-choice-list { grid-template-columns: 1fr; }
+#sap-b1-mastery-lab .sbl-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#sap-b1-mastery-lab .sbl-detail-grid section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: .8rem .95rem; }
+#sap-b1-mastery-lab .sbl-level-group { display: grid; gap: .5rem; padding-block: .5rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+#sap-b1-mastery-lab .sbl-level-heading,
+#sap-b1-mastery-lab .sbl-card-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+#sap-b1-mastery-lab .sbl-node { min-height: 4.5rem; text-align: start; }
+#sap-b1-mastery-lab .sbl-node-meta { display: block; margin-top: .25rem; color: var(--sbl-dim); }
+#sap-b1-mastery-lab .sbl-node.is-selected { border-color: var(--sbl-accent); box-shadow: 0 0 0 1px var(--sbl-accent), 0 8px 26px -12px rgba(74,163,255,.55); }
+
+/* modo aprender */
+#sap-b1-mastery-lab .sbl-mindset {
+  font-size: 1.04rem; font-weight: 600; color: var(--sbl-gold);
+  border-left: 3px solid var(--sbl-gold); padding-left: .7rem;
+}
+#sap-b1-mastery-lab .sbl-tips ul { margin: .3rem 0 0; padding-left: 1.1rem; display: grid; gap: .35rem; }
+#sap-b1-mastery-lab .sbl-tips li::marker { color: var(--sbl-gold); }
+#sap-b1-mastery-lab .sbl-checklist .sbl-steps,
+#sap-b1-mastery-lab .sbl-senior .sbl-steps { list-style: none; margin: .4rem 0 0; padding: 0; display: grid; gap: .45rem; }
+#sap-b1-mastery-lab .sbl-steps li { display: flex; gap: .6rem; align-items: baseline; }
+#sap-b1-mastery-lab .sbl-step-n {
+  font-family: ui-monospace, Menlo, monospace; font-size: .72rem;
+  display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem;
+  border-radius: 50%; border: 1px solid rgba(74,163,255,.5); color: var(--sbl-accent); flex: none;
+}
+#sap-b1-mastery-lab .sbl-senior { background: rgba(74,163,255,0.07); border: 1px solid rgba(74,163,255,0.22); border-radius: 10px; padding: .8rem .95rem; }
+#sap-b1-mastery-lab .sbl-distractors { background: rgba(255,107,122,0.06); border: 1px solid rgba(255,107,122,0.2); border-radius: 10px; padding: .8rem .95rem; }
+#sap-b1-mastery-lab .sbl-distractors ul { margin: .3rem 0 0; padding-left: 1.05rem; display: grid; gap: .3rem; }
+#sap-b1-mastery-lab .sbl-distractors li::marker { color: var(--sbl-red); }
+
+/* diagrama */
+#sap-b1-mastery-lab .sbl-diagram { margin: 0; background: rgba(255,255,255,0.028); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: .7rem .8rem .55rem; }
+#sap-b1-mastery-lab .sbl-diagram svg { width: 100%; height: auto; display: block; }
+#sap-b1-mastery-lab .sbl-diagram figcaption { text-align: center; color: var(--sbl-dim); font-size: .78rem; margin-top: .35rem; }
+
+/* radar */
+#sap-b1-mastery-lab .sbl-radar-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+#sap-b1-mastery-lab .sbl-radar { width: 168px; height: auto; }
+
+/* heatmap */
+#sap-b1-mastery-lab .sbl-heatmap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
+#sap-b1-mastery-lab .sbl-heat-cell {
+  display: grid; gap: .15rem; justify-items: start; text-align: start; cursor: pointer;
+  border-radius: 10px; padding: .55rem .7rem; border: 1px solid rgba(255,255,255,0.09);
+}
+#sap-b1-mastery-lab .sbl-heat-num { font-size: 1.25rem; font-weight: 700; font-family: ui-monospace, Menlo, monospace; }
+#sap-b1-mastery-lab .sbl-heat-lab { color: var(--sbl-dim); }
+#sap-b1-mastery-lab .sbl-heat-0 { background: rgba(255,255,255,0.035); }
+#sap-b1-mastery-lab .sbl-heat-1 { background: rgba(74,163,255,0.12); }
+#sap-b1-mastery-lab .sbl-heat-2 { background: rgba(74,163,255,0.26); }
+#sap-b1-mastery-lab .sbl-heat-3 { background: rgba(61,220,151,0.22); }
+#sap-b1-mastery-lab .sbl-heat-4 { background: rgba(61,220,151,0.4); box-shadow: inset 0 0 0 1px rgba(61,220,151,.6); }
+
+/* evaluación por fases */
+#sap-b1-mastery-lab .sbl-phase { list-style: none; display: flex; gap: .5rem; padding: 0; margin: 0; flex-wrap: wrap; }
+#sap-b1-mastery-lab .sbl-phase li {
+  font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; color: var(--sbl-dim);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: .18rem .7rem;
+}
+#sap-b1-mastery-lab .sbl-phase li.is-on { color: var(--sbl-gold); border-color: rgba(255,200,87,.55); background: rgba(255,200,87,.09); }
+#sap-b1-mastery-lab .sbl-hint { background: rgba(255,200,87,0.08); border: 1px solid rgba(255,200,87,0.25); border-radius: 8px; padding: .5rem .7rem; color: var(--sbl-ink); }
+
+/* simulador de efectos */
+#sap-b1-mastery-lab .sbl-checks { display: flex; flex-wrap: wrap; gap: .4rem; margin-block: .35rem; }
+#sap-b1-mastery-lab .sbl-effects-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .6rem; margin-top: .4rem; }
+#sap-b1-mastery-lab .sbl-effect { background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: .55rem .7rem; display: grid; gap: .2rem; }
+
+/* contrato de contexto */
+#sap-b1-mastery-lab .sbl-contract { display: flex; flex-wrap: wrap; gap: .4rem; }
+#sap-b1-mastery-lab .sbl-contract-cell { font-size: .74rem; border: 1px dashed rgba(255,255,255,0.2); color: var(--sbl-dim); border-radius: 999px; padding: .14rem .6rem; }
+#sap-b1-mastery-lab .sbl-contract-cell.is-on { border-style: solid; border-color: rgba(61,220,151,.55); color: var(--sbl-green); background: rgba(61,220,151,.08); }
+
+/* varios */
+#sap-b1-mastery-lab .sbl-mode-toggle { display: flex; gap: .4rem; }
+#sap-b1-mastery-lab .sbl-process-stage { display: grid; gap: .25rem; min-width: 8rem; text-align: center; }
+#sap-b1-mastery-lab .sbl-process-mark { height: .35rem; border-radius: 999px; background: rgba(255,255,255,0.14); }
+#sap-b1-mastery-lab .sbl-process-stage[aria-current="step"] .sbl-process-mark { background: linear-gradient(90deg, var(--sbl-accent), var(--sbl-gold)); }
+#sap-b1-mastery-lab .sbl-score-ring { display: inline-grid; place-items: center; width: 5rem; height: 5rem; border: .55rem solid rgba(255,255,255,0.09); border-top-color: var(--sbl-accent); border-radius: 50%; font-weight: 700; }
+#sap-b1-mastery-lab .sbl-file { max-width: 18rem; }
+#sap-b1-mastery-lab .sbl-toast { border-inline-start: 3px solid var(--sbl-accent); padding-inline-start: .75rem; }
+#sap-b1-mastery-lab .sbl-answer-feedback { border-inline-start: 3px solid var(--sbl-green); padding-inline-start: .75rem; }
+#sap-b1-mastery-lab .sbl-answer-feedback[data-correct="false"] { border-inline-start-color: var(--sbl-red); }
+#sap-b1-mastery-lab pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+@media (max-width: 620px) {
+  #sap-b1-mastery-lab .sbl-detail-grid { grid-template-columns: 1fr; }
+  #sap-b1-mastery-lab .sbl-heatmap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #sap-b1-mastery-lab .sbl-effects-grid { grid-template-columns: 1fr; }
+  #sap-b1-mastery-lab .sbl-topline { align-items: stretch; }
+  #sap-b1-mastery-lab .sbl-process-stage { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sap-b1-mastery-lab .sbl-progress-fill { transition: none; }
+}
+
+/* botones y controles propios (independientes del entorno) */
+#sap-b1-mastery-lab .btn {
+  appearance: none;
+  background: rgba(255,255,255,0.05);
+  color: var(--sbl-ink);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 9px;
+  padding: .5rem .95rem;
+  font-size: .92rem;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .1s ease;
+}
+#sap-b1-mastery-lab .btn:hover { background: rgba(74,163,255,0.12); border-color: rgba(74,163,255,0.45); }
+#sap-b1-mastery-lab .btn:active { transform: translateY(1px); }
+#sap-b1-mastery-lab .btn:disabled { opacity: .55; cursor: not-allowed; }
+#sap-b1-mastery-lab .btn-primary {
+  background: linear-gradient(180deg, rgba(74,163,255,0.32), rgba(74,163,255,0.18));
+  border-color: rgba(74,163,255,0.6);
+  color: #dbeeff;
+  font-weight: 600;
+}
+#sap-b1-mastery-lab .btn-primary:hover { background: linear-gradient(180deg, rgba(74,163,255,0.45), rgba(74,163,255,0.26)); }
+#sap-b1-mastery-lab .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.14); color: var(--sbl-dim); }
+#sap-b1-mastery-lab .viz-tile { text-align: start; }
+#sap-b1-mastery-lab .form-label { display: inline-grid; gap: .25rem; font-size: .8rem; color: var(--sbl-dim); }
+#sap-b1-mastery-lab .form-select,
+#sap-b1-mastery-lab .form-control {
+  background: rgba(10,16,28,0.8);
+  color: var(--sbl-ink);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 8px;
+  padding: .4rem .6rem;
+  font-size: .9rem;
+}
+#sap-b1-mastery-lab .viz-controls { display: flex; flex-wrap: wrap; gap: .8rem; align-items: end; }
+#sap-b1-mastery-lab .viz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .6rem; }
+#sap-b1-mastery-lab .viz-stat { display: grid; gap: .2rem; padding: .8rem .95rem; }
+#sap-b1-mastery-lab .viz-stat-value { font-size: 1.7rem; font-weight: 700; font-family: ui-monospace, Menlo, monospace; }
+#sap-b1-mastery-lab .text-muted { color: var(--sbl-dim); }
+#sap-b1-mastery-lab .text-small { font-size: .8rem; }
+#sap-b1-mastery-lab .text-nowrap { white-space: nowrap; }
+#sap-b1-mastery-lab .table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+#sap-b1-mastery-lab .table th { text-align: start; color: var(--sbl-dim); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+#sap-b1-mastery-lab .table td, #sap-b1-mastery-lab .table th { padding: .45rem .5rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+#sap-b1-mastery-lab .table-responsive { overflow-x: auto; }
+#sap-b1-mastery-lab a.btn { display: inline-block; text-decoration: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  #sap-b1-mastery-lab .btn { transition: none; }
+}
