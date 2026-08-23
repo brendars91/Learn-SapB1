@@ -15,12 +15,8 @@ export const SKILLS = BASE_SKILLS.map(s => {
   const deep = DEEP[s.id];
   if (!deep) return s;
   const [g, anchorEs, anchorEn, path, ex] = deep;
-<<<<<<< HEAD
   const pathArray = typeof path === 'string' ? path.split('›').map(p => p.trim()).filter(Boolean) : path;
   return { ...s, anchor: { g, es: anchorEs, en: anchorEn }, path: pathArray, example: ex ? { q: ex.q, show: ex.show, a: { es: ex.a, en: ex.a } } : undefined };
-=======
-  return { ...s, anchor: { g, es: anchorEs, en: anchorEn }, path, example: ex ? { q: ex.q, show: ex.show, a: { es: ex.a, en: ex.a } } : undefined };
->>>>>>> origin/main
 });
 
 export const CASES = [
