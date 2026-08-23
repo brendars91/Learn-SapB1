@@ -25,15 +25,24 @@ const l34 = await readFile(path.join(projectRoot, 'src/content/l34.mjs'), 'utf8'
 const l56 = await readFile(path.join(projectRoot, 'src/content/l56.mjs'), 'utf8');
 const l78 = await readFile(path.join(projectRoot, 'src/content/l78.mjs'), 'utf8');
 const deep = await readFile(path.join(projectRoot, 'src/content/deep.mjs'), 'utf8');
+const uib1 = await readFile(path.join(projectRoot, 'src/ui-b1.mjs'), 'utf8');
+const mcSource = await readFile(path.join(projectRoot, 'src/masterclass.mjs'), 'utf8');
+const mcd1 = await readFile(path.join(projectRoot, 'src/masterclass-data-1.mjs'), 'utf8');
+const mcd2 = await readFile(path.join(projectRoot, 'src/masterclass-data-2.mjs'), 'utf8');
+const mcd3 = await readFile(path.join(projectRoot, 'src/masterclass-data-3.mjs'), 'utf8');
+const mcd4 = await readFile(path.join(projectRoot, 'src/masterclass-data-4.mjs'), 'utf8');
+const mcd5 = await readFile(path.join(projectRoot, 'src/masterclass-data-5.mjs'), 'utf8');
+const mcd6 = await readFile(path.join(projectRoot, 'src/masterclass-data-6.mjs'), 'utf8');
 
 const strip = source => source
   .replace(/^import[^;]+;\s*$/gm, '')
   .replace(/^export\s+/gm, '');
 
-const contentBundle = [base, l0, l1, l2, l34, l56, l78, deep, contentSource].map(strip).join('\n\n');
+const contentBundle = [base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, contentSource].map(strip).join('\n\n');
+const uib1Css = await readFile(path.join(projectRoot, 'src/ui-b1.css'), 'utf8');
 const runtime = [contentBundle, strip(domainSource), strip(appSource)].join('\n\n');
 
-const fragment = `${shell.trim()}\n<style>\n${styles.trim()}\n</style>\n<script>\n(() => {\n'use strict';\n${runtime}\nconst sapB1LabRoot = document.getElementById('sap-b1-mastery-lab');\nmountSapB1Lab(sapB1LabRoot);\n})();\n</script>\n`;
+const fragment = `${shell.trim()}\n<style>\n${styles.trim()}\n${uib1Css.trim()}\n</style>\n<script>\n(() => {\n'use strict';\n${runtime}\nconst sapB1LabRoot = document.getElementById('sap-b1-mastery-lab');\nmountSapB1Lab(sapB1LabRoot);\n})();\n</script>\n`;
 
 const standalone = `<!doctype html>
 <html lang="es">

@@ -355,3 +355,25 @@
 }
 
 /* the page shell around the app matches the paper */
+
+/* ============ Masterclass layer ============ */
+.sbl-masterclass {
+  border-top: 3px double var(--ink);
+  padding-top: .8rem;
+  grid-column: 1 / -1;
+}
+.mc-title { font-size: 1.05rem; margin: 0 0 .6rem; letter-spacing: .3px; }
+.mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: .8rem 0; }
+@media (max-width: 720px) { .mc-grid { grid-template-columns: 1fr; } }
+.mc-block { background: rgba(255,255,255,.5); border: 1px solid var(--line); padding: .7rem .9rem; }
+.mc-block h4 { margin: 0 0 .4rem; font-size: .82rem; text-transform: uppercase; letter-spacing: .5px; }
+.mc-block ul, .mc-block ol { margin: 0; padding-left: 1.1rem; }
+.mc-block li { margin: .3rem 0; font-size: .92rem; line-height: 1.45; }
+.mc-bp { border-left: 3px solid var(--accent); }
+.sbl-war {
+  border: 1px solid var(--accent); background: rgba(124,45,45,.05);
+  padding: .7rem .9rem; margin: .8rem 0;
+}
+.sbl-war h4 { margin: 0 0 .5rem; }
+.war-line { margin: .3rem 0; font-size: .92rem; }
+.war-line strong { display: inline-block; min-width: 88px; color: var(--accent); font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; }
