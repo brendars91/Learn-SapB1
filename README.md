@@ -1,4 +1,4 @@
-# SAP Business One Mastery Lab
+# Learn-SapB1
 
 <div align="center">
 
@@ -8,7 +8,7 @@
 
 [![tests](https://img.shields.io/badge/tests-38%2F38%20PASS-brightgreen)](#verificación) [![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/archivo-%3C1%20MiB-orange)](#cómo-usarla)
 
-### ➡️ [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/sap-b1-mastery-lab/)
+### ➡️ [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/)
 
 </div>
 
@@ -20,7 +20,7 @@ Herramienta de estudio **personal, offline y sin cuentas** para aprender SAP Bus
 
 ### Cómo usarla
 
-**Opción 1 (recomendada):** pulsa [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/sap-b1-mastery-lab/) — funciona directamente en el navegador, sin instalación.
+**Opción 1 (recomendada):** pulsa [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/) — funciona directamente en el navegador, sin instalación.
 
 **Opción 2:** descarga [`index.html`](index.html) y ábrelo con doble clic en cualquier navegador moderno. Todo el contenido, estilos y lógica viven dentro del único archivo HTML (<1 MiB). No requiere servidor, cuenta, clave API ni conexión.
 
@@ -88,7 +88,7 @@ A **personal, offline, account-free** study environment to master SAP Business O
 
 ### How to use
 
-**Option 1 (recommended):** click [**OPEN THE APP**](https://brendars91.github.io/sap-b1-mastery-lab/) — runs straight in the browser.
+**Option 1 (recommended):** click [**OPEN THE APP**](https://brendars91.github.io/Learn-SapB1/) — runs straight in the browser.
 
 **Option 2:** download [`index.html`](index.html) and double-click it. Everything lives in a single <1 MiB HTML file: no server, account, API key, or network needed.
 
