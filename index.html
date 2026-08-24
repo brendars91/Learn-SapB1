@@ -541,6 +541,31 @@
 .csl-lvltrack{height:.6rem;background:var(--paper-2);border:1px solid var(--line)}
 .csl-lvlfill{height:100%;background:var(--accent)}
 .csl-lvlpct{font:700 .8rem monospace;text-align:right}
+
+/* v7: encuadre + guiado + carrera */
+.act-brief{display:grid;gap:.4rem;padding:.9rem 1rem;border:1px solid var(--line);background:var(--paper-2);border-radius:4px}
+.act-brief div{display:grid;grid-template-columns:8rem 1fr;gap:.6rem;align-items:baseline}
+.act-brief strong{color:var(--accent);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase}
+.act-guided{padding:.8rem 1rem;border-left:4px solid #b08d3e;background:#f6efdc;border-radius:4px}
+.act-guided strong{display:block;color:#7a5c1e}
+.act-guided span{font-size:.85rem;color:var(--muted)}
+.act-hints{margin:.5rem 0 0}
+.act-hints li{margin:.3rem 0}
+.act-details{list-style:none;margin:.6rem 0 0;padding:0;display:grid;gap:.3rem}
+.act-details li{font-size:.85rem}
+.act-details li.ok{color:#48734f}
+.act-details li.ko{color:var(--accent)}
+.act-details li em{color:var(--muted);font-style:normal}
+.cr-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:flex-start}
+.cr-role{display:grid;gap:.2rem;text-align:right;border-left:4px solid var(--accent);padding-left:1rem}
+.cr-role strong{font-size:1.2rem}
+.cr-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.8rem}
+.cr-ticket header{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-bottom:.4rem}
+.cr-ticket h3{margin:.3rem 0}
+.cr-log{display:grid;gap:.35rem;max-height:22rem;overflow:auto}
+.cr-log-row{display:grid;grid-template-columns:5rem 1fr auto;gap:.6rem;font-size:.85rem;align-items:baseline;border-bottom:1px dotted var(--line);padding-bottom:.3rem}
+.cr-log-id{font-family:monospace;color:var(--muted)}
+.cr-log-ok{color:#48734f;font-size:.78rem}
 </style>
 <script>
 (() => {
@@ -548,7 +573,7 @@
 // Base del curriculum v2 — I18N, niveles, evidencia, procesos enriquecidos y DSL de skills.
 const I18N = {
   es: {
-    appLabel: 'Laboratorio de dominio SAP Business One', navHome: 'Inicio', navMap: 'Mapa', navCases: 'Casos', navIncidents: 'Incidentes', navSimulator: 'Cadena', navAI: 'Consola avanzada', navEvidence: 'Fuentes',
+    appLabel: 'Laboratorio de dominio SAP Business One', navHome: 'Inicio', navCareer: 'Carrera', navMap: 'Mapa', navCases: 'Casos', navIncidents: 'Incidentes', navSimulator: 'Cadena', navAI: 'Consola avanzada', navEvidence: 'Fuentes',
     language: 'Idioma', track: 'Ruta', trackFunctional: 'Funcional', trackTechnical: 'Técnica + IA', trackDual: 'Doble ruta',
     startDiagnostic: 'Iniciar diagnóstico', resume: 'Continuar', reset: 'Reiniciar progreso', export: 'Exportar progreso', import: 'Importar progreso',
     mastery: 'Dominio', dueReview: 'Repasos', skillsExplored: 'Competencias', recommended: 'Siguiente misión', begin: 'Comenzar',
@@ -577,7 +602,7 @@ const I18N = {
     promptFieldRole: 'Rol', promptFieldGoal: 'Objetivo', promptFieldContext: 'Contexto', promptFieldEvidence: 'Evidencia', promptFieldUncertainty: 'Incertidumbre', promptFieldOutput: 'Formato de salida', promptFieldHumanGate: 'Revisión humana', promptFieldSyntheticContext: 'Caso sintético'
   },
   en: {
-    appLabel: 'SAP Business One mastery lab', navHome: 'Home', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'Advanced console', navEvidence: 'Sources',
+    appLabel: 'SAP Business One mastery lab', navHome: 'Home', navCareer: 'Career', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'Advanced console', navEvidence: 'Sources',
     language: 'Language', track: 'Path', trackFunctional: 'Functional', trackTechnical: 'Technical + AI', trackDual: 'Dual path',
     startDiagnostic: 'Start diagnostic', resume: 'Continue', reset: 'Reset progress', export: 'Export progress', import: 'Import progress',
     mastery: 'Mastery', dueReview: 'Reviews', skillsExplored: 'Skills', recommended: 'Next mission', begin: 'Begin',
@@ -606,7 +631,7 @@ const I18N = {
     promptFieldRole: 'Role', promptFieldGoal: 'Goal', promptFieldContext: 'Context', promptFieldEvidence: 'Evidence', promptFieldUncertainty: 'Uncertainty', promptFieldOutput: 'Output format', promptFieldHumanGate: 'Human review', promptFieldSyntheticContext: 'Synthetic case'
   },
   de: {
-    appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Home', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
+    appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Home', navCareer: 'Career', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
     language: 'Sprache', track: 'Lernpfad', trackFunctional: 'Funktional', trackTechnical: 'Technik + KI', trackDual: 'Doppelpfad',
     startDiagnostic: 'Diagnose starten', resume: 'Fortsetzen', reset: 'Fortschritt löschen', export: 'Fortschritt exportieren', import: 'Fortschritt importieren',
     mastery: 'Beherrschung', dueReview: 'Wiederholungen', skillsExplored: 'Kompetenzen', recommended: 'Nächste Mission', begin: 'Starten',
@@ -4685,8 +4710,9 @@ const MASTERCLASS = {
 Object.assign(MASTERCLASS, MC_BATCH1, MC_BATCH2, MC_BATCH3, MC_BATCH4, MC_BATCH5, MC_BATCH6);
 
 
-// activities.mjs — Evaluaciones prácticas, no cuestionarios.
-// Cada skill recibe el formato que mejor reproduce el trabajo real de un consultor B1.
+// activities.mjs — v7: actividades con andamiaje pedagógico real.
+// P0-1 encuadre específico · P0-3 feedback por elemento · P0-4 simulador con campos reales
+// P0-5 sin autodelato forense · P0-6 consecuencias con distractores causales.
 
 const JOURNAL_IDS = new Set(['SYN-SK-L4-01','SYN-SK-L4-02','SYN-SK-L4-03','SYN-SK-L4-05','SYN-SK-L4-06','SYN-SK-L4-07','SYN-SK-L4-08']);
 const FORENSIC_IDS = new Set(['SYN-SK-L0-04','SYN-SK-L0-07','SYN-SK-L2-01','SYN-SK-L2-02','SYN-SK-L2-04','SYN-SK-L2-05','SYN-SK-L2-06','SYN-SK-L3-08','SYN-SK-L7-08']);
@@ -4722,27 +4748,76 @@ const JOURNALS = {
   'SYN-SK-L4-08': [['Gasto centro CC-VENTAS','Debe','600,00'],['Gasto centro CC-OPS','Debe','400,00'],['Contrapartida','Haber','1000,00']]
 };
 
+// Campos reales por skill simulador: [label, valorCorrecto, decoys plausibles] (P0-4)
+const SIMULATOR_FIELDS = {
+  'SYN-SK-L0-01': [
+    ['Módulo donde vive el Pedido de cliente', 'Ventas – CRM', ['Compras – CRM', 'Comprobantes', 'Finanzas']],
+    ['Base de datos de esta sesión', 'SBODEMOGE', ['SBOCOMMON', 'SBODRAFT', 'SBOTEST']],
+    ['Ruta del asiento manual', 'Comprobantes → Asiento', ['Ventas → Factura', 'Banco → Extracto', 'Existencias → Traspaso']]
+  ],
+  'SYN-SK-L0-02': [
+    ['Nº de socio de negocio (cliente)', 'C20000', ['C20001', 'C29999', 'V10000']],
+    ['Condición de pago estándar del cliente', '30 días netos', ['Contado', '2% 10 / 30 días', '60 días netos']],
+    ['Grupo del socio', 'Clientes locales', ['Proveedores locales', 'Clientes UE', 'Potenciales']]
+  ],
+  'SYN-SK-L0-03': [
+    ['Grupo de artículos', 'Hardware', ['Software', 'Servicios', 'Consumibles']],
+    ['Método de gestión de stock', 'Valorado permanentemente', ['No valorado', 'Solo cantidades', 'Planificación por demanda']],
+    ['Método de coste', 'Media móvil', ['FIFO', 'Estándar', 'Lote']]
+  ]
+};
+
+// Encuadre específico por skill (P0-1): qué es, qué hacer, qué se evalúa.
+function activityBrief(skill, locale) {
+  const loc = locale || 'es';
+  const L = v => Array.isArray(v) ? v.map(L).join(' ') : (v?.[loc] ?? v?.es ?? '');
+  const type = activityType(skill.id);
+  const verb = {
+    simulator: { es: 'Opera la ventana como el consultor: elige el valor correcto de cada campo.', en: 'Operate the window like the consultant: pick the right value per field.', de: 'Bediene das Fenster wie der Berater: je Feld der richtige Wert.' },
+    bughunt: { es: 'Audita la evidencia del incidente: marca SOLO lo que está mal.', en: 'Audit the incident evidence: mark ONLY what is wrong.', de: 'Prüfe die Evidenz: markiere NUR das Falsche.' },
+    journal: { es: 'Registra el evento en contabilidad: lado correcto por naturaleza de cuenta e importe exacto.', en: 'Post the event: correct side by account nature, exact amount.', de: 'Buche das Ereignis: richtige Seite, exakter Betrag.' },
+    forensic: { es: 'Reconstruye la cadena documental y señala el punto exacto donde se rompió.', en: 'Reconstruct the document chain and point at the exact break.', de: 'Rekonstruiere die Belegkette, zeige die Bruchstelle.' },
+    consequence: { es: 'Ordena la cascada real: qué causó qué. Hay señuelos que no pertenecen a la cadena.', en: 'Order the real cascade: what caused what. Decoys do not belong.', de: 'Ordne die echte Kaskade. Köder gehören nicht dazu.' },
+    config: { es: 'Monta la ruta de menú EXACTA. Sobran opciones: solo las correctas, en orden.', en: 'Build the EXACT menu path. Only correct ones, in order.', de: 'Baue den EXAKTEN Menüpfad. Nur Richtiges, in Ordnung.' }
+  }[type] || {};
+  const evals = {
+    simulator: { es: 'Se evalúa: interpretar el documento, no memorizarlo.', en: 'Graded on: interpreting the document.', de: 'Bewertet: Delegation interpretieren.' },
+    bughunt: { es: 'Se evalúa: distinguir señal de ruido.', en: 'Graded on: signal vs noise.', de: 'Bewertet: Signal vs Rauschen.' },
+    journal: { es: 'Se evalúa: naturaleza de cuenta + cuadre Debe=Haber.', en: 'Graded on: account nature + balance.', de: 'Bewertet: Kontonatur + Saldo.' },
+    forensic: { es: 'Se evalúa: seguir la lógica del proceso, no la forma del texto.', en: 'Graded on: process logic.', de: 'Bewertet: Prozesslogik.' },
+    consequence: { es: 'Se evalúa: causalidad real, no patrón de orden.', en: 'Graded on: real causality.', de: 'Bewertet: echte Kausalität.' },
+    config: { es: 'Se evalúa: memoria procedural de la ruta real.', en: 'Graded on: procedural memory.', de: 'Bewertet: prozedurales Gedächtnis.' }
+  }[type] || {};
+  return { what: L(skill.objective), task: verb[loc] || verb.es || '', graded: evals[loc] || evals.es || '' };
+}
+
 function text(v, locale) { return v?.[locale] ?? v?.es ?? String(v ?? ''); }
 function asArray(v) { return Array.isArray(v) ? v : v ? [v] : []; }
 function shuffledDeterministic(items) { return items.map((v,i)=>({v,k:(i*7+3)%items.length})).sort((a,b)=>a.k-b.k).map(x=>x.v); }
+function skillIndex(id) { const m=/L(\d+)-(\d+)/.exec(id); return m ? Number(m[1])*8+Number(m[2]) : 0; }
 
 function configSpec(skill, mc, locale) {
   const raw = text(asArray(mc.cfg)[0], locale);
   const route = raw.split(':')[0].split('>').map(x=>x.trim()).filter(Boolean);
-  const decoys = ['Gestión','Informes','Parametrizaciones generales','Herramientas'];
-  return { route, tokens: shuffledDeterministic([...route, ...decoys.filter(x=>!route.includes(x)).slice(0,Math.max(2,5-route.length))]) };
+  const pool = ['Gestión','Informes','Parametrizaciones generales','Herramientas'];
+  const decoys = shuffledDeterministic(pool.filter(x=>!route.includes(x)).slice(0, Math.max(2, 5-route.length)));
+  return { route, tokens: shuffledDeterministic([...route, ...decoys]) };
 }
 function simulatorSpec(skill, mc, locale) {
+  const custom = SIMULATOR_FIELDS[skill.id];
+  if (custom) {
+    return { targets: custom.map(([label, expected, decoys]) => ({ label, expected, options: shuffledDeterministic([expected, ...decoys]) })) };
+  }
   const fields = asArray(mc.screen?.fields);
   const editable = fields.filter(f=>f[2]).slice(0,3);
   let targets = editable.length ? editable : fields.slice(0,Math.min(3,fields.length));
   if (!targets.length) targets = asArray(mc.screen?.rows).slice(0,3).map(r => [r[0], r[1] ?? r[0]]);
-  return { targets: targets.map((f,i)=>({ label:f[0], expected:f[1], options:shuffledDeterministic([f[1], i===0?'— Vacío —':'Automático', i===0?'Bloqueado':'Manual']) })) };
+  return { targets: targets.map((f,i)=>({ label:f[0], expected:f[1], options:shuffledDeterministic([f[1], i===0?'— Sin valor —':'Automático', i===0?'Bloqueado':'Manual']) })) };
 }
 function forensicSpec(skill, mc, locale) {
   const steps = asArray(mc.e2e).map((x,i)=>({ label:text(x,locale), broken:false, index:i }));
-  const broken = { label:`⚠ ${text(mc.war?.root,locale)}`, broken:true, index:steps.length };
-  return { evidence: shuffledDeterministic([...steps.slice(0,3),broken]), resolution:text(mc.war?.fix,locale) };
+  const broken = { label: text(mc.war?.root, locale), broken: true, index: steps.length };
+  return { evidence: shuffledDeterministic([...steps.slice(0,3), broken]), resolution: text(mc.war?.fix, locale) };
 }
 function bughuntSpec(skill, mc, locale) {
   return { clues: shuffledDeterministic([
@@ -4753,24 +4828,78 @@ function bughuntSpec(skill, mc, locale) {
   ]), resolution:text(mc.war?.fix,locale) };
 }
 function consequenceSpec(skill, mc, locale) {
-  return { trigger:text(mc.war?.symptom,locale), chain:[
-    text(mc.war?.root,locale),
-    text(asArray(mc.e2e)[Math.min(1,asArray(mc.e2e).length-1)],locale),
-    text(mc.war?.fix,locale)
-  ].filter(Boolean) };
+  const trigger = text(mc.war?.sympt, locale);
+  const root = text(mc.war?.root, locale);
+  const mid = text(asArray(mc.e2e)[Math.min(1,asArray(mc.e2e).length-1)], locale);
+  const fix = text(mc.war?.fix, locale);
+  const chain = [root, mid, fix].filter(Boolean);
+  const pool = [
+    { es:'El informe mensual se imprime dos veces y nadie lo lee', en:'The monthly report prints twice and nobody reads it', de:'Der Monatsbericht druckt zweimal, keiner liest ihn' },
+    { es:'Un usuario adelanta la fecha del sistema para facturar antes', en:'A user shifts system date to invoice earlier', de:'Ein Benutzer verschiebt das Systemdatum' },
+    { es:'El proveedor sube el precio sin actualizar la lista de compra', en:'Vendor raises price without updating the purchase price list', de:'Der Lieferant erhöht den Preis ohne aktualisierte Einkaufsliste' }
+  ];
+  const d = pool[skillIndex(skill.id) % pool.length];
+  const decoy = d[locale] || d.es;
+  return { trigger, chain, tokens: shuffledDeterministic([...chain, decoy]) };
 }
 
-function getActivity(skill, locale='es') {
+function getActivity(skill, locale) {
+  const loc = locale || 'es';
   const mc = MASTERCLASS[skill.id];
   const type = activityType(skill.id);
-  const base = { type, label:text(LABELS[type],locale), mc };
-  if (!mc) return { ...base, unavailable:true };
-  if (type==='journal') return { ...base, lines:JOURNALS[skill.id] || [['Cuenta de origen','Debe','1000,00'],['Contrapartida','Haber','1000,00']] };
-  if (type==='config') return { ...base, ...configSpec(skill,mc,locale) };
-  if (type==='simulator') return { ...base, ...simulatorSpec(skill,mc,locale) };
-  if (type==='forensic') return { ...base, ...forensicSpec(skill,mc,locale) };
-  if (type==='bughunt') return { ...base, ...bughuntSpec(skill,mc,locale) };
-  return { ...base, ...consequenceSpec(skill,mc,locale) };
+  const base = { type, label: text(LABELS[type], loc), mc, brief: activityBrief(skill, loc) };
+  if (!mc) return { ...base, unavailable: true };
+  if (type==='journal') return { ...base, lines: JOURNALS[skill.id] || [['Cuenta de origen','Debe','1000,00'],['Contrapartida','Haber','1000,00']] };
+  if (type==='config') return { ...base, ...configSpec(skill, mc, loc) };
+  if (type==='simulator') return { ...base, ...simulatorSpec(skill, mc, loc) };
+  if (type==='forensic') return { ...base, ...forensicSpec(skill, mc, loc) };
+  if (type==='bughunt') return { ...base, ...bughuntSpec(skill, mc, loc) };
+  return { ...base, ...consequenceSpec(skill, mc, loc) };
+}
+
+// Validación con feedback por elemento (P0-3): devuelve detalles de qué falló.
+function validateActivityDetailed(activity, answers, sequence) {
+  const A = answers || {};
+  const seq = sequence || [];
+  const details = [];
+  let correct = true;
+  if (activity.type === 'simulator') {
+    activity.targets.forEach((f, i) => {
+      const ok = A['sim-' + i] === f.expected;
+      if (!ok) correct = false;
+      details.push({ item: f.label, ok, expected: f.expected, got: A['sim-' + i] || '—' });
+    });
+  } else if (activity.type === 'bughunt') {
+    activity.clues.forEach((c, i) => {
+      const ok = Boolean(A['clue-' + i]) === Boolean(c.error);
+      if (!ok) correct = false;
+      details.push({ item: c.label.slice(0, 70), ok, expected: c.error ? 'Marcar' : 'No marcar', got: A['clue-' + i] ? 'Marcado' : 'Sin marcar' });
+    });
+  } else if (activity.type === 'forensic') {
+    const chosen = Number(A.broken);
+    const ok = activity.evidence[chosen]?.broken === true;
+    if (!ok) correct = false;
+    details.push({ item: 'Eslabón señalado', ok, expected: 'El eslabón roto real', got: activity.evidence[chosen]?.label?.slice(0, 70) || '—' });
+  } else if (activity.type === 'config' || activity.type === 'consequence') {
+    const ref = activity.route || activity.chain;
+    ref.forEach((step, i) => {
+      const ok = seq[i] === step;
+      if (!ok) correct = false;
+      details.push({ item: 'Paso ' + (i + 1) + ': esperaba "' + String(step).slice(0, 40) + '"', ok, expected: step, got: seq[i] || '—' });
+    });
+    if (activity.tokens && seq.length > ref.length) {
+      correct = false;
+      details.push({ item: 'Incluiste señuelos que no pertenecen a la cadena', ok: false, expected: ref.length + ' pasos exactos', got: seq.length + ' pasos' });
+    }
+  } else if (activity.type === 'journal') {
+    activity.lines.forEach((l, i) => {
+      const sideOk = A['side-' + i] === l[1];
+      const amountOk = String(A['amount-' + i] || '').replace(/\s/g, '') === l[2];
+      if (!sideOk || !amountOk) correct = false;
+      details.push({ item: l[0] + ' — lado/importe', ok: sideOk && amountOk, expected: l[1] + ' ' + l[2], got: (A['side-' + i] || '—') + ' ' + (A['amount-' + i] || '—') });
+    });
+  }
+  return { correct, details };
 }
 
 const ACTIVITY_COUNTS = Object.freeze(Array.from({length:9},(_,l)=>Array.from({length:8},(_,i)=>activityType(`SYN-SK-L${l}-${String(i+1).padStart(2,'0')}`))).flat().reduce((a,t)=>(a[t]=(a[t]||0)+1,a),{}));
@@ -5065,6 +5194,80 @@ Toda escritura (UPDATE/INSERT/DELETE, Service Layer POST) requiere confirmación
     check: ['¿El input externo está enmarcado?', '¿Las escrituras requieren aprobación?']
   }
 ];
+
+
+// career.mjs — Modo Carrera: la empresa Nordwind Handel GmbH.
+// Cada skill dominada resuelve un ticket real; los KPIs de la empresa evolucionan con el usuario.
+
+const CAREER = {
+  company: { es: 'Nordwind Handel GmbH', en: 'Nordwind Trading Ltd.', de: 'Nordwind Handel GmbH' },
+  intro: {
+    es: 'Eres el nuevo consultor de Nordwind Handel GmbH. Cada skill que dominas resuelve un ticket real de la empresa y mueve sus KPIs. Tu cargo evoluciona con los tickets cerrados.',
+    en: 'You are Nordwind Trading\'s new consultant. Each mastered skill resolves a real ticket and moves company KPIs. Your title evolves as you close tickets.',
+    de: 'Du bist der neue Berater der Nordwind Handel GmbH. Jede gemeisterte Skill löst ein echtes Ticket und bewegt die KPIs. Deine Rolle wächst mit jedem geschlossenen Ticket.'
+  },
+  roles: [
+    { at: 0,  es: 'Becario', en: 'Intern', de: 'Praktikant' },
+    { at: 8,  es: 'Consultor junior', en: 'Junior consultant', de: 'Junior-Berater' },
+    { at: 20, es: 'Consultor', en: 'Consultant', de: 'Berater' },
+    { at: 35, es: 'Consultor senior', en: 'Senior consultant', de: 'Senior-Berater' },
+    { at: 50, es: 'Arquitecto de procesos', en: 'Process architect', de: 'Prozessarchitekt' },
+    { at: 64, es: 'Arquitecto B1 principal', en: 'Principal B1 architect', de: 'Principal-B1-Architekt' }
+  ],
+  kpis: [
+    { id: 'tickets', label: { es: 'Tickets cerrados', en: 'Tickets closed', de: 'Geschlossene Tickets' }, unit: '' },
+    { id: 'dso',     label: { es: 'DSO · días de cobro', en: 'DSO · days to collect', de: 'DSO · Tage bis zum Zahlungseingang' }, unit: 'd' },
+    { id: 'stock',   label: { es: 'Capital en stock', en: 'Capital in stock', de: 'Lagerkapital' }, unit: 'k€' },
+    { id: 'errors',  label: { es: 'Errores de proceso/mes', en: 'Process errors/month', de: 'Prozessfehler/Monat' }, unit: '' }
+  ]
+};
+
+function skillIndexNumber(id) {
+  const m = /L(\d+)-(\d+)/.exec(id || '');
+  return m ? Number(m[1]) * 8 + Number(m[2]) : 0;
+}
+
+// Departamento emisor del ticket, derivado del nivel del skill.
+function departmentFor(level, locale = 'es', levelsMeta) {
+  const t = levelsMeta?.[level]?.title;
+  const v = t?.[locale] ?? t?.es ?? '';
+  return v || 'Nordwind';
+}
+
+// Ticket derivado del war story del skill: síntoma → petición del cliente.
+function getTicket(skill, mc, locale = 'es', levelsMeta) {
+  const L = v => Array.isArray(v) ? v.map(L).join(' ') : (v?.[locale] ?? v?.es ?? (v === undefined || v === null ? '' : String(v)));
+  const war = mc?.war;
+  if (!war) return null;
+  const sympt = Array.isArray(war.sympt) ? war.sympt.map(L).join(' ') : L(war.sympt);
+  return {
+    id: `NW-${String(skillIndexNumber(skill.id)).padStart(3, '0')}`,
+    from: departmentFor(skill.level, locale, levelsMeta),
+    subject: L(war.q),
+    body: sympt,
+    resolution: L(war.fix),
+    skillId: skill.id
+  };
+}
+
+function careerProgress(masteredCount, locale = 'es', totalSkills = 72) {
+  const role = [...CAREER.roles].reverse().find(r => masteredCount >= r.at) || CAREER.roles[0];
+  const pct = Math.round(masteredCount / totalSkills * 100);
+  return { role: role[locale] || role.es, pct };
+}
+
+// KPIs vivos: mejoran con el dominio (memoria realista: no llegan a cero/perfección).
+function kpiSnapshot(masteredCount, totalSkills = 72) {
+  const f = Math.max(0, Math.min(1, masteredCount / totalSkills));
+  return CAREER.kpis.map(k => {
+    let value = 0;
+    if (k.id === 'tickets') value = masteredCount;
+    else if (k.id === 'dso') value = Math.max(34, Math.round(62 - 28 * f));
+    else if (k.id === 'stock') value = Math.max(210, Math.round(480 - 200 * f));
+    else if (k.id === 'errors') value = Math.max(4, Math.round(23 - 17 * f));
+    return { id: k.id, label: k.label, unit: k.unit, value };
+  });
+}
 
 
 // content.mjs v2 — Agregador del curriculum completo + decisiones interactivas v2.
@@ -5434,8 +5637,9 @@ function nextReviewDate(correctStreak, from = new Date()) {
 
 
 
+
 const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
-const VIEWS = ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence'];
+const VIEWS = ['home', 'career', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence'];
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, character => ({
@@ -5456,9 +5660,9 @@ function createInitialState(saved = {}) {
     diagnosticFeedback: null,
     recommendedLevel: Number.isInteger(saved.recommendedLevel) ? saved.recommendedLevel : 0,
     selectedSkillId: saved.selectedSkillId || 'SYN-SK-L0-01',
-    skillMode: saved.skillMode === 'prove' ? 'prove' : 'learn',
+    skillMode: ['learn','guided','prove'].includes(saved.skillMode) ? saved.skillMode : 'learn',
     assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false,
-    activityAnswers: {}, activitySequence: [], activityFeedback: null,
+    activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0,
     consoleTab: 'queries', consoleQuery: null, consoleOpen: null,
     levelFilter: saved.levelFilter ?? 'all',
     trackFilter: saved.trackFilter || 'all',
@@ -5482,8 +5686,8 @@ function reduceState(state, action) {
     case 'SET_LOCALE': return ['es', 'en', 'de'].includes(action.locale) ? { ...state, locale: action.locale, toast: '' } : state;
     case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
     case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
-    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, toast: '' };
-    case 'SET_SKILL_MODE': return { ...state, skillMode: action.mode === 'prove' ? 'prove' : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null };
+    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0, toast: '' };
+    case 'SET_SKILL_MODE': return { ...state, skillMode: ['learn','guided','prove'].includes(action.mode) ? action.mode : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0 };
     case 'ACTIVITY_ANSWER': return { ...state, activityAnswers: { ...state.activityAnswers, [action.key]: action.value }, activityFeedback: null };
     case 'ACTIVITY_TOGGLE': {
       const selected = Boolean(state.activityAnswers[action.key]);
@@ -5491,7 +5695,8 @@ function reduceState(state, action) {
     }
     case 'ACTIVITY_SEQUENCE': return { ...state, activitySequence: [...state.activitySequence, action.value], activityFeedback: null };
     case 'ACTIVITY_SEQUENCE_UNDO': return { ...state, activitySequence: state.activitySequence.slice(0, -1), activityFeedback: null };
-    case 'ACTIVITY_FEEDBACK': return { ...state, activityFeedback: { correct: action.correct, message: action.message }, assessmentResult: { correct: action.correct } };
+    case 'ACTIVITY_FEEDBACK': return { ...state, activityFeedback: { correct: action.correct, message: action.message, details: action.details || null }, assessmentResult: { correct: action.correct } };
+    case 'ACTIVITY_HINT': return { ...state, activityHints: (state.activityHints || 0) + 1 };
     case 'RESET_ACTIVITY': return { ...state, activityAnswers: {}, activitySequence: [], activityFeedback: null, assessmentResult: null };
     case 'ANSWER_STEP_DECIDE': return { ...state, assessmentChoice: action.index, assessmentStep: Math.max(state.assessmentStep, 1) };
     case 'ANSWER_STEP_PRINCIPLE': return { ...state, assessmentPrinciple: action.index, assessmentStep: Math.max(state.assessmentStep, 2) };
@@ -5719,7 +5924,7 @@ function renderChrome(state) {
       </div>
     </div>
     <nav class="sbl-nav" aria-label="${escapeHtml(I18N[state.locale].appLabel)}">
-      ${navButton(state, 'home', 'navHome')}${navButton(state, 'map', 'navMap')}${navButton(state, 'cases', 'navCases')}${navButton(state, 'incidents', 'navIncidents')}${navButton(state, 'simulator', 'navSimulator')}${navButton(state, 'ai', 'navAI')}${navButton(state, 'evidence', 'navEvidence')}
+      ${navButton(state, 'home', 'navHome')}${navButton(state, 'career', 'navCareer')}${navButton(state, 'map', 'navMap')}${navButton(state, 'cases', 'navCases')}${navButton(state, 'incidents', 'navIncidents')}${navButton(state, 'simulator', 'navSimulator')}${navButton(state, 'ai', 'navAI')}${navButton(state, 'evidence', 'navEvidence')}
     </nav>`;
 }
 
@@ -5925,32 +6130,34 @@ function renderActivityBody(state, activity) {
 function renderProveMode(state, skill) {
   const activity = getActivity(skill, state.locale);
   const feedback = state.activityFeedback;
+  const guided = state.skillMode === 'guided';
+  const hints = state.activityHints || 0;
+  const skillHints = asArrayHints(skill.assessment?.hints);
   if (activity.unavailable) return `<p>Actividad en preparación.</p>`;
+  const briefHtml = activity.brief ? `<div class="act-brief">
+    <div><strong>¿Qué es esto?</strong><span>${escapeHtml(activity.brief.what)}</span></div>
+    <div><strong>Tu tarea</strong><span>${escapeHtml(activity.brief.task)}</span></div>
+    <div><strong>Se evalúa</strong><span>${escapeHtml(activity.brief.graded)}</span></div>
+  </div>` : '';
+  const guidedHtml = guided ? `<div class="act-guided"><strong>Modo guiado</strong><span>Errores no cuentan. Pide pista cuando lo necesites.</span>
+    ${hints > 0 ? `<ol class="act-hints">${skillHints.slice(0, hints).map(h => `<li>${escapeHtml(localizeHint(h, state.locale))}</li>`).join('')}</ol>` : ''}</div>` : '';
+  const detailsHtml = feedback?.details?.length ? `<ul class="act-details">${feedback.details.map(d => `<li class="${d.ok ? 'ok' : 'ko'}">${d.ok ? '✓' : '✗'} ${escapeHtml(d.item)}${d.ok ? '' : ` — <em>correcto: ${escapeHtml(String(d.expected)).slice(0,60)}</em>`}</li>`).join('')}</ul>` : '';
   return `<section class="sbl-activity" data-activity-type="${activity.type}">
-    <header class="act-head"><span class="act-icon">${{simulator:'⌨',bughunt:'⌖',journal:'⚖',forensic:'⌕',consequence:'⟿',config:'⚙'}[activity.type]}</span><div><span class="viz-badge">${escapeHtml(activity.label)}</span><h3>${local(skill.title,state.locale)} · ${escapeHtml(activityInstructions(activity.type,state.locale))}</h3></div></header>
+    <header class="act-head"><span class="act-icon">${{simulator:'⌨',bughunt:'⌖',journal:'⚖',forensic:'⌕',consequence:'⟿',config:'⚙'}[activity.type]}</span><div><span class="viz-badge">${escapeHtml(activity.label)}${guided ? ' · guiado' : ''}</span><h3>${local(skill.title,state.locale)}</h3></div></header>
+    ${briefHtml}
+    ${guidedHtml}
     ${activity.mc?.screen && ['simulator','bughunt','journal','forensic'].includes(activity.type) ? `<div class="act-screen">${b1Window(activity.mc.screen,state.locale)}</div>`:''}
     ${renderActivityBody(state,activity)}
-    ${feedback?`<div class="act-feedback ${feedback.correct?'is-correct':'is-wrong'}"><strong>${feedback.correct?'✓ Misión resuelta':'↻ Aún no'}</strong><p>${escapeHtml(feedback.message)}</p></div>`:''}
-    <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="check-activity">Comprobar decisión</button><button type="button" class="btn" data-action="reset-activity">Reiniciar</button></div>
+    ${feedback?`<div class="act-feedback ${feedback.correct?'is-correct':'is-wrong'}"><strong>${feedback.correct?'✓ Misión resuelta':'↻ Aún no — te digo exactamente qué falló'}</strong><p>${escapeHtml(feedback.message)}</p>${detailsHtml}</div>`:''}
+    <div class="sbl-actions">
+      <button type="button" class="btn btn-primary" data-action="check-activity">Comprobar</button>
+      ${guided && skillHints.length && hints < skillHints.length ? `<button type="button" class="btn" data-action="activity-hint">💡 Pista (${hints}/${skillHints.length})</button>`:''}
+      <button type="button" class="btn" data-action="reset-activity">Reiniciar</button>
+    </div>
   </section>`;
 }
-
-function validateActivity(state, skill) {
-  const a = getActivity(skill,state.locale), A=state.activityAnswers||{}, seq=state.activitySequence||[];
-  let correct=false, message='Revisa la evidencia y vuelve a intentarlo.';
-  if(a.type==='simulator') correct=a.targets.every((f,i)=>A[`sim-${i}`]===f.expected);
-  if(a.type==='bughunt') correct=a.clues.every((c,i)=>Boolean(A[`clue-${i}`])===Boolean(c.error));
-  if(a.type==='forensic') correct=a.evidence[Number(A.broken)]?.broken===true;
-  if(a.type==='config') correct=JSON.stringify(seq)===JSON.stringify(a.route);
-  if(a.type==='consequence') correct=JSON.stringify(seq)===JSON.stringify(a.chain);
-  if(a.type==='journal') correct=a.lines.every((l,i)=>A[`side-${i}`]===l[1] && String(A[`amount-${i}`]||'').replace(/\s/g,'')===l[2]);
-  if(correct) message=a.resolution || 'Decisión correcta: la evidencia, el control y el resultado son coherentes.';
-  else if(a.type==='journal') message='El asiento no representa correctamente el evento o no cuadra. Comprueba naturaleza de cuenta, lado e importe.';
-  else if(a.type==='config') message='La ruta contiene un nivel incorrecto, falta un nivel o el orden no es el del menú real.';
-  else if(a.type==='consequence') message='Los hechos son correctos, pero la secuencia causal no. Empieza por la causa raíz, no por la solución.';
-  return {correct,message};
-}
-
+function asArrayHints(v) { return Array.isArray(v) ? v : v ? [v] : []; }
+function localizeHint(h, locale) { return h?.[locale] ?? h?.es ?? String(h ?? ''); }
 function renderSkillDetail(state, skill) {
   const record = state.progress[skill.id] || {};
   const mode = state.skillMode;
@@ -5958,6 +6165,7 @@ function renderSkillDetail(state, skill) {
     <div class="sbl-card-head"><span class="viz-badge">${escapeHtml(skill.id)}</span>
       <div class="sbl-mode-toggle" role="tablist">
         <button type="button" class="btn${mode === 'learn' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="learn" aria-pressed="${mode === 'learn'}">${t(state, 'learnMode')}</button>
+        <button type="button" class="btn${mode === 'guided' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="guided" aria-pressed="${mode === 'guided'}">Práctica guiada</button>
         <button type="button" class="btn${mode === 'prove' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="prove" aria-pressed="${mode === 'prove'}">${t(state, 'proveSkill')}</button>
       </div></div>
     <h2 id="skill-title">${local(skill.title, state.locale)}</h2>
@@ -6069,8 +6277,50 @@ function renderConsole(state) {
   </section>`;
 }
 
+function renderCareer(state) {
+  const L = state.locale;
+  const loc = v => v?.[L] ?? v?.es ?? '';
+  const mastered = SKILLS.filter(s => state.progress[s.id]?.mastered).length;
+  const cp = careerProgress(mastered, L);
+  const kpis = kpiSnapshot(mastered);
+  const nextSkill = recommendNext(SKILLS, state.progress, new Date(), { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
+  const nextMc = MASTERCLASS[nextSkill.id];
+  const ticket = nextMc ? getTicket(nextSkill, nextMc, L, LEVELS) : null;
+  const roleUp = [...CAREER.roles].reverse().find(r => mastered < r.at);
+  const nextRole = roleUp ? roleUp[L] || roleUp.es : '';
+  const nextAt = roleUp ? roleUp.at : 72;
+  return `<section class="sbl-stack" aria-labelledby="career-title">
+    <header class="cr-head">
+      <div><span class="viz-badge">SAP BUSINESS ONE · CONSULTING CAREER MODE</span>
+      <h2 id="career-title">${escapeHtml(loc(CAREER.company))}</h2>
+      <p class="text-small">${escapeHtml(loc(CAREER.intro))}</p></div>
+      <div class="cr-role">
+        <span class="text-small">${L==='de'?'Aktuelle Rolle':L==='en'?'Current role':'Cargo actual'}</span>
+        <strong>${escapeHtml(cp.role)}</strong>
+        <span class="text-small">${mastered}/72 · ${L==='de'?`nächste Rolle: ${nextRole} bei ${nextAt}`:L==='en'?`next: ${nextRole} at ${nextAt}`:`siguiente: ${nextRole} a las ${nextAt}`}</span>
+      </div>
+    </header>
+    <div class="cr-kpis">${kpis.map(k => `<div class="card viz-stat"><span class="text-muted">${escapeHtml(loc(k.label))}</span><span class="viz-stat-value">${k.value}${k.unit}</span></div>`).join('')}</div>
+    ${ticket ? `<section class="card cr-ticket">
+      <header><span class="viz-badge">${L==='de'?'NÄCHSTES TICKET':L==='en'?'NEXT TICKET':'SIGUIENTE TICKET'}</span><strong>${escapeHtml(ticket.id)} · ${escapeHtml(ticket.from)}</strong></header>
+      <h3>${escapeHtml(ticket.subject)}</h3>
+      <p>${escapeHtml(ticket.body)}</p>
+      <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${ticket.skillId}">${L==='de'?'Ticket bearbeiten':L==='en'?'Work this ticket':'Atender este ticket'}</button></div>
+    </section>` : ''}
+    <section class="card sbl-stack">
+      <h3>${L==='de'?'Ticket-Verlauf':L==='en'?'Ticket log':'Registro de tickets'}</h3>
+      <div class="cr-log">${SKILLS.filter(s => state.progress[s.id]?.mastered).slice(0, 30).reverse().map(s => {
+        const mc = MASTERCLASS[s.id];
+        const tk = mc ? getTicket(s, mc, L, LEVELS) : null;
+        return tk ? `<div class="cr-log-row"><span class="cr-log-id">${tk.id}</span><span>${escapeHtml(tk.subject)}</span><span class="cr-log-ok">✓ ${L==='de'?'gelöst':L==='en'?'resolved':'resuelto'}</span></div>` : '';
+      }).join('') || `<em>${L==='de'?'Noch keine Tickets gelöst.':L==='en'?'No tickets resolved yet.':'Aún no hay tickets resueltos.'}</em>`}</div>
+    </section>
+  </section>`;
+}
+
 function renderView(state) {
   switch (state.view) {
+    case 'career': return renderCareer(state);
     case 'map': return renderMap(state);
     case 'cases': return `<div class="sbl-stack"><h2>${t(state, 'caseLabTitle')}</h2>${renderDecision(state, CASES[state.caseIndex], 'case')}</div>`;
     case 'incidents': return `<div class="sbl-stack"><h2>${t(state, 'incidentTitle')}</h2>${renderDecision(state, INCIDENTS[state.incidentIndex], 'incident')}</div>`;
@@ -6148,11 +6398,14 @@ function mountSapB1Lab(root) {
     else if (action === 'reset-activity') dispatch({ type: 'RESET_ACTIVITY' });
     else if (action === 'check-activity') {
       const skill = SKILLS.find(s => s.id === state.selectedSkillId);
-      const alreadyPassed = state.activityFeedback?.correct === true;
-      const result = validateActivity(state, skill);
-      dispatch({ type: 'ACTIVITY_FEEDBACK', ...result });
-      if (result.correct && !alreadyPassed) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
+      if (!skill) return;
+      const activity = getActivity(skill, state.locale);
+      const result = validateActivityDetailed(activity, state.activityAnswers, state.activitySequence);
+      const passed = result.correct;
+      dispatch({ type: 'ACTIVITY_FEEDBACK', correct: passed, message: passed ? (activity.resolution || 'Decisión correcta: la evidencia, el control y el resultado son coherentes.') : 'Revisa los elementos marcados y vuelve a intentarlo.', details: result.details });
+      if (passed && state.skillMode === 'prove' && state.activityFeedback?.correct !== true) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
     }
+    else if (action === 'activity-hint') dispatch({ type: 'ACTIVITY_HINT' });
     else if (action === 'step-decide') dispatch({ type: 'ANSWER_STEP_DECIDE', index: Number(control.dataset.index) });
     else if (action === 'step-principle') dispatch({ type: 'ANSWER_STEP_PRINCIPLE', index: Number(control.dataset.index) });
     else if (action === 'reveal-reasoning') {

@@ -3,11 +3,12 @@ import { I18N, LEVELS, SKILLS, CASES, INCIDENTS, BOSSES, EVIDENCE, DIAGNOSTIC, P
 import { calculateMastery, recommendNext, scanSensitiveInput, lintPrompt, validateProgressImport, nextReviewDate } from './domain.mjs';
 import { b1Window } from './ui-b1.mjs';
 import { MASTERCLASS } from './masterclass.mjs';
-import { getActivity } from './activities.mjs';
+import { getActivity, validateActivityDetailed } from './activities.mjs';
 import { ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS } from './advanced.mjs';
+import { CAREER, getTicket, careerProgress, kpiSnapshot } from './career.mjs';
 
 const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
-const VIEWS = ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence'];
+const VIEWS = ['home', 'career', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence'];
 
 export function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, character => ({
@@ -28,9 +29,9 @@ export function createInitialState(saved = {}) {
     diagnosticFeedback: null,
     recommendedLevel: Number.isInteger(saved.recommendedLevel) ? saved.recommendedLevel : 0,
     selectedSkillId: saved.selectedSkillId || 'SYN-SK-L0-01',
-    skillMode: saved.skillMode === 'prove' ? 'prove' : 'learn',
+    skillMode: ['learn','guided','prove'].includes(saved.skillMode) ? saved.skillMode : 'learn',
     assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false,
-    activityAnswers: {}, activitySequence: [], activityFeedback: null,
+    activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0,
     consoleTab: 'queries', consoleQuery: null, consoleOpen: null,
     levelFilter: saved.levelFilter ?? 'all',
     trackFilter: saved.trackFilter || 'all',
@@ -54,8 +55,8 @@ export function reduceState(state, action) {
     case 'SET_LOCALE': return ['es', 'en', 'de'].includes(action.locale) ? { ...state, locale: action.locale, toast: '' } : state;
     case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
     case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
-    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, toast: '' };
-    case 'SET_SKILL_MODE': return { ...state, skillMode: action.mode === 'prove' ? 'prove' : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null };
+    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0, toast: '' };
+    case 'SET_SKILL_MODE': return { ...state, skillMode: ['learn','guided','prove'].includes(action.mode) ? action.mode : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0 };
     case 'ACTIVITY_ANSWER': return { ...state, activityAnswers: { ...state.activityAnswers, [action.key]: action.value }, activityFeedback: null };
     case 'ACTIVITY_TOGGLE': {
       const selected = Boolean(state.activityAnswers[action.key]);
@@ -63,7 +64,8 @@ export function reduceState(state, action) {
     }
     case 'ACTIVITY_SEQUENCE': return { ...state, activitySequence: [...state.activitySequence, action.value], activityFeedback: null };
     case 'ACTIVITY_SEQUENCE_UNDO': return { ...state, activitySequence: state.activitySequence.slice(0, -1), activityFeedback: null };
-    case 'ACTIVITY_FEEDBACK': return { ...state, activityFeedback: { correct: action.correct, message: action.message }, assessmentResult: { correct: action.correct } };
+    case 'ACTIVITY_FEEDBACK': return { ...state, activityFeedback: { correct: action.correct, message: action.message, details: action.details || null }, assessmentResult: { correct: action.correct } };
+    case 'ACTIVITY_HINT': return { ...state, activityHints: (state.activityHints || 0) + 1 };
     case 'RESET_ACTIVITY': return { ...state, activityAnswers: {}, activitySequence: [], activityFeedback: null, assessmentResult: null };
     case 'ANSWER_STEP_DECIDE': return { ...state, assessmentChoice: action.index, assessmentStep: Math.max(state.assessmentStep, 1) };
     case 'ANSWER_STEP_PRINCIPLE': return { ...state, assessmentPrinciple: action.index, assessmentStep: Math.max(state.assessmentStep, 2) };
@@ -291,7 +293,7 @@ function renderChrome(state) {
       </div>
     </div>
     <nav class="sbl-nav" aria-label="${escapeHtml(I18N[state.locale].appLabel)}">
-      ${navButton(state, 'home', 'navHome')}${navButton(state, 'map', 'navMap')}${navButton(state, 'cases', 'navCases')}${navButton(state, 'incidents', 'navIncidents')}${navButton(state, 'simulator', 'navSimulator')}${navButton(state, 'ai', 'navAI')}${navButton(state, 'evidence', 'navEvidence')}
+      ${navButton(state, 'home', 'navHome')}${navButton(state, 'career', 'navCareer')}${navButton(state, 'map', 'navMap')}${navButton(state, 'cases', 'navCases')}${navButton(state, 'incidents', 'navIncidents')}${navButton(state, 'simulator', 'navSimulator')}${navButton(state, 'ai', 'navAI')}${navButton(state, 'evidence', 'navEvidence')}
     </nav>`;
 }
 
@@ -497,32 +499,34 @@ function renderActivityBody(state, activity) {
 function renderProveMode(state, skill) {
   const activity = getActivity(skill, state.locale);
   const feedback = state.activityFeedback;
+  const guided = state.skillMode === 'guided';
+  const hints = state.activityHints || 0;
+  const skillHints = asArrayHints(skill.assessment?.hints);
   if (activity.unavailable) return `<p>Actividad en preparación.</p>`;
+  const briefHtml = activity.brief ? `<div class="act-brief">
+    <div><strong>¿Qué es esto?</strong><span>${escapeHtml(activity.brief.what)}</span></div>
+    <div><strong>Tu tarea</strong><span>${escapeHtml(activity.brief.task)}</span></div>
+    <div><strong>Se evalúa</strong><span>${escapeHtml(activity.brief.graded)}</span></div>
+  </div>` : '';
+  const guidedHtml = guided ? `<div class="act-guided"><strong>Modo guiado</strong><span>Errores no cuentan. Pide pista cuando lo necesites.</span>
+    ${hints > 0 ? `<ol class="act-hints">${skillHints.slice(0, hints).map(h => `<li>${escapeHtml(localizeHint(h, state.locale))}</li>`).join('')}</ol>` : ''}</div>` : '';
+  const detailsHtml = feedback?.details?.length ? `<ul class="act-details">${feedback.details.map(d => `<li class="${d.ok ? 'ok' : 'ko'}">${d.ok ? '✓' : '✗'} ${escapeHtml(d.item)}${d.ok ? '' : ` — <em>correcto: ${escapeHtml(String(d.expected)).slice(0,60)}</em>`}</li>`).join('')}</ul>` : '';
   return `<section class="sbl-activity" data-activity-type="${activity.type}">
-    <header class="act-head"><span class="act-icon">${{simulator:'⌨',bughunt:'⌖',journal:'⚖',forensic:'⌕',consequence:'⟿',config:'⚙'}[activity.type]}</span><div><span class="viz-badge">${escapeHtml(activity.label)}</span><h3>${local(skill.title,state.locale)} · ${escapeHtml(activityInstructions(activity.type,state.locale))}</h3></div></header>
+    <header class="act-head"><span class="act-icon">${{simulator:'⌨',bughunt:'⌖',journal:'⚖',forensic:'⌕',consequence:'⟿',config:'⚙'}[activity.type]}</span><div><span class="viz-badge">${escapeHtml(activity.label)}${guided ? ' · guiado' : ''}</span><h3>${local(skill.title,state.locale)}</h3></div></header>
+    ${briefHtml}
+    ${guidedHtml}
     ${activity.mc?.screen && ['simulator','bughunt','journal','forensic'].includes(activity.type) ? `<div class="act-screen">${b1Window(activity.mc.screen,state.locale)}</div>`:''}
     ${renderActivityBody(state,activity)}
-    ${feedback?`<div class="act-feedback ${feedback.correct?'is-correct':'is-wrong'}"><strong>${feedback.correct?'✓ Misión resuelta':'↻ Aún no'}</strong><p>${escapeHtml(feedback.message)}</p></div>`:''}
-    <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="check-activity">Comprobar decisión</button><button type="button" class="btn" data-action="reset-activity">Reiniciar</button></div>
+    ${feedback?`<div class="act-feedback ${feedback.correct?'is-correct':'is-wrong'}"><strong>${feedback.correct?'✓ Misión resuelta':'↻ Aún no — te digo exactamente qué falló'}</strong><p>${escapeHtml(feedback.message)}</p>${detailsHtml}</div>`:''}
+    <div class="sbl-actions">
+      <button type="button" class="btn btn-primary" data-action="check-activity">Comprobar</button>
+      ${guided && skillHints.length && hints < skillHints.length ? `<button type="button" class="btn" data-action="activity-hint">💡 Pista (${hints}/${skillHints.length})</button>`:''}
+      <button type="button" class="btn" data-action="reset-activity">Reiniciar</button>
+    </div>
   </section>`;
 }
-
-function validateActivity(state, skill) {
-  const a = getActivity(skill,state.locale), A=state.activityAnswers||{}, seq=state.activitySequence||[];
-  let correct=false, message='Revisa la evidencia y vuelve a intentarlo.';
-  if(a.type==='simulator') correct=a.targets.every((f,i)=>A[`sim-${i}`]===f.expected);
-  if(a.type==='bughunt') correct=a.clues.every((c,i)=>Boolean(A[`clue-${i}`])===Boolean(c.error));
-  if(a.type==='forensic') correct=a.evidence[Number(A.broken)]?.broken===true;
-  if(a.type==='config') correct=JSON.stringify(seq)===JSON.stringify(a.route);
-  if(a.type==='consequence') correct=JSON.stringify(seq)===JSON.stringify(a.chain);
-  if(a.type==='journal') correct=a.lines.every((l,i)=>A[`side-${i}`]===l[1] && String(A[`amount-${i}`]||'').replace(/\s/g,'')===l[2]);
-  if(correct) message=a.resolution || 'Decisión correcta: la evidencia, el control y el resultado son coherentes.';
-  else if(a.type==='journal') message='El asiento no representa correctamente el evento o no cuadra. Comprueba naturaleza de cuenta, lado e importe.';
-  else if(a.type==='config') message='La ruta contiene un nivel incorrecto, falta un nivel o el orden no es el del menú real.';
-  else if(a.type==='consequence') message='Los hechos son correctos, pero la secuencia causal no. Empieza por la causa raíz, no por la solución.';
-  return {correct,message};
-}
-
+function asArrayHints(v) { return Array.isArray(v) ? v : v ? [v] : []; }
+function localizeHint(h, locale) { return h?.[locale] ?? h?.es ?? String(h ?? ''); }
 function renderSkillDetail(state, skill) {
   const record = state.progress[skill.id] || {};
   const mode = state.skillMode;
@@ -530,6 +534,7 @@ function renderSkillDetail(state, skill) {
     <div class="sbl-card-head"><span class="viz-badge">${escapeHtml(skill.id)}</span>
       <div class="sbl-mode-toggle" role="tablist">
         <button type="button" class="btn${mode === 'learn' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="learn" aria-pressed="${mode === 'learn'}">${t(state, 'learnMode')}</button>
+        <button type="button" class="btn${mode === 'guided' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="guided" aria-pressed="${mode === 'guided'}">Práctica guiada</button>
         <button type="button" class="btn${mode === 'prove' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="prove" aria-pressed="${mode === 'prove'}">${t(state, 'proveSkill')}</button>
       </div></div>
     <h2 id="skill-title">${local(skill.title, state.locale)}</h2>
@@ -641,8 +646,50 @@ function renderConsole(state) {
   </section>`;
 }
 
+function renderCareer(state) {
+  const L = state.locale;
+  const loc = v => v?.[L] ?? v?.es ?? '';
+  const mastered = SKILLS.filter(s => state.progress[s.id]?.mastered).length;
+  const cp = careerProgress(mastered, L);
+  const kpis = kpiSnapshot(mastered);
+  const nextSkill = recommendNext(SKILLS, state.progress, new Date(), { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
+  const nextMc = MASTERCLASS[nextSkill.id];
+  const ticket = nextMc ? getTicket(nextSkill, nextMc, L, LEVELS) : null;
+  const roleUp = [...CAREER.roles].reverse().find(r => mastered < r.at);
+  const nextRole = roleUp ? roleUp[L] || roleUp.es : '';
+  const nextAt = roleUp ? roleUp.at : 72;
+  return `<section class="sbl-stack" aria-labelledby="career-title">
+    <header class="cr-head">
+      <div><span class="viz-badge">SAP BUSINESS ONE · CONSULTING CAREER MODE</span>
+      <h2 id="career-title">${escapeHtml(loc(CAREER.company))}</h2>
+      <p class="text-small">${escapeHtml(loc(CAREER.intro))}</p></div>
+      <div class="cr-role">
+        <span class="text-small">${L==='de'?'Aktuelle Rolle':L==='en'?'Current role':'Cargo actual'}</span>
+        <strong>${escapeHtml(cp.role)}</strong>
+        <span class="text-small">${mastered}/72 · ${L==='de'?`nächste Rolle: ${nextRole} bei ${nextAt}`:L==='en'?`next: ${nextRole} at ${nextAt}`:`siguiente: ${nextRole} a las ${nextAt}`}</span>
+      </div>
+    </header>
+    <div class="cr-kpis">${kpis.map(k => `<div class="card viz-stat"><span class="text-muted">${escapeHtml(loc(k.label))}</span><span class="viz-stat-value">${k.value}${k.unit}</span></div>`).join('')}</div>
+    ${ticket ? `<section class="card cr-ticket">
+      <header><span class="viz-badge">${L==='de'?'NÄCHSTES TICKET':L==='en'?'NEXT TICKET':'SIGUIENTE TICKET'}</span><strong>${escapeHtml(ticket.id)} · ${escapeHtml(ticket.from)}</strong></header>
+      <h3>${escapeHtml(ticket.subject)}</h3>
+      <p>${escapeHtml(ticket.body)}</p>
+      <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${ticket.skillId}">${L==='de'?'Ticket bearbeiten':L==='en'?'Work this ticket':'Atender este ticket'}</button></div>
+    </section>` : ''}
+    <section class="card sbl-stack">
+      <h3>${L==='de'?'Ticket-Verlauf':L==='en'?'Ticket log':'Registro de tickets'}</h3>
+      <div class="cr-log">${SKILLS.filter(s => state.progress[s.id]?.mastered).slice(0, 30).reverse().map(s => {
+        const mc = MASTERCLASS[s.id];
+        const tk = mc ? getTicket(s, mc, L, LEVELS) : null;
+        return tk ? `<div class="cr-log-row"><span class="cr-log-id">${tk.id}</span><span>${escapeHtml(tk.subject)}</span><span class="cr-log-ok">✓ ${L==='de'?'gelöst':L==='en'?'resolved':'resuelto'}</span></div>` : '';
+      }).join('') || `<em>${L==='de'?'Noch keine Tickets gelöst.':L==='en'?'No tickets resolved yet.':'Aún no hay tickets resueltos.'}</em>`}</div>
+    </section>
+  </section>`;
+}
+
 function renderView(state) {
   switch (state.view) {
+    case 'career': return renderCareer(state);
     case 'map': return renderMap(state);
     case 'cases': return `<div class="sbl-stack"><h2>${t(state, 'caseLabTitle')}</h2>${renderDecision(state, CASES[state.caseIndex], 'case')}</div>`;
     case 'incidents': return `<div class="sbl-stack"><h2>${t(state, 'incidentTitle')}</h2>${renderDecision(state, INCIDENTS[state.incidentIndex], 'incident')}</div>`;
@@ -720,11 +767,14 @@ export function mountSapB1Lab(root) {
     else if (action === 'reset-activity') dispatch({ type: 'RESET_ACTIVITY' });
     else if (action === 'check-activity') {
       const skill = SKILLS.find(s => s.id === state.selectedSkillId);
-      const alreadyPassed = state.activityFeedback?.correct === true;
-      const result = validateActivity(state, skill);
-      dispatch({ type: 'ACTIVITY_FEEDBACK', ...result });
-      if (result.correct && !alreadyPassed) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
+      if (!skill) return;
+      const activity = getActivity(skill, state.locale);
+      const result = validateActivityDetailed(activity, state.activityAnswers, state.activitySequence);
+      const passed = result.correct;
+      dispatch({ type: 'ACTIVITY_FEEDBACK', correct: passed, message: passed ? (activity.resolution || 'Decisión correcta: la evidencia, el control y el resultado son coherentes.') : 'Revisa los elementos marcados y vuelve a intentarlo.', details: result.details });
+      if (passed && state.skillMode === 'prove' && state.activityFeedback?.correct !== true) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
     }
+    else if (action === 'activity-hint') dispatch({ type: 'ACTIVITY_HINT' });
     else if (action === 'step-decide') dispatch({ type: 'ANSWER_STEP_DECIDE', index: Number(control.dataset.index) });
     else if (action === 'step-principle') dispatch({ type: 'ANSWER_STEP_PRINCIPLE', index: Number(control.dataset.index) });
     else if (action === 'reveal-reasoning') {
