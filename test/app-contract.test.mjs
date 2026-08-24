@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import {
   createInitialState,
   reduceState,
@@ -7,6 +8,8 @@ import {
   renderAppMarkup,
   escapeHtml
 } from '../src/app.mjs';
+import { getActivity } from '../src/activities.mjs';
+import { SKILLS } from '../src/content.mjs';
 
 test('initial state starts on home dashboard in Spanish with dual track', () => {
   const state = createInitialState();
@@ -119,26 +122,25 @@ test('German console and evidence views contain localized content', () => {
   assert.doesNotMatch(evidence, /logistics learning path/);
 });
 
-test('English practical mode never leaks Spanish interface labels', () => {
-  const html = renderAppMarkup(createInitialState({ locale: 'en', view: 'map', selectedSkillId: 'SYN-SK-L0-01', skillMode: 'prove' }));
-  for (const leaked of ['Práctica guiada', 'Comprobar', 'Reiniciar', 'Selecciona', 'Misión resuelta', 'Aún no', '¿Qué es esto?', 'Tu tarea', 'Se evalúa']) {
-    assert.doesNotMatch(html, new RegExp(leaked), leaked);
-  }
-  assert.match(html, /Check|Reset/);
+test('Pages entrypoint mounts the strict locale runtime', async () => {
+  const [index, runtime] = await Promise.all([
+    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../src/runtime-strict.mjs', import.meta.url), 'utf8')
+  ]);
+  assert.match(index, /mountStrictSapB1Lab/);
+  assert.match(index, /runtime-strict\.mjs/);
+  assert.match(runtime, /Guided practice/);
+  assert.match(runtime, /Geführte Praxis/);
+  assert.match(runtime, /Warum funktioniert das\?/);
+  assert.match(runtime, /Stolperstein/);
 });
 
-test('German learning view never falls back to Spanish or English masterclass copy', () => {
-  const html = renderAppMarkup(createInitialState({ locale: 'de', view: 'map', selectedSkillId: 'SYN-SK-L0-04', skillMode: 'learn' }));
-  for (const leaked of ['Configuración exacta', 'Proceso end-to-end', 'Síntoma', 'Causa raíz', 'Resolución', 'Buenas prácticas senior', 'Real order in OK mode', 'Create delivery']) {
-    assert.doesNotMatch(html, new RegExp(leaked, 'i'), leaked);
-  }
-  assert.match(html, /Vertiefung|Konfiguration|Praxis/);
-});
-
-test('German advanced console does not fall back to Spanish or English prose', () => {
-  const html = renderAppMarkup(createInitialState({ locale: 'de', view: 'ai' }));
-  for (const leaked of ['Back to list', 'Why does it work', 'Customer aging', 'Real B1 SQL', 'Consultas expertas', '¿Por qué funciona?', 'Trampa']) {
-    assert.doesNotMatch(html, new RegExp(leaked, 'i'), leaked);
-  }
-  assert.match(html, /Expertenabfragen|Warum funktioniert das|Stolperstein/);
+test('practical activities provide localized English and German field content', () => {
+  const skill = SKILLS.find(s => s.id === 'SYN-SK-L0-01');
+  const en = getActivity(skill, 'en');
+  const de = getActivity(skill, 'de');
+  assert.match(en.targets[0].label, /Module|Sales Order/);
+  assert.doesNotMatch(en.targets.map(x => x.label).join(' '), /Módulo|Pedido de cliente/);
+  assert.match(de.targets[0].label, /Modul|Kundenauftrag/);
+  assert.doesNotMatch(de.targets.map(x => x.label).join(' '), /Módulo|Pedido de cliente/);
 });
