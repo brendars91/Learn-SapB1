@@ -6,7 +6,7 @@
 
 🇪🇸 [Español](#español) · 🇬🇧 [English](#english)
 
-[![tests](https://img.shields.io/badge/tests-43%2F43%20PASS-brightgreen)](#verificación) [![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/archivo-%3C1%20MiB-orange)](#cómo-usarla)
+[![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/standalone-%3C1%20MiB-orange)](#cómo-usarla)
 
 ### ➡️ [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/)
 
@@ -20,9 +20,9 @@ Herramienta de estudio **personal, offline y sin cuentas** para aprender SAP Bus
 
 ### Cómo usarla
 
-**Opción 1 (recomendada):** pulsa [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/) — funciona directamente en el navegador, sin instalación.
+**Opción 1 (recomendada):** pulsa [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/) — funciona directamente en el navegador, sin instalación. La versión web usa los módulos de `src/` para que GitHub Pages siempre sirva la lógica actual.
 
-**Opción 2:** descarga [`index.html`](index.html) y ábrelo con doble clic en cualquier navegador moderno. Todo el contenido, estilos y lógica viven dentro del único archivo HTML (<1 MiB). No requiere servidor, cuenta, clave API ni conexión.
+**Opción 2 (offline):** descarga [`dist/SAP-Business-One-Mastery-Lab-Standalone.html`](dist/SAP-Business-One-Mastery-Lab-Standalone.html) y ábrelo con doble clic en cualquier navegador moderno. El standalone contiene contenido, estilos y lógica en un único archivo HTML y no requiere servidor, cuenta ni clave API.
 
 ### Qué contiene
 
@@ -31,51 +31,53 @@ Herramienta de estudio **personal, offline y sin cuentas** para aprender SAP Bus
 | **Diagnóstico adaptativo** | 6 decisiones calibran tu punto de entrada entre 9 niveles |
 | **72 competencias únicas** | 9 niveles × 8 skills, cada una con autoría propia: concepto, mentalidad, tips de experto, trampa típica de junior y checklist de verificación |
 | **Modo Entender** | Cada skill abre con un **diagrama visual a medida** (cadena documental, cascada de precios, balance Debe/Haber…), mentalidad en una frase y tips de experto — entender antes de examinar |
-| **Modo Demostrar** | Evaluación en 3 pasos: decide → comprométete con el *principio* que justifica → razonamiento senior paso a paso + por qué falla cada opción incorrecta |
-| **Caso Lab e Incident Room** | 12 casos + 6 incidentes con razonamiento senior y análisis de distractores |
-| **Explorador de cadena** | O2C / P2P / finanzas / integración: clic en cada documento y ve sus **3 efectos** (stock, contabilidad, saldo del socio) |
-| **Lab de IA y contexto** | Constructor del contrato de contexto con puntuación en vivo y escáner de privacidad local |
-| **9 niveles de IA y vibecoding** | Desde triaje de casos de IA hasta defensa anti prompt-injection y automatización con puerta humana |
+| **Modo Demostrar** | Evaluación práctica con feedback por elemento y puerta de seguridad |
+| **Caso Lab e Incident Room** | Casos e incidentes con razonamiento senior y análisis de distractores |
+| **Explorador de cadena** | O2C / P2P / finanzas / integración: clic en cada documento y ve sus efectos en stock, contabilidad y saldo del socio |
+| **Consola avanzada** | SQL, dashboards/KPI y vibecoding aplicado a SAP Business One |
 | **Radar y heatmap** | Perfil de dominio en 4 dimensiones (conocimiento, aplicación, verificación, riesgo) y mapa de calor por nivel |
-| **Repaso espaciado** | Cola de recuperación con repetición [1, 3, 7, 14] días |
-| **Registro de evidencia** | 7 fuentes oficiales SAP con fecha de verificación y aplicabilidad por versión |
+| **Registro de evidencia** | Fuentes oficiales SAP con fecha de verificación y aplicabilidad por versión |
+
+### Idiomas
+
+La interfaz permite **Español, English y Deutsch**. La versión web aplica una frontera de idioma estricta: al elegir un idioma no se reutilizan silenciosamente textos de otro idioma. Los mockups legacy cuyos campos aún no tienen una localización completa se ocultan en EN/DE antes que mostrar una mezcla de idiomas.
 
 ### El estándar de dominio (diseño pedagógico)
 
 - **Dominio ≠ acierto único.** Se exigen umbrales distintos por dimensión: conocimiento y aplicación ≥ 80, verificación y riesgo ≥ 90.
-- **Safety gate:** ninguna competencia se domina sin pasar la puerta de seguridad (la respuesta "segura pero incompleta" no domina).
+- **Safety gate:** ninguna competencia se domina sin pasar la puerta de seguridad.
 - **3 aciertos sostenidos** para dominar; un fallo reinicia la racha.
-- **El error enseña:** cada opción incorrecta tiene su propia explicación de por qué falla.
+- **El error enseña:** el feedback identifica qué elemento falló y qué debía verificarse.
 
 ### Privacidad y modo offline
 
 - Todos los datos de aprendizaje son sintéticos y marcados `SYN-*`.
-- El progreso permanece en `localStorage` de tu navegador; la exportación contiene solo IDs, puntuaciones y fechas — nada personal.
-- El texto del Lab de IA es solo de sesión: nunca se persiste ni se exporta.
-- **Cero telemetría, cero peticiones de red.** Los enlaces a fuentes oficiales solo se abren si los pulsas.
+- El progreso permanece en `localStorage` de tu navegador; la exportación contiene solo IDs, puntuaciones y fechas.
+- El texto libre de trabajo no se persiste en la exportación de progreso.
+- **Cero telemetría.** Los enlaces a fuentes oficiales solo se abren si los pulsas.
 
-### Verificación
+### Verificación local
 
+```bash
+node scripts/enforce-strict-locale.mjs
+npm test
+npm run build
+npm run test:browser:local
 ```
-node --test test/*.test.mjs   →  43/43 PASS
-node scripts/build.mjs        →  reconstruye el standalone desde src/
-npm run test:browser:local    →  recorre vistas y 72 skills × 3 modos en Chromium
-```
-
-Incluye test **anti-plantilla**: falla si dos competencias vuelven a compartir texto de evaluación (garantiza autoría única por skill).
 
 ### Estructura del repositorio
 
-```
-SAP-Business-One-Mastery-Lab-Standalone.html  ← la aplicación (ábrelo y listo)
-src/            contenido (72 skills autorados), dominio, UI, estilos
-test/           38 tests: contenido, contratos, runtime, unicidad
-scripts/        build del standalone
+```text
+index.html                                      ← entrada de GitHub Pages
+src/                                            ← contenido, dominio, UI y runtime trilingüe
+dist/SAP-Business-One-Mastery-Lab-Standalone.html ← versión offline autocontenida
+test/                                           ← pruebas de contenido, contratos y runtime
+scripts/                                        ← build y controles de localización
 ```
 
 ### Fuentes
 
-Todo el contenido técnico está anclado a documentación oficial SAP Business One 10.0 (verificable en la pestaña **Fuentes** de la aplicación): rutas de aprendizaje oficiales de logística/contabilidad/implementación, SDK Help, Service Layer (guía 1.28, OData v4 primario desde FP 2405) y Crystal Reports.
+Todo el contenido técnico está anclado a documentación oficial SAP Business One 10.0 (verificable en la pestaña **Fuentes** de la aplicación): rutas de aprendizaje oficiales, SDK Help, Service Layer y Crystal Reports.
 
 ### Licencia y alcance
 
@@ -85,49 +87,45 @@ Herramienta educativa personal de [Brenda](https://github.com/brendars91). Datos
 
 ## English
 
-A **personal, offline, account-free** study environment to master SAP Business One with a senior consultant's rigour: not memorising screens, but understanding dependencies, reasoning like a professional, and knowing what to verify before acting.
+A **personal, offline, account-free** study environment to master SAP Business One with a senior consultant's rigour: understand dependencies, reason professionally, and know what to verify before acting.
 
 ### How to use
 
-**Option 1 (recommended):** click [**OPEN THE APP**](https://brendars91.github.io/Learn-SapB1/) — runs straight in the browser.
+**Option 1 (recommended):** click [**OPEN THE APP**](https://brendars91.github.io/Learn-SapB1/) — it runs directly in the browser. The web version loads the current modules from `src/`, so GitHub Pages is no longer tied to a stale generated `index.html` bundle.
 
-**Option 2:** download [`index.html`](index.html) and double-click it. Everything lives in a single <1 MiB HTML file: no server, account, API key, or network needed.
+**Option 2 (offline):** download [`dist/SAP-Business-One-Mastery-Lab-Standalone.html`](dist/SAP-Business-One-Mastery-Lab-Standalone.html) and double-click it. The standalone keeps content, styles and logic in one HTML file and requires no account or API key.
 
 ### What's inside
 
-- **Adaptive diagnostic** — 6 decisions calibrate your entry point across 9 levels
-- **72 unique skills** — each hand-authored: concept, mindset, expert tips, junior trap, verification checklist, custom SVG diagram
-- **Understand mode** — learn visually before any test
-- **Prove mode** — 3-step assessment: decide → commit to the *principle* → senior reasoning + why each wrong option fails
-- **Case Lab & Incident Room** — 12 cases + 6 incidents with senior reasoning and distractor analysis
-- **Chain explorer** — O2C / P2P / finance / integration: click any document to see its **3 effects** (stock, accounting, partner balance)
-- **AI & Context Lab** — context-contract builder with live scoring and local privacy scanner
-- **9 levels of AI & vibecoding** — from AI opportunity triage to prompt-injection defence and human-gated automation
-- **Mastery radar & heatmap** — 4-dimension profile (knowledge, application, verification, risk)
-- **Spaced repetition** — [1, 3, 7, 14]-day retrieval queue
-- **Evidence registry** — 7 official SAP sources with verification dates and version applicability
+- **72 unique skills** across 9 levels
+- **Understand mode** with visual explanations, expert tips, risks and verification steps
+- **Practical assessment** with granular feedback and a safety gate
+- **Case Lab & Incident Room** for senior reasoning
+- **Chain explorer** for O2C / P2P / finance / integration effects
+- **Advanced console** for SAP B1 SQL, management dashboards and applied vibecoding
+- **Mastery radar & heatmap** across knowledge, application, verification and risk
+- **Evidence registry** anchored to official SAP sources
 
-### Mastery standard
+### Languages
 
-Mastery ≠ one right answer. Dimension thresholds: knowledge/application ≥ 80, verification/risk ≥ 90; a safety gate must pass; 3 sustained correct answers required. Every wrong option explains why it fails.
+The application supports **Español, English and Deutsch**. The web runtime enforces a strict language boundary: selecting a language no longer silently falls back to another language. Legacy SAP B1 mock-ups that do not yet have a complete EN/DE field set are hidden rather than displayed with mixed-language labels.
 
 ### Privacy & offline
 
-Synthetic-only data (`SYN-*`), progress stays in your browser's `localStorage`, exports contain no personal data, prompt-lab text is session-only. Zero telemetry, zero network requests.
+Synthetic-only learning data (`SYN-*`), progress stays in browser `localStorage`, exported progress contains no free-text working content, and there is no telemetry.
 
-### Verification
+### Local verification
 
+```bash
+node scripts/enforce-strict-locale.mjs
+npm test
+npm run build
+npm run test:browser:local
 ```
-node --test test/*.test.mjs   →  43/43 PASS
-node scripts/build.mjs        →  rebuilds the standalone from src/
-npm run test:browser:local    →  exercises views and 72 skills × 3 modes in Chromium
-```
-
-Includes an **anti-template test**: fails if two skills ever share assessment text again.
 
 ### Sources
 
-All technical content is anchored to official SAP Business One 10.0 documentation (see the **Sources** tab in the app).
+Technical content is anchored to official SAP Business One 10.0 documentation available from the application's **Sources** tab.
 
 ### License & scope
 
