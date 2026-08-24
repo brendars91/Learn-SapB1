@@ -6,7 +6,6 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const outDir = path.join(projectRoot, 'dist');
 const fragmentPath = path.join(outDir, 'sap-b1-mastery-lab.html');
 const standalonePath = path.join(outDir, 'SAP-Business-One-Mastery-Lab-Standalone.html');
-const indexPath = path.join(projectRoot, 'index.html');
 
 const [shell, styles, contentSource, domainSource, appSource] = await Promise.all([
   readFile(path.join(projectRoot, 'src/fragment.html'), 'utf8'),
@@ -70,7 +69,6 @@ ${fragment}
 
 await writeFile(fragmentPath, fragment, 'utf8');
 await writeFile(standalonePath, standalone, 'utf8');
-await writeFile(indexPath, standalone, 'utf8');
 const bytes = Buffer.byteLength(standalone);
 if (bytes >= 1024 * 1024) throw new Error(`Standalone exceeds 1 MiB: ${bytes} bytes`);
-process.stdout.write(`Built fragment (${Buffer.byteLength(fragment)} bytes), standalone (${bytes} bytes) and synchronized index.html\n`);
+process.stdout.write(`Built fragment (${Buffer.byteLength(fragment)} bytes) and standalone (${bytes} bytes)\n`);
