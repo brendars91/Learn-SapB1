@@ -101,7 +101,6 @@ export const MC_BATCH6 = {
   ]
 },
 'SYN-SK-L7-05': {
-  unused: true,
   screen: { title: { es: 'UI API', en: 'UI API' }, menu: false, tabs: ['General'], activeTab: 0,
     header: [['Add-on', 'Captura serie obligatoria', 'in'], ['Evento', 'ITEM_PRESSED', 'in']],
     cols: ['Evento', 'Origen', 'Acción'], rows: [
@@ -138,7 +137,7 @@ export const MC_BATCH6 = {
     note: { es: 'Service Layer real: REST puro. Login → cookie de sesión → POST/GET sobre entidades OData.', en: 'Real Service Layer: pure REST. Login → session cookie → POST/GET over OData entities.' } },
   cfg: [
     { es: 'Service Layer expone B1 como OData: /Orders, /Invoices, /BusinessPartners. v2 endpoint /b1s/v2.', en: 'Service Layer exposes B1 as OData: /Orders, /Invoices, /BusinessPartners. v2 endpoint /b1s/v2.' },
-    { es: 'Autenticación: Basic (cada request) o Login+cookie de sesión (eficiente para lotes).', en: 'Authentication: Basic (each request) or Login+session cookie (efficient for batches).' }
+    { es: 'Para entidades de negocio, inicia sesión mediante POST /Login y reutiliza la cookie B1SESSION hasta su expiración. La autenticación Basic se documenta para el servicio de Semantic Layer, no como alternativa general para Orders o BusinessPartners.', en: 'For business entities, authenticate through POST /Login and reuse the B1SESSION cookie until it expires. Basic Authentication is documented for the Semantic Layer service, not as a general alternative for Orders or BusinessPartners.' }
   ],
   e2e: [
     { es: '1. POST /Login con credenciales → B1SESSION cookie.', en: '1. POST /Login with credentials → B1SESSION cookie.' },
@@ -158,15 +157,15 @@ export const MC_BATCH6 = {
     header: [['Sesión', 'b1-session-...', 'sys'], ['TTL', '30 min', 'sys']],
     cols: ['Patrón', 'Uso', 'Cuidado'], rows: [
       ['Sesión persistente', 'Integraciones', 'Renovar al expirar'],
-      ['$batch', 'Cargas masivas', 'Atómico: todo o nada'],
-      ['ChangeSets', 'Grupos dentro de batch', 'Aislamiento por grupo']
+      ['$batch', 'Agrupar operaciones HTTP', 'No implica atomicidad global'],
+      ['Change sets', 'Escrituras dentro de batch', 'Unidad atómica por conjunto']
     ],
     status: ['Patrones de integración'],
     note: { es: 'Patrones reales: sesión persistente para integrar, $batch con changesets para carga atómica.', en: 'Real patterns: persistent session to integrate, $batch with changesets for atomic bulk.' } },
   cfg: [ { es: '$batch = transacción: si una operación falla, todo el changeset se revierte.', en: '$batch = transaction: if one operation fails, the whole changeset rolls back.' } ],
   e2e: [
     { es: '1. Integración nocturna: login 1 vez, 3.000 pedidos en 60 $batch de 50.', en: '1. Nightly integration: login once, 3,000 orders in 60 $batch of 50.' },
-    { es: '2. Cada $batch es atómico: fallo en la línea 30 → revert el batch, log, reintento.', en: '2. Each $batch is atomic: failure at line 30 → batch rolls back, log, retry.' },
+    { es: '2. Cada change set es atómico: si falla una operación, revierte ese conjunto, registra el error y reintenta de forma idempotente.', en: '2. Each change set is atomic: if one operation fails, roll back that set, log the error, and retry idempotently.' },
     { es: '3. Los changesets agrupan: cabecera+líneas de un pedido en el mismo set.', en: '3. Changesets group: one order\'s header+lines in the same set.' }
   ],
   war: { q: { es: 'Carga masiva a mitad: 1.200 de 3.000 pedidos, luego cae la red.', en: 'Bulk load half-way: 1,200 of 3,000 orders, then network drops.' },

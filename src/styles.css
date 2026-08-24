@@ -36,7 +36,9 @@
   font-family: var(--serif);
   font-size: var(--step-0);
   line-height: 1.55;
+  box-sizing: border-box;
   width: 100%;
+  min-width: 0;
   padding: clamp(0.75rem, 2vw, 2rem);
   border-radius: 0;                     /* editorial: sharp */
 }

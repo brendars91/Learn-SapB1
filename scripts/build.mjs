@@ -58,7 +58,7 @@ const standalone = `<!doctype html>
 <style>
   :root { color-scheme: light; }
   body { margin: 0; min-height: 100vh; background: #efe7d5; color: #1f1a13; font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif; }
-  .page { max-width: 1180px; margin: 0 auto; padding: clamp(.6rem, 2vw, 1.4rem); }
+  .page { box-sizing: border-box; width: 100%; max-width: 1180px; margin: 0 auto; padding: clamp(.6rem, 2vw, 1.4rem); }
 </style>
 </head>
 <body>

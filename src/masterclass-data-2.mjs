@@ -12,11 +12,11 @@ export const MC_BATCH2 = {
     note: { es: 'O2C completo en una ventana: pedido → entrega → factura. El asiento nace al añadir la factura: D Cliente 856,80 / H Ventas 720,00 + H IVA 136,80.', en: 'Full O2C in one window: order → delivery → invoice. The journal is born on invoice add: D Customer 856.80 / H Sales 720.00 + H VAT 136.80.' } },
   cfg: [
     { es: 'La cadena O2C: Pedido (reserva) → Entrega (mueve stock, coste) → Factura (contabiliza) → Cobro (cierra).', en: 'The O2C chain: Order (reserves) → Delivery (moves stock, cost) → Invoice (posts) → Payment (closes).' },
-    { es: 'Factura "con entrega": una sola ventana hace entrega+factura. Rápido pero pierde el eslabón logístico.', en: 'Invoice "with delivery": one window does delivery+invoice. Fast but loses the logistics link.' }
+    { es: 'Factura de clientes directa, sin entrega base: para artículos de inventario puede contabilizar en un solo documento la salida de stock y coste, además de cliente, ingreso e impuesto. Es un flujo abreviado y no crea una entrega independiente.', en: 'Direct A/R invoice without a base delivery: for inventory items it can post stock and cost together with receivables, revenue, and tax in one document. It is an abbreviated flow and does not create a separate delivery.' }
   ],
   e2e: [
     { es: '1. Pedido 162: 10× LED + 5× PIR, total 720,00 neto.', en: '1. Order 162: 10× LED + 5× PIR, total 720.00 net.' },
-    { es: '2. Entrega 5001: 6× LED (parcial). Coste de ventas contabilizado a valoración de coste.', en: '2. Delivery 5001: 6× LED (partial). COGS posted at cost valuation.' },
+    { es: '2. Entrega 5001: 10× LED + 5× PIR, neto 720,00. Coste de ventas contabilizado según la valoración configurada.', en: '2. Delivery 5001: 10× LED + 5× PIR, net 720.00. COGS posted according to the configured valuation.' },
     { es: '3. Factura 1001-2026: D Cliente 856,80 / H Ventas 720,00 / H IVA 136,80 (19% alemán).', en: '3. Invoice 1001-2026: D Customer 856.80 / H Sales 720.00 / H VAT 136.80 (19% German).' },
     { es: '4. Cobro entrante 856,80: D Banco / H Cliente. La factura queda cerrada.', en: '4. Incoming payment 856.80: D Bank / H Customer. Invoice closed.' }
   ],
@@ -52,11 +52,11 @@ export const MC_BATCH2 = {
     { es: '4. Pago saliente: D Proveedor / H Banco. Cadena P2P cerrada.', en: '4. Outgoing payment: D Vendor / H Bank. P2P chain closed.' }
   ],
   war: { q: { es: 'La cuenta GR/IR lleva meses con saldo creciente.', en: 'The GR/IR account carries a growing balance for months.' },
-    sympt: [{ es: 'GR/IR (bestimmte cuentas de tránsito) sube cada mes: entradas sin factura durante >60 días.', en: 'GR/IR rises monthly: receipts without invoice for >60 days.' }],
+    sympt: [{ es: 'La cuenta puente de mercancías recibidas no facturadas aumenta cada mes: hay entradas pendientes de factura desde hace más de 60 días.', en: 'The goods-received-not-invoiced clearing account rises monthly: some receipts have awaited invoices for more than 60 days.' }],
     root: [{ es: 'Facturas de proveedor que llegan tarde (o se pierden): la mercancía entra, la deuda no se reconoce.', en: 'Late (or lost) vendor invoices: goods enter, debt unrecognized.' }],
     fix: [{ es: 'Informe mensual GR/IR con antigüedad + contacto con proveedores. La cuenta puente es un KPI de proceso, no un error.', en: 'Monthly GR/IR aging report + supplier contact. The bridge is a process KPI, not an error.' }] },
   bp: [
-    { es: 'GR/IR a cero = proceso P2P sano. Cualquier saldo es material sin factura o factura sin material.', en: 'GR/IR at zero = healthy P2P. Any balance is material without invoice or invoice without material.' },
+    { es: 'La antigüedad y conciliación de la cuenta puente son indicadores del proceso P2P; un saldo no es automáticamente un error, pero sí exige explicar entradas, facturas y diferencias pendientes.', en: 'Clearing-account ageing and reconciliation are P2P indicators; a balance is not automatically an error, but pending receipts, invoices, and differences must be explained.' },
     { es: 'El 3-vías: pedido vs entrada vs factura. Cualquier diferencia es una excepción que gestionar.', en: 'The 3-way match: order vs receipt vs invoice. Any difference is an exception to manage.' }
   ]
 },
@@ -151,7 +151,7 @@ export const MC_BATCH2 = {
     note: { es: 'Pago saliente con asignación a factura de proveedor: D Proveedor / H Banco.', en: 'Outgoing payment assigned to vendor invoice: D Vendor / H Bank.' } },
   cfg: [ { es: 'Finanzas > Pagos > Pago saliente: D Proveedor / H Banco, asignado a facturas concretas.', en: 'Finanzas > Pagos > Pago saliente: D Vendor / H Bank, assigned to specific invoices.' } ],
   e2e: [
-    { es: '1. Pago 571,20 asignado a la factura 7001-2026: D Proveedor / H Banco.', en: '1. Payment 571.20 assigned to invoice 7001-2026: D Vendor / H account.' },
+    { es: '1. Pago 571,20 asignado a la factura 7001-2026: D Proveedor / H Banco.', en: '1. Payment 571.20 assigned to invoice 7001-2026: D Vendor / H Bank.' },
     { es: '2. Factura de proveedor queda cerrada y el compromiso se libera.', en: '2. Vendor invoice closed and commitment released.' },
     { es: '3. Extracto bancario: la línea del extracto concilia contra este pago.', en: '3. Bank statement: the statement line reconciles against this payment.' }
   ],
@@ -173,7 +173,7 @@ export const MC_BATCH2 = {
     totals: [['Total', '160,00']],
     status: ['Existencias → Traspasos'],
     note: { es: 'Traspaso real: mueve 40 unidades de 01 a 02 a coste 4,00. Sin asiento si ambas cuentas de stock son la misma.', en: 'Real transfer: moves 40 units 01→02 at 4.00 cost. No journal if both stock accounts are the same.' } },
-  cfg: [ { es: 'Existencias > Traspaso de stock: mueve stock entre almacenes a coste. Con "valoration" distinta por almacén, genera asiento.', en: 'Inventory > Stock transfer: moves stock between warehouses at cost. With different per-warehouse valuation, posts a journal.' } ],
+  cfg: [ { es: 'Existencias > Traspaso de stock: mueve stock entre almacenes a coste. Si la determinación contable usa cuentas de inventario distintas por almacén, genera el asiento entre esas cuentas.', en: 'Inventory > Stock Transfer: moves stock between warehouses at cost. If G/L account determination uses different inventory accounts by warehouse, it posts between those accounts.' } ],
   e2e: [
     { es: '1. Traspaso 40× A00001 de 01 a 02 a coste 4,00 = 160,00 de valor movido.', en: '1. Transfer 40× A00001 from 01 to 02 at 4.00 cost = 160.00 value moved.' },
     { es: '2. El stock físico cambia de almacén; el total global queda igual.', en: '2. Physical stock changes warehouse; global total stays equal.' },
