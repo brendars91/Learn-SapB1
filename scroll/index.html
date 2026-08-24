@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SapB1 · Aprende SAP Business One operándolo</title>
+<meta name="description" content="Un laboratorio de aprendizaje premium donde dominas SAP Business One resolviendo los tickets reales de una empresa ficticia, Nordwind Handel GmbH.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230d0c0a'/><rect x='9' y='8' width='14' height='3' rx='1.5' fill='%237c2d2d'/><rect x='9' y='14.5' width='14' height='3' rx='1.5' fill='%23efe7d5'/></svg>">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  :root {
+    --sc-canvas:     #0d0c0a;
+    --sc-surface:    #171512;
+    --sc-ink:        #efe7d5;
+    --sc-ink-soft:   #a89f8d;
+    --sc-accent:     #9c3f34;
+    --sc-accent-ink: #efe7d5;
+    --sc-font-display: "Archivo", system-ui, sans-serif;
+    --sc-font-text:    "Geist", system-ui, sans-serif;
+  }
+
+  .site-bar { display: flex; align-items: center; gap: 1.5rem; }
+  .site-bar .mark { font-family: var(--sc-font-display); font-weight: 700; letter-spacing: -0.02em; }
+  .led__nav { display: flex; gap: 1.25rem; margin-left: auto; }
+  .led__nav a { color: var(--sc-ink-soft); text-decoration: none; font-size: 0.85rem; }
+  .led__nav a:hover { color: var(--sc-ink); }
+
+  .kicker { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sc-ink); opacity: 0.92; margin: 0 0 1rem; }
+
+  /* Contrast fix: scrims fuertes solo donde el copy crema sienta sobre imagen clara */
+  section[data-sc-act="scrub"] .sc-scrim--lead { --sc-scrim-a: 92%; }
+  .peak .sc-scrim--band { --sc-scrim-a: 90%; --sc-scrim-angle: 0deg; }
+  .peak .sc-copy--lead { text-shadow: 0 1px 24px rgba(13, 12, 10, 0.55); }
+  .peak .sc-body { position: relative; z-index: 2; }
+
+  @media (max-width: 700px) {
+    section[data-sc-act="scrub"] .sc-copy--lead,
+    .peak .sc-copy--lead {
+      background: linear-gradient(180deg, rgba(13,12,10,0.88) 0%, rgba(13,12,10,0.55) 75%, rgba(13,12,10,0) 100%);
+      padding: 1.25rem 1.25rem 2.5rem;
+      margin: -1.25rem -1.25rem -2.5rem;
+      border-radius: 2px;
+    }
+  }
+
+  .argument [data-sc-cue] { font-family: var(--sc-font-display); font-size: clamp(1.5rem, 3.6vw, 2.6rem); line-height: 1.15; max-width: 22ch; letter-spacing: -0.015em; }
+
+  .peak .sc-copy { max-width: 30rem; }
+  .kpi-live { position: absolute; left: var(--sc-gutter); bottom: clamp(2rem, 6vh, 4rem); display: flex; gap: clamp(1.5rem, 4vw, 3.5rem); }
+  .kpi__n { display: block; font-family: var(--sc-font-display); font-weight: 700; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .kpi__l { display: block; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-soft); margin-top: 0.35rem; }
+
+  .results .sc-copy { position: absolute; top: clamp(2rem, 8vh, 5rem); right: var(--sc-gutter); text-align: right; }
+  .ledger { position: absolute; left: var(--sc-gutter); right: var(--sc-gutter); bottom: clamp(2rem, 8vh, 5rem); font-variant-numeric: tabular-nums; background: rgba(23, 21, 16, 0.72); border: 1px solid rgba(239, 231, 213, 0.1); padding: clamp(1.2rem, 3vw, 2rem); border-radius: 4px; backdrop-filter: blur(2px); }
+  .ledger__cap { font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sc-ink-soft); margin: 0 0 0.8rem; }
+  .ledger__cap::before { content: ""; display: inline-block; width: 2.2rem; height: 1px; background: var(--sc-accent); vertical-align: middle; margin-right: 0.8rem; }
+  .ledger__rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid color-mix(in oklab, var(--sc-ink) 14%, transparent); }
+  .ledger__row { display: grid; grid-template-columns: 6ch 1fr auto; gap: 1.5rem; padding: 0.65rem 0; border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 14%, transparent); font-size: 0.95rem; }
+  .ledger__no { color: var(--sc-accent); font-weight: 600; }
+  .ledger__desc { color: var(--sc-ink-soft); }
+  .ledger__amt { text-align: right; }
+  .ledger__total { display: flex; justify-content: space-between; padding-top: 0.9rem; font-weight: 700; letter-spacing: 0.02em; }
+
+  .close__inner { text-align: center; max-width: 46rem; }
+  .close__inner .sc-display--lg { font-size: clamp(2.6rem, 6.5vw, 4.6rem); }
+  .close__rule { width: 3.5rem; height: 3px; background: var(--sc-accent); margin: 2.2rem auto; }
+  .close__inner .cta { font-size: 1.05rem; padding: 1rem 2.4rem; }
+  .foot { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  @media (max-width: 700px) {
+    .foot { flex-direction: column; gap: 0.4rem; font-size: 0.78rem; }
+    .close__rule { width: 3rem; height: 4px; margin: 1.8rem auto; }
+  }
+
+  .cta { display: inline-block; background: var(--sc-accent); color: var(--sc-accent-ink); font-family: var(--sc-font-display); font-weight: 600; text-decoration: none; padding: 0.8rem 1.8rem; border-radius: 3px; letter-spacing: 0.01em; }
+  .cta:hover { filter: brightness(1.12); }
+
+  .led__ticker { position: fixed; right: 0; top: 0; bottom: 0; width: 40px; overflow: hidden; pointer-events: none; opacity: 0.55; }
+  .led__ticker::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0 11px, color-mix(in oklab, var(--sc-ink) 10%, transparent) 11px 12px); }
+</style>
+</head>
+<body>
+
+<span data-sc-progress></span>
+<div class="sc-grain" aria-hidden="true"></div>
+
+<header class="site-bar">
+  <span class="mark">SapB1</span>
+  <nav class="led__nav">
+    <a href="#aprender">Aprender</a>
+    <a href="#practicar">Practicar</a>
+    <a href="#dominar">Dominar</a>
+  </nav>
+  <a class="cta" href="https://brendars91.github.io/Learn-SapB1/">Abrir el laboratorio</a>
+</header>
+
+<main id="top">
+
+  <section data-sc-act="scrub" data-sc-span="2.6" data-sc-dwell="0.34" data-sc-drift="#0d0c0a">
+    <div data-sc-stage>
+      <img class="sc-stage__poster" src="assets/01-poster.webp" srcset="assets/01-m.webp 760w, assets/01.webp 1600w" sizes="(max-width: 700px) 380px, 1600px" alt="">
+      <div class="sc-scrim sc-scrim--lead" aria-hidden="true"></div>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 0.78 0">
+        <p class="kicker">Nordwind Handel GmbH · Ticket NW-001</p>
+        <h1 class="sc-display sc-display--xl" data-sc-kinetic="lines">El ERP no es el enemigo.</h1>
+        <p class="sc-body">Es un sistema que se aprende operándolo. Tu primer ticket, tu primer documento, tu primer asiento: aquí empieza la carrera.</p>
+      </div>
+    </div>
+  </section>
+
+  <section data-sc-act="pin" data-sc-span="3.0" data-sc-drift="#171512">
+    <div data-sc-stage class="argument">
+      <p data-sc-cue="0 0.32 0">Cada número descuadrado es una decisión de negocio tomada a ciegas.</p>
+      <p data-sc-cue="0.26 0.60">Cada campo mal configurado se propaga a cada documento que lo toca después.</p>
+      <p data-sc-cue="0.54 0.88">Y nadie nace sabiendo qué hace la contabilización de un pedido.</p>
+      <p data-sc-cue="0.82">La diferencia entre un becario y un consultor es saber el porqué detrás de cada campo.</p>
+    </div>
+  </section>
+
+  <section class="sc-section" data-sc-act="flow" data-sc-drift="#12100d" id="aprender">
+    <div class="sc-wrap split">
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display sc-display--lg">Entender antes de operar.</h2>
+        <p class="sc-body">72 masterclasses. Cada una abre con la pantalla real de SAP B1, la configuración exacta y el flujo documental completo. Nada de teoría suelta: lo que ves es lo que operarás después.</p>
+        <p class="sc-body">72 competencias de nivel 0 a nivel 8. Finanzas, ventas, compras, inventario, banco, reporting. El mapa completo de SAP Business One.</p>
+      </div>
+      <figure data-sc-reveal="left" data-sc-reveal-at="0.18 0.62">
+        <img src="assets/03.webp" width="1920" height="1080" alt="Workspace de estudio con diagramas de flujos documentales">
+      </figure>
+    </div>
+  </section>
+
+  <section class="sc-section" data-sc-act="flow" data-sc-drift="#15130f" id="practicar">
+    <div class="sc-wrap split split--flip">
+      <figure data-sc-reveal="right" data-sc-reveal-at="0.18 0.62">
+        <img src="assets/02.webp" width="1920" height="1080" alt="Documentos financieros con una cifra marcada en rojo que no cuadra">
+      </figure>
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display sc-display--lg">Practicar sin miedo a romper nada.</h2>
+        <p class="sc-body">Entender, práctica guiada con pistas, demostrar dominio sin ayuda. El simulador responde campo a campo y te dice exactamente cuál falló y por qué.</p>
+        <p class="sc-body">Seis motores de actividad: simulador de ventanas, caza de errores, asientos contables, forense documental, predicción de consecuencias y configuración.</p>
+      </div>
+    </div>
+  </section>
+
+  <section data-sc-act="pin" data-sc-span="4.2" data-sc-drift="#1a1713" id="dominar">
+    <div data-sc-stage class="peak">
+      <img class="sc-stage__poster" src="assets/05.webp" srcset="assets/05-m.webp 760w, assets/05.webp 1600w" sizes="(max-width: 700px) 380px, 1600px" alt="Sede de una empresa comercial al atardecer conectando almacén y oficinas">
+      <div class="sc-scrim sc-scrim--band" aria-hidden="true"></div>
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0.02 0.5">
+        <h2 class="sc-display sc-display--xl" data-sc-kinetic="lines">Resuelve 72 tickets. Mueve la empresa entera.</h2>
+        <p class="sc-body">De becario a arquitecto. Cada ticket cerrado mejora un proceso de verdad: el DSO baja, el stock se libera, los errores operativos se desvanecen.</p>
+      </div>
+      <div class="kpi-live" aria-hidden="true">
+        <div class="kpi"><span class="kpi__n" data-ledger-target="dso">62</span><span class="kpi__l">DSO · días</span></div>
+        <div class="kpi"><span class="kpi__n" data-ledger-target="stock">480</span><span class="kpi__l">Stock · k€</span></div>
+        <div class="kpi"><span class="kpi__n" data-ledger-target="err">23</span><span class="kpi__l">Errores / mes</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section data-sc-act="pin" data-sc-span="2.8" data-sc-drift="#171310">
+    <div data-sc-stage class="results">
+      <div class="sc-copy" data-sc-cue="0.05 0.9">
+        <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">La empresa que dejas no es la que encontraste.</h2>
+      </div>
+      <div class="ledger">
+        <p class="ledger__cap">Libro mayor · Nordwind Handel GmbH</p>
+        <ol class="ledger__rows">
+          <li class="ledger__row"><span class="ledger__no">NW-001</span><span class="ledger__desc">Primer inicio de sesión</span><span class="ledger__amt">0,00</span></li>
+          <li class="ledger__row"><span class="ledger__no">NW-018</span><span class="ledger__desc">Condición de pago equivocada</span><span class="ledger__amt">+1.240,00</span></li>
+          <li class="ledger__row"><span class="ledger__no">NW-040</span><span class="ledger__desc">Stock fantasma en almacén 02</span><span class="ledger__amt">-3.850,00</span></li>
+          <li class="ledger__row"><span class="ledger__no">NW-061</span><span class="ledger__desc">Cierre de ejercicio automático</span><span class="ledger__amt">+12.900,00</span></li>
+          <li class="ledger__row"><span class="ledger__no">NW-072</span><span class="ledger__desc">Arquitectura de aprobaciones</span><span class="ledger__amt">+31.500,00</span></li>
+        </ol>
+        <div class="ledger__total">
+          <span>TOTAL</span><span data-ledger-target="total">41.790,00 €</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="abrir" data-sc-act="pin" data-sc-span="1.15" data-sc-drift="#0d0c0a">
+    <div data-sc-stage class="close" data-sc-spotlight>
+      <div class="close__inner">
+        <h2 class="sc-display sc-display--lg" data-sc-cue="0.06" data-sc-kinetic="lines">Conozco SAP Business One porque lo he operado.</h2>
+        <div class="close__rule" aria-hidden="true"></div>
+        <a class="cta" href="https://brendars91.github.io/Learn-SapB1/" data-sc-magnet="0.26" data-sc-cue="0.06" data-sc-rise="0">Abrir el laboratorio</a>
+      </div>
+      <footer class="foot">
+        <span>SapB1 · laboratorio de aprendizaje SAP Business One</span>
+        <span>Nordwind Handel GmbH · 72 tickets · hecho a mano</span>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+<div class="led__ticker" aria-hidden="true"></div>
+
+<script src="scrollcraft.js"></script>
+<script>
+ScrollCraft.mount(document.body);
+
+// Signature move · El Ledger: la cinta contable vive con el scroll.
+(function () {
+  var targets = {
+    dso:  [62, 34],
+    stock:[480, 210],
+    err:  [23, 4]
+  };
+  var els = {};
+  document.querySelectorAll('[data-ledger-target]').forEach(function (el) {
+    els[el.getAttribute('data-ledger-target')] = el;
+  });
+  function fmt(n) { return String(Math.round(n)); }
+  function frame() {
+    var t = Math.min(1, Math.max(0, (window.scrollY || 0) / (document.body.scrollHeight - window.innerHeight)));
+    var e = 1 - Math.pow(1 - t, 3);
+    Object.keys(targets).forEach(function (k) {
+      if (!els[k]) return;
+      var v = targets[k][0] + (targets[k][1] - targets[k][0]) * e;
+      els[k].textContent = fmt(v);
+    });
+  }
+  window.addEventListener('scroll', function () { window.requestAnimationFrame(frame); }, { passive: true });
+  frame();
+})();
+</script>
+</body>
+</html>
