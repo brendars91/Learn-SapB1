@@ -1,6 +1,9 @@
 // app.mjs v2 — Motor entender-primero con visualizaciones SVG y evaluación 4 pasos.
 import { I18N, LEVELS, SKILLS, CASES, INCIDENTS, BOSSES, EVIDENCE, DIAGNOSTIC, PROCESS_STEPS, translate } from './content.mjs';
 import { calculateMastery, recommendNext, scanSensitiveInput, lintPrompt, validateProgressImport, nextReviewDate } from './domain.mjs';
+import { b1Window } from './ui-b1.mjs';
+import { MASTERCLASS } from './masterclass.mjs';
+import { getActivity } from './activities.mjs';
 
 const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
 const VIEWS = ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'review', 'evidence'];
@@ -26,6 +29,7 @@ export function createInitialState(saved = {}) {
     selectedSkillId: saved.selectedSkillId || 'SYN-SK-L0-01',
     skillMode: saved.skillMode === 'prove' ? 'prove' : 'learn',
     assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false,
+    activityAnswers: {}, activitySequence: [], activityFeedback: null,
     levelFilter: saved.levelFilter ?? 'all',
     trackFilter: saved.trackFilter || 'all',
     assessmentResult: null,
@@ -48,8 +52,17 @@ export function reduceState(state, action) {
     case 'SET_LOCALE': return ['es', 'en', 'de'].includes(action.locale) ? { ...state, locale: action.locale, toast: '' } : state;
     case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
     case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
-    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, toast: '' };
-    case 'SET_SKILL_MODE': return { ...state, skillMode: action.mode === 'prove' ? 'prove' : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null };
+    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, toast: '' };
+    case 'SET_SKILL_MODE': return { ...state, skillMode: action.mode === 'prove' ? 'prove' : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null };
+    case 'ACTIVITY_ANSWER': return { ...state, activityAnswers: { ...state.activityAnswers, [action.key]: action.value }, activityFeedback: null };
+    case 'ACTIVITY_TOGGLE': {
+      const selected = Boolean(state.activityAnswers[action.key]);
+      return { ...state, activityAnswers: { ...state.activityAnswers, [action.key]: !selected }, activityFeedback: null };
+    }
+    case 'ACTIVITY_SEQUENCE': return { ...state, activitySequence: [...state.activitySequence, action.value], activityFeedback: null };
+    case 'ACTIVITY_SEQUENCE_UNDO': return { ...state, activitySequence: state.activitySequence.slice(0, -1), activityFeedback: null };
+    case 'ACTIVITY_FEEDBACK': return { ...state, activityFeedback: { correct: action.correct, message: action.message }, assessmentResult: { correct: action.correct } };
+    case 'RESET_ACTIVITY': return { ...state, activityAnswers: {}, activitySequence: [], activityFeedback: null, assessmentResult: null };
     case 'ANSWER_STEP_DECIDE': return { ...state, assessmentChoice: action.index, assessmentStep: Math.max(state.assessmentStep, 1) };
     case 'ANSWER_STEP_PRINCIPLE': return { ...state, assessmentPrinciple: action.index, assessmentStep: Math.max(state.assessmentStep, 2) };
     case 'REVEAL_REASONING': return { ...state, assessmentShown: true, assessmentStep: 3 };
@@ -424,37 +437,69 @@ function renderLearnMode(state, skill) {
   </div>`;
 }
 
+function activityInstructions(type, locale) {
+  const all = {
+    simulator:{es:'Completa los campos editables de la ventana. No memorices: interpreta el documento.',en:'Complete the editable fields. Interpret the document; do not guess.',de:'Fülle die bearbeitbaren Felder aus. Interpretiere den Beleg.'},
+    bughunt:{es:'Audita la evidencia y marca únicamente la anomalía que explica el incidente.',en:'Audit the evidence and mark only the anomaly that explains the incident.',de:'Prüfe die Evidenz und markiere nur die ursächliche Anomalie.'},
+    journal:{es:'Construye el asiento: asigna Debe/Haber e importe. El total debe cuadrar.',en:'Build the journal: assign Debit/Credit and amount. Totals must balance.',de:'Erstelle den Buchungssatz: Soll/Haben und Betrag. Summen müssen stimmen.'},
+    forensic:{es:'Sigue la cadena documental y señala exactamente el eslabón roto.',en:'Trace the document chain and identify the exact broken link.',de:'Verfolge die Belegkette und finde das gebrochene Glied.'},
+    consequence:{es:'Ordena la cascada real: causa → impacto → respuesta segura.',en:'Order the real cascade: cause → impact → safe response.',de:'Ordne die Kaskade: Ursache → Auswirkung → sichere Reaktion.'},
+    config:{es:'Construye la ruta exacta de configuración. Sobran opciones.',en:'Build the exact configuration path. Some options are decoys.',de:'Baue den exakten Konfigurationspfad. Einige Optionen sind Ablenkungen.'}
+  };
+  return all[type]?.[locale] || all[type]?.es || '';
+}
+
+function renderActivityBody(state, activity) {
+  const A = state.activityAnswers || {};
+  if (activity.type === 'simulator') return `<div class="act-form">${activity.targets.map((f,i)=>`<label><strong>${escapeHtml(f.label)}</strong><select class="form-select" data-activity-input="sim-${i}"><option value="">— Selecciona —</option>${f.options.map(v=>`<option value="${escapeHtml(v)}"${A[`sim-${i}`]===v?' selected':''}>${escapeHtml(v)}</option>`).join('')}</select></label>`).join('')}</div>`;
+  if (activity.type === 'bughunt') return `<div class="act-evidence">${activity.clues.map((c,i)=>`<button type="button" class="act-clue${A[`clue-${i}`]?' is-marked':''}" data-action="activity-toggle" data-key="clue-${i}"><span>${A[`clue-${i}`]?'⚑':'○'}</span>${escapeHtml(c.label)}</button>`).join('')}</div>`;
+  if (activity.type === 'forensic') return `<div class="act-chain">${activity.evidence.map((e,i)=>`<button type="button" class="act-link${A.broken===String(i)?' is-marked':''}" data-action="activity-answer" data-key="broken" data-value="${i}"><span>${i+1}</span>${escapeHtml(e.label)}</button>`).join('<b>→</b>')}</div>`;
+  if (activity.type === 'config') {
+    const sequence = state.activitySequence || [];
+    return `<div class="act-route-built">${sequence.length?sequence.map(x=>`<span>${escapeHtml(x)}</span>`).join('<b>›</b>'):'<em>La ruta aparece aquí…</em>'}</div><div class="act-token-bank">${activity.tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ Deshacer último</button>`;
+  }
+  if (activity.type === 'consequence') {
+    const sequence = state.activitySequence || [];
+    const tokens = [...activity.chain].reverse();
+    return `<div class="act-trigger"><strong>Evento observado</strong><p>${escapeHtml(activity.trigger)}</p></div><div class="act-route-built">${sequence.length?sequence.map((x,i)=>`<span><small>${i+1}</small>${escapeHtml(x)}</span>`).join('<b>→</b>'):'<em>Construye la cascada…</em>'}</div><div class="act-token-bank">${tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ Deshacer último</button>`;
+  }
+  if (activity.type === 'journal') {
+    const amount = v => Number(String(v||'0').replace(/\./g,'').replace(',','.')) || 0;
+    const debit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Debe'?amount(A[`amount-${i}`]):0),0);
+    const credit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Haber'?amount(A[`amount-${i}`]):0),0);
+    const balanced = debit>0 && Math.abs(debit-credit)<.005;
+    return `<div class="act-journal"><div class="act-jhead"><span>Cuenta</span><span>Debe / Haber</span><span>Importe</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(line[0])}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option${A[`side-${i}`]==='Debe'?' selected':''}>Debe</option><option${A[`side-${i}`]==='Haber'?' selected':''}>Haber</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ Debe <output>${debit.toFixed(2).replace('.',',')}</output> · Σ Haber <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?'✓ Cuadrado':'⚠ Diferencia '+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div></div>`;
+  }
+  return '';
+}
+
 function renderProveMode(state, skill) {
-  const challenge = skill.assessment;
-  const step = state.assessmentStep;
-  const choice = state.assessmentChoice;
-  const principle = state.assessmentPrinciple;
-  const shown = state.assessmentShown;
-  const finished = Boolean(state.assessmentResult);
-  const correct = choice === challenge.correct;
-  const principleCorrect = principle === challenge.principleCorrect;
-  const hint = challenge.hints?.[state.locale] || '';
-  return `<div class="sbl-prove">
-    <ol class="sbl-phase" aria-label="progress">
-      <li class="${step >= 0 ? 'is-on' : ''}">${t(state, 'stepDecide')}</li>
-      <li class="${step >= 1 ? 'is-on' : ''}">${t(state, 'stepCommit')}</li>
-      <li class="${step >= 2 ? 'is-on' : ''}">${t(state, 'stepReveal')}</li>
-    </ol>
-    ${step === 0 ? `
-      <h3>${local(challenge.prompt, state.locale)}</h3>
-      ${hint ? `<div class="sbl-hint"><strong>${t(state, 'hintLabel')}:</strong> ${escapeHtml(hint)}</div>` : ''}
-      <div class="sbl-choice-list">${challenge.optionsText[state.locale].map((option, index) => `<button type="button" class="btn" data-action="step-decide" data-index="${index}">${escapeHtml(option)}</button>`).join('')}</div>` : ''}
-    ${step === 1 && challenge.principles ? `
-      <h3>${t(state, 'commitPrinciple')}</h3>
-      <div class="sbl-choice-list">${challenge.principles.map((p, index) => `<button type="button" class="btn" data-action="step-principle" data-index="${index}">${local(p, state.locale)}</button>`).join('')}</div>` : ''}
-    ${step >= 2 ? `
-      ${!finished ? `<button type="button" class="btn btn-primary" data-action="reveal-reasoning" data-skill="${skill.id}" data-correct="${correct}" data-safety="${challenge.safe[choice] ?? true}" data-principle="${principleCorrect}">${t(state, 'stepReveal')}</button>` : ''}
-      ${shown || finished ? `
-        <div class="sbl-answer-feedback" data-correct="${correct}"><strong>${correct ? t(state, 'correct') : t(state, 'incorrect')}</strong>${principleCorrect ? ` <span class="viz-badge">+${t(state, "stepCommit")}</span>` : ''}<p>${local(challenge.why || challenge.rationale, state.locale)}</p></div>
-        ${renderSeniorPanel(state, challenge)}
-        ${renderDistractorPanel(state, { distractorWhy: challenge.distractorWhy })}
-        <button type="button" class="btn" data-action="clear-skill-assessment">${t(state, 'next')}</button>` : ''}` : ''}
-  </div>`;
+  const activity = getActivity(skill, state.locale);
+  const feedback = state.activityFeedback;
+  if (activity.unavailable) return `<p>Actividad en preparación.</p>`;
+  return `<section class="sbl-activity" data-activity-type="${activity.type}">
+    <header class="act-head"><span class="act-icon">${{simulator:'⌨',bughunt:'⌖',journal:'⚖',forensic:'⌕',consequence:'⟿',config:'⚙'}[activity.type]}</span><div><span class="viz-badge">${escapeHtml(activity.label)}</span><h3>${local(skill.title,state.locale)} · ${escapeHtml(activityInstructions(activity.type,state.locale))}</h3></div></header>
+    ${activity.mc?.screen && ['simulator','bughunt','journal','forensic'].includes(activity.type) ? `<div class="act-screen">${b1Window(activity.mc.screen,state.locale)}</div>`:''}
+    ${renderActivityBody(state,activity)}
+    ${feedback?`<div class="act-feedback ${feedback.correct?'is-correct':'is-wrong'}"><strong>${feedback.correct?'✓ Misión resuelta':'↻ Aún no'}</strong><p>${escapeHtml(feedback.message)}</p></div>`:''}
+    <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="check-activity">Comprobar decisión</button><button type="button" class="btn" data-action="reset-activity">Reiniciar</button></div>
+  </section>`;
+}
+
+function validateActivity(state, skill) {
+  const a = getActivity(skill,state.locale), A=state.activityAnswers||{}, seq=state.activitySequence||[];
+  let correct=false, message='Revisa la evidencia y vuelve a intentarlo.';
+  if(a.type==='simulator') correct=a.targets.every((f,i)=>A[`sim-${i}`]===f.expected);
+  if(a.type==='bughunt') correct=a.clues.every((c,i)=>Boolean(A[`clue-${i}`])===Boolean(c.error));
+  if(a.type==='forensic') correct=a.evidence[Number(A.broken)]?.broken===true;
+  if(a.type==='config') correct=JSON.stringify(seq)===JSON.stringify(a.route);
+  if(a.type==='consequence') correct=JSON.stringify(seq)===JSON.stringify(a.chain);
+  if(a.type==='journal') correct=a.lines.every((l,i)=>A[`side-${i}`]===l[1] && String(A[`amount-${i}`]||'').replace(/\s/g,'')===l[2]);
+  if(correct) message=a.resolution || 'Decisión correcta: la evidencia, el control y el resultado son coherentes.';
+  else if(a.type==='journal') message='El asiento no representa correctamente el evento o no cuadra. Comprueba naturaleza de cuenta, lado e importe.';
+  else if(a.type==='config') message='La ruta contiene un nivel incorrecto, falta un nivel o el orden no es el del menú real.';
+  else if(a.type==='consequence') message='Los hechos son correctos, pero la secuencia causal no. Empieza por la causa raíz, no por la solución.';
+  return {correct,message};
 }
 
 function renderSkillDetail(state, skill) {
@@ -596,6 +641,18 @@ export function mountSapB1Lab(root) {
     if (action === 'nav') dispatch({ type: 'NAVIGATE', view: control.dataset.view });
     else if (action === 'select-skill') dispatch({ type: 'SELECT_SKILL', skillId: control.dataset.skill });
     else if (action === 'set-skill-mode') dispatch({ type: 'SET_SKILL_MODE', mode: control.dataset.mode });
+    else if (action === 'activity-toggle') dispatch({ type: 'ACTIVITY_TOGGLE', key: control.dataset.key });
+    else if (action === 'activity-answer') dispatch({ type: 'ACTIVITY_ANSWER', key: control.dataset.key, value: control.dataset.value });
+    else if (action === 'activity-sequence') dispatch({ type: 'ACTIVITY_SEQUENCE', value: control.dataset.value });
+    else if (action === 'activity-undo') dispatch({ type: 'ACTIVITY_SEQUENCE_UNDO' });
+    else if (action === 'reset-activity') dispatch({ type: 'RESET_ACTIVITY' });
+    else if (action === 'check-activity') {
+      const skill = SKILLS.find(s => s.id === state.selectedSkillId);
+      const alreadyPassed = state.activityFeedback?.correct === true;
+      const result = validateActivity(state, skill);
+      dispatch({ type: 'ACTIVITY_FEEDBACK', ...result });
+      if (result.correct && !alreadyPassed) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
+    }
     else if (action === 'step-decide') dispatch({ type: 'ANSWER_STEP_DECIDE', index: Number(control.dataset.index) });
     else if (action === 'step-principle') dispatch({ type: 'ANSWER_STEP_PRINCIPLE', index: Number(control.dataset.index) });
     else if (action === 'reveal-reasoning') {
@@ -626,6 +683,8 @@ export function mountSapB1Lab(root) {
   });
 
   root.addEventListener('change', event => {
+    const direct = event.target;
+    if (direct.dataset.activityInput) { dispatch({ type: 'ACTIVITY_ANSWER', key: direct.dataset.activityInput, value: direct.value }); return; }
     const control = event.target.closest('[data-action]');
     if (!control) return;
     if (control.dataset.action === 'locale') dispatch({ type: 'SET_LOCALE', locale: control.value });
