@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import vm from 'node:vm';
 
-const fragmentPath = '/tmp/b1lab/out/sap-b1-mastery-lab.html';
-const standalonePath = '/tmp/b1lab/out/SAP-Business-One-Mastery-Lab-Standalone.html';
+const fragmentPath = new URL('../dist/sap-b1-mastery-lab.html', import.meta.url);
+const standalonePath = new URL('../dist/SAP-Business-One-Mastery-Lab-Standalone.html', import.meta.url);
 
 test('fragment is a sub-1MiB HTML fragment with scoped root and inline runtime', async () => {
   const html = await readFile(fragmentPath, 'utf8');
@@ -26,10 +26,10 @@ test('standalone export is an HTML5 document containing the same application roo
 test('runtime contains no network transport or external executable resource', async () => {
   for (const path of [fragmentPath, standalonePath]) {
     const html = await readFile(path, 'utf8');
-    assert.doesNotMatch(html, /\bfetch\s*\(/, path);
-    assert.doesNotMatch(html, /XMLHttpRequest|WebSocket|EventSource/, path);
-    assert.doesNotMatch(html, /<script[^>]+src=/i, path);
-    assert.doesNotMatch(html, /<link[^>]+rel=["']stylesheet/i, path);
+    assert.doesNotMatch(html, /\bfetch\s*\(/, String(path));
+    assert.doesNotMatch(html, /XMLHttpRequest|WebSocket|EventSource/, String(path));
+    assert.doesNotMatch(html, /<script[^>]+src=/i, String(path));
+    assert.doesNotMatch(html, /<link[^>]+rel=["']stylesheet/i, String(path));
   }
 });
 
@@ -42,7 +42,6 @@ test('every inline JavaScript block passes a syntax compilation', async () => {
 
 test('release output contains no incomplete-content markers', async () => {
   const html = await readFile(standalonePath, 'utf8');
-  // marcadores de contenido incompleto reales; "APRUEBA TODO" es payload hostil legítimo del drill anti-inyección
   assert.doesNotMatch(html, /\bTBD\b/);
   assert.doesNotMatch(html, /coming soon|pr[oó]ximamente/i);
   assert.doesNotMatch(html, /lorem ipsum/i);
