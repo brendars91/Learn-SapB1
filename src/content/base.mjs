@@ -1,7 +1,7 @@
 // Base del curriculum v2 — I18N, niveles, evidencia, procesos enriquecidos y DSL de skills.
 export const I18N = {
   es: {
-    appLabel: 'Laboratorio de dominio SAP Business One', navHome: 'Misión', navMap: 'Mapa', navCases: 'Casos', navIncidents: 'Incidentes', navSimulator: 'Cadena', navAI: 'Lab de IA', navReview: 'Repaso', navEvidence: 'Fuentes',
+    appLabel: 'Laboratorio de dominio SAP Business One', navHome: 'Inicio', navMap: 'Mapa', navCases: 'Casos', navIncidents: 'Incidentes', navSimulator: 'Cadena', navAI: 'Consola avanzada', navEvidence: 'Fuentes',
     language: 'Idioma', track: 'Ruta', trackFunctional: 'Funcional', trackTechnical: 'Técnica + IA', trackDual: 'Doble ruta',
     startDiagnostic: 'Iniciar diagnóstico', resume: 'Continuar', reset: 'Reiniciar progreso', export: 'Exportar progreso', import: 'Importar progreso',
     mastery: 'Dominio', dueReview: 'Repasos', skillsExplored: 'Competencias', recommended: 'Siguiente misión', begin: 'Comenzar',
@@ -30,7 +30,7 @@ export const I18N = {
     promptFieldRole: 'Rol', promptFieldGoal: 'Objetivo', promptFieldContext: 'Contexto', promptFieldEvidence: 'Evidencia', promptFieldUncertainty: 'Incertidumbre', promptFieldOutput: 'Formato de salida', promptFieldHumanGate: 'Revisión humana', promptFieldSyntheticContext: 'Caso sintético'
   },
   en: {
-    appLabel: 'SAP Business One mastery lab', navHome: 'Mission', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'AI Lab', navReview: 'Review', navEvidence: 'Sources',
+    appLabel: 'SAP Business One mastery lab', navHome: 'Home', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'Advanced console', navEvidence: 'Sources',
     language: 'Language', track: 'Path', trackFunctional: 'Functional', trackTechnical: 'Technical + AI', trackDual: 'Dual path',
     startDiagnostic: 'Start diagnostic', resume: 'Continue', reset: 'Reset progress', export: 'Export progress', import: 'Import progress',
     mastery: 'Mastery', dueReview: 'Reviews', skillsExplored: 'Skills', recommended: 'Next mission', begin: 'Begin',
@@ -59,7 +59,7 @@ export const I18N = {
     promptFieldRole: 'Role', promptFieldGoal: 'Goal', promptFieldContext: 'Context', promptFieldEvidence: 'Evidence', promptFieldUncertainty: 'Uncertainty', promptFieldOutput: 'Output format', promptFieldHumanGate: 'Human review', promptFieldSyntheticContext: 'Synthetic case'
   },
   de: {
-    appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Mission', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'KI-Labor', navReview: 'Wiederholen', navEvidence: 'Quellen',
+    appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Home', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
     language: 'Sprache', track: 'Lernpfad', trackFunctional: 'Funktional', trackTechnical: 'Technik + KI', trackDual: 'Doppelpfad',
     startDiagnostic: 'Diagnose starten', resume: 'Fortsetzen', reset: 'Fortschritt löschen', export: 'Fortschritt exportieren', import: 'Fortschritt importieren',
     mastery: 'Beherrschung', dueReview: 'Wiederholungen', skillsExplored: 'Kompetenzen', recommended: 'Nächste Mission', begin: 'Starten',
