@@ -489,6 +489,18 @@
   border-top: 1px solid var(--b1-line); background: #f4f1ea;
   font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-style: italic;
 }
+/* Actividades prácticas: el usuario opera, audita, ordena y construye. */
+.sbl-activity{display:grid;gap:1rem;border-top:3px double var(--ink);padding-top:1rem}
+.act-head{display:flex;gap:1rem;align-items:flex-start}.act-head h3{font-size:1.05rem;margin:.35rem 0}.act-icon{font:2rem/1 monospace;color:var(--accent)}
+.act-screen{max-height:28rem;overflow:auto;border:1px solid var(--line)}
+.act-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.8rem;padding:1rem;background:var(--paper-2);border:1px solid var(--line)}.act-form label{display:grid;gap:.35rem}
+.act-evidence{display:grid;gap:.5rem}.act-clue{display:flex;gap:.7rem;text-align:left;padding:.8rem;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);cursor:pointer}.act-clue:hover,.act-clue.is-marked{border-color:var(--accent)}.act-clue.is-marked{box-shadow:inset 4px 0 var(--accent)}
+.act-chain{display:flex;align-items:stretch;gap:.4rem;overflow:auto;padding:.5rem 0}.act-chain>b{align-self:center;color:var(--muted)}.act-link{min-width:10rem;padding:.8rem;border:1px solid var(--line);background:var(--paper-2);text-align:left;color:var(--ink);cursor:pointer}.act-link span{display:block;font:700 .75rem monospace;color:var(--accent)}.act-link.is-marked{outline:3px double var(--accent)}
+.act-route-built{display:flex;gap:.45rem;align-items:center;min-height:4rem;padding:.8rem;border:1px dashed var(--accent);overflow:auto}.act-route-built span{background:var(--paper-2);border:1px solid var(--line);padding:.45rem;white-space:nowrap}.act-route-built small{display:block;color:var(--accent)}.act-token-bank{display:flex;flex-wrap:wrap;gap:.45rem}.act-trigger{border-left:4px solid var(--accent);padding:.6rem 1rem;background:var(--paper-2)}
+.act-journal{border:1px solid var(--line);overflow:auto}.act-jhead,.act-jline{display:grid;grid-template-columns:minmax(15rem,2fr) minmax(8rem,1fr) minmax(8rem,1fr);gap:.5rem;padding:.55rem;border-bottom:1px solid var(--line);align-items:center}.act-jhead{font:700 .72rem monospace;text-transform:uppercase;background:var(--ink);color:var(--paper)}.act-balance{padding:.7rem;text-align:right;font:700 .85rem monospace;background:var(--paper-2)}.act-balance.is-balanced{color:#315d38;background:#e9f1e5}
+.act-feedback{padding:1rem;border:1px solid}.act-feedback.is-correct{border-color:#48734f;background:#e9f1e5}.act-feedback.is-wrong{border-color:var(--accent);background:#f2dfd8}.act-feedback p{margin:.4rem 0 0}
+.btn-small{font-size:.75rem;justify-self:start}
+@media(max-width:650px){.act-chain{flex-direction:column}.act-chain>b{transform:rotate(90deg)}.act-jhead,.act-jline{grid-template-columns:1fr}.act-jhead{display:none}}
 </style>
 <script>
 (() => {
@@ -4633,6 +4645,97 @@ const MASTERCLASS = {
 Object.assign(MASTERCLASS, MC_BATCH1, MC_BATCH2, MC_BATCH3, MC_BATCH4, MC_BATCH5, MC_BATCH6);
 
 
+// activities.mjs — Evaluaciones prácticas, no cuestionarios.
+// Cada skill recibe el formato que mejor reproduce el trabajo real de un consultor B1.
+
+const JOURNAL_IDS = new Set(['SYN-SK-L4-01','SYN-SK-L4-02','SYN-SK-L4-03','SYN-SK-L4-05','SYN-SK-L4-06','SYN-SK-L4-07','SYN-SK-L4-08']);
+const FORENSIC_IDS = new Set(['SYN-SK-L0-04','SYN-SK-L0-07','SYN-SK-L2-01','SYN-SK-L2-02','SYN-SK-L2-04','SYN-SK-L2-05','SYN-SK-L2-06','SYN-SK-L3-08','SYN-SK-L7-08']);
+const CONFIG_IDS = new Set(['SYN-SK-L1-06','SYN-SK-L1-07','SYN-SK-L1-08','SYN-SK-L3-03','SYN-SK-L3-05','SYN-SK-L3-07','SYN-SK-L4-04','SYN-SK-L5-02','SYN-SK-L5-03','SYN-SK-L5-04','SYN-SK-L5-05','SYN-SK-L5-06','SYN-SK-L6-04','SYN-SK-L6-05']);
+const CONSEQUENCE_IDS = new Set(['SYN-SK-L0-05','SYN-SK-L0-06','SYN-SK-L1-05','SYN-SK-L2-08','SYN-SK-L3-06','SYN-SK-L5-08','SYN-SK-L6-01','SYN-SK-L6-02','SYN-SK-L6-06','SYN-SK-L6-07','SYN-SK-L6-08','SYN-SK-L7-02','SYN-SK-L7-03','SYN-SK-L7-04','SYN-SK-L7-05','SYN-SK-L7-06','SYN-SK-L7-07','SYN-SK-L8-01','SYN-SK-L8-02','SYN-SK-L8-03','SYN-SK-L8-04','SYN-SK-L8-05','SYN-SK-L8-06','SYN-SK-L8-07','SYN-SK-L8-08']);
+const BUGHUNT_IDS = new Set(['SYN-SK-L0-08','SYN-SK-L1-01','SYN-SK-L1-02','SYN-SK-L1-03','SYN-SK-L1-04','SYN-SK-L2-03','SYN-SK-L2-07','SYN-SK-L3-01','SYN-SK-L3-02','SYN-SK-L3-04','SYN-SK-L5-01','SYN-SK-L5-07','SYN-SK-L6-03','SYN-SK-L7-01']);
+
+function activityType(id) {
+  if (JOURNAL_IDS.has(id)) return 'journal';
+  if (FORENSIC_IDS.has(id)) return 'forensic';
+  if (CONFIG_IDS.has(id)) return 'config';
+  if (CONSEQUENCE_IDS.has(id)) return 'consequence';
+  if (BUGHUNT_IDS.has(id)) return 'bughunt';
+  return 'simulator';
+}
+
+const LABELS = {
+  simulator: { es: 'Simulador de tarea', en: 'Task simulator', de: 'Aufgabensimulator' },
+  bughunt: { es: 'Caza de errores', en: 'Bug hunt', de: 'Fehlersuche' },
+  journal: { es: 'Constructor de asientos', en: 'Journal builder', de: 'Buchungssatz-Builder' },
+  forensic: { es: 'Forense documental', en: 'Document forensics', de: 'Dokumentenforensik' },
+  consequence: { es: 'Predicción de consecuencias', en: 'Consequence prediction', de: 'Folgenabschätzung' },
+  config: { es: 'Reto de configuración', en: 'Configuration challenge', de: 'Konfigurationsaufgabe' }
+};
+
+const JOURNALS = {
+  'SYN-SK-L4-01': [['Cliente 430000','Debe','1190,00'],['Ventas 800000','Haber','1000,00'],['IVA repercutido 177600','Haber','190,00']],
+  'SYN-SK-L4-02': [['Gasto/activo determinado','Debe','1000,00'],['Proveedor 160000','Haber','1190,00'],['IVA soportado 157600','Debe','190,00']],
+  'SYN-SK-L4-03': [['Cliente 430000','Debe','1190,00'],['Ventas 800000','Haber','1000,00'],['IVA repercutido 177600','Haber','190,00']],
+  'SYN-SK-L4-05': [['Banco 120000','Debe','1190,00'],['Cliente 430000','Haber','1190,00']],
+  'SYN-SK-L4-06': [['Proveedor 160000','Debe','1190,00'],['Banco 120000','Haber','1190,00']],
+  'SYN-SK-L4-07': [['Amortización 622000','Debe','100,00'],['Amortización acumulada 490000','Haber','100,00']],
+  'SYN-SK-L4-08': [['Gasto centro CC-VENTAS','Debe','600,00'],['Gasto centro CC-OPS','Debe','400,00'],['Contrapartida','Haber','1000,00']]
+};
+
+function text(v, locale) { return v?.[locale] ?? v?.es ?? String(v ?? ''); }
+function asArray(v) { return Array.isArray(v) ? v : v ? [v] : []; }
+function shuffledDeterministic(items) { return items.map((v,i)=>({v,k:(i*7+3)%items.length})).sort((a,b)=>a.k-b.k).map(x=>x.v); }
+
+function configSpec(skill, mc, locale) {
+  const raw = text(asArray(mc.cfg)[0], locale);
+  const route = raw.split(':')[0].split('>').map(x=>x.trim()).filter(Boolean);
+  const decoys = ['Gestión','Informes','Parametrizaciones generales','Herramientas'];
+  return { route, tokens: shuffledDeterministic([...route, ...decoys.filter(x=>!route.includes(x)).slice(0,Math.max(2,5-route.length))]) };
+}
+function simulatorSpec(skill, mc, locale) {
+  const fields = asArray(mc.screen?.fields);
+  const editable = fields.filter(f=>f[2]).slice(0,3);
+  let targets = editable.length ? editable : fields.slice(0,Math.min(3,fields.length));
+  if (!targets.length) targets = asArray(mc.screen?.rows).slice(0,3).map(r => [r[0], r[1] ?? r[0]]);
+  return { targets: targets.map((f,i)=>({ label:f[0], expected:f[1], options:shuffledDeterministic([f[1], i===0?'— Vacío —':'Automático', i===0?'Bloqueado':'Manual']) })) };
+}
+function forensicSpec(skill, mc, locale) {
+  const steps = asArray(mc.e2e).map((x,i)=>({ label:text(x,locale), broken:false, index:i }));
+  const broken = { label:`⚠ ${text(mc.war?.root,locale)}`, broken:true, index:steps.length };
+  return { evidence: shuffledDeterministic([...steps.slice(0,3),broken]), resolution:text(mc.war?.fix,locale) };
+}
+function bughuntSpec(skill, mc, locale) {
+  return { clues: shuffledDeterministic([
+    { label:text(mc.war?.root,locale), error:true },
+    { label:text(asArray(mc.bp)[0],locale), error:false },
+    { label:text(asArray(mc.e2e)[0],locale), error:false },
+    { label:text(asArray(mc.cfg)[0],locale), error:false }
+  ]), resolution:text(mc.war?.fix,locale) };
+}
+function consequenceSpec(skill, mc, locale) {
+  return { trigger:text(mc.war?.symptom,locale), chain:[
+    text(mc.war?.root,locale),
+    text(asArray(mc.e2e)[Math.min(1,asArray(mc.e2e).length-1)],locale),
+    text(mc.war?.fix,locale)
+  ].filter(Boolean) };
+}
+
+function getActivity(skill, locale='es') {
+  const mc = MASTERCLASS[skill.id];
+  const type = activityType(skill.id);
+  const base = { type, label:text(LABELS[type],locale), mc };
+  if (!mc) return { ...base, unavailable:true };
+  if (type==='journal') return { ...base, lines:JOURNALS[skill.id] || [['Cuenta de origen','Debe','1000,00'],['Contrapartida','Haber','1000,00']] };
+  if (type==='config') return { ...base, ...configSpec(skill,mc,locale) };
+  if (type==='simulator') return { ...base, ...simulatorSpec(skill,mc,locale) };
+  if (type==='forensic') return { ...base, ...forensicSpec(skill,mc,locale) };
+  if (type==='bughunt') return { ...base, ...bughuntSpec(skill,mc,locale) };
+  return { ...base, ...consequenceSpec(skill,mc,locale) };
+}
+
+const ACTIVITY_COUNTS = Object.freeze(Array.from({length:9},(_,l)=>Array.from({length:8},(_,i)=>activityType(`SYN-SK-L${l}-${String(i+1).padStart(2,'0')}`))).flat().reduce((a,t)=>(a[t]=(a[t]||0)+1,a),{}));
+
+
 // content.mjs v2 — Agregador del curriculum completo + decisiones interactivas v2.
 
 
@@ -4996,6 +5099,9 @@ function nextReviewDate(correctStreak, from = new Date()) {
 // app.mjs v2 — Motor entender-primero con visualizaciones SVG y evaluación 4 pasos.
 
 
+
+
+
 const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
 const VIEWS = ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'review', 'evidence'];
 
@@ -5020,6 +5126,7 @@ function createInitialState(saved = {}) {
     selectedSkillId: saved.selectedSkillId || 'SYN-SK-L0-01',
     skillMode: saved.skillMode === 'prove' ? 'prove' : 'learn',
     assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false,
+    activityAnswers: {}, activitySequence: [], activityFeedback: null,
     levelFilter: saved.levelFilter ?? 'all',
     trackFilter: saved.trackFilter || 'all',
     assessmentResult: null,
@@ -5042,8 +5149,17 @@ function reduceState(state, action) {
     case 'SET_LOCALE': return ['es', 'en', 'de'].includes(action.locale) ? { ...state, locale: action.locale, toast: '' } : state;
     case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
     case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
-    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, toast: '' };
-    case 'SET_SKILL_MODE': return { ...state, skillMode: action.mode === 'prove' ? 'prove' : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null };
+    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, toast: '' };
+    case 'SET_SKILL_MODE': return { ...state, skillMode: action.mode === 'prove' ? 'prove' : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null };
+    case 'ACTIVITY_ANSWER': return { ...state, activityAnswers: { ...state.activityAnswers, [action.key]: action.value }, activityFeedback: null };
+    case 'ACTIVITY_TOGGLE': {
+      const selected = Boolean(state.activityAnswers[action.key]);
+      return { ...state, activityAnswers: { ...state.activityAnswers, [action.key]: !selected }, activityFeedback: null };
+    }
+    case 'ACTIVITY_SEQUENCE': return { ...state, activitySequence: [...state.activitySequence, action.value], activityFeedback: null };
+    case 'ACTIVITY_SEQUENCE_UNDO': return { ...state, activitySequence: state.activitySequence.slice(0, -1), activityFeedback: null };
+    case 'ACTIVITY_FEEDBACK': return { ...state, activityFeedback: { correct: action.correct, message: action.message }, assessmentResult: { correct: action.correct } };
+    case 'RESET_ACTIVITY': return { ...state, activityAnswers: {}, activitySequence: [], activityFeedback: null, assessmentResult: null };
     case 'ANSWER_STEP_DECIDE': return { ...state, assessmentChoice: action.index, assessmentStep: Math.max(state.assessmentStep, 1) };
     case 'ANSWER_STEP_PRINCIPLE': return { ...state, assessmentPrinciple: action.index, assessmentStep: Math.max(state.assessmentStep, 2) };
     case 'REVEAL_REASONING': return { ...state, assessmentShown: true, assessmentStep: 3 };
@@ -5418,37 +5534,69 @@ function renderLearnMode(state, skill) {
   </div>`;
 }
 
+function activityInstructions(type, locale) {
+  const all = {
+    simulator:{es:'Completa los campos editables de la ventana. No memorices: interpreta el documento.',en:'Complete the editable fields. Interpret the document; do not guess.',de:'Fülle die bearbeitbaren Felder aus. Interpretiere den Beleg.'},
+    bughunt:{es:'Audita la evidencia y marca únicamente la anomalía que explica el incidente.',en:'Audit the evidence and mark only the anomaly that explains the incident.',de:'Prüfe die Evidenz und markiere nur die ursächliche Anomalie.'},
+    journal:{es:'Construye el asiento: asigna Debe/Haber e importe. El total debe cuadrar.',en:'Build the journal: assign Debit/Credit and amount. Totals must balance.',de:'Erstelle den Buchungssatz: Soll/Haben und Betrag. Summen müssen stimmen.'},
+    forensic:{es:'Sigue la cadena documental y señala exactamente el eslabón roto.',en:'Trace the document chain and identify the exact broken link.',de:'Verfolge die Belegkette und finde das gebrochene Glied.'},
+    consequence:{es:'Ordena la cascada real: causa → impacto → respuesta segura.',en:'Order the real cascade: cause → impact → safe response.',de:'Ordne die Kaskade: Ursache → Auswirkung → sichere Reaktion.'},
+    config:{es:'Construye la ruta exacta de configuración. Sobran opciones.',en:'Build the exact configuration path. Some options are decoys.',de:'Baue den exakten Konfigurationspfad. Einige Optionen sind Ablenkungen.'}
+  };
+  return all[type]?.[locale] || all[type]?.es || '';
+}
+
+function renderActivityBody(state, activity) {
+  const A = state.activityAnswers || {};
+  if (activity.type === 'simulator') return `<div class="act-form">${activity.targets.map((f,i)=>`<label><strong>${escapeHtml(f.label)}</strong><select class="form-select" data-activity-input="sim-${i}"><option value="">— Selecciona —</option>${f.options.map(v=>`<option value="${escapeHtml(v)}"${A[`sim-${i}`]===v?' selected':''}>${escapeHtml(v)}</option>`).join('')}</select></label>`).join('')}</div>`;
+  if (activity.type === 'bughunt') return `<div class="act-evidence">${activity.clues.map((c,i)=>`<button type="button" class="act-clue${A[`clue-${i}`]?' is-marked':''}" data-action="activity-toggle" data-key="clue-${i}"><span>${A[`clue-${i}`]?'⚑':'○'}</span>${escapeHtml(c.label)}</button>`).join('')}</div>`;
+  if (activity.type === 'forensic') return `<div class="act-chain">${activity.evidence.map((e,i)=>`<button type="button" class="act-link${A.broken===String(i)?' is-marked':''}" data-action="activity-answer" data-key="broken" data-value="${i}"><span>${i+1}</span>${escapeHtml(e.label)}</button>`).join('<b>→</b>')}</div>`;
+  if (activity.type === 'config') {
+    const sequence = state.activitySequence || [];
+    return `<div class="act-route-built">${sequence.length?sequence.map(x=>`<span>${escapeHtml(x)}</span>`).join('<b>›</b>'):'<em>La ruta aparece aquí…</em>'}</div><div class="act-token-bank">${activity.tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ Deshacer último</button>`;
+  }
+  if (activity.type === 'consequence') {
+    const sequence = state.activitySequence || [];
+    const tokens = [...activity.chain].reverse();
+    return `<div class="act-trigger"><strong>Evento observado</strong><p>${escapeHtml(activity.trigger)}</p></div><div class="act-route-built">${sequence.length?sequence.map((x,i)=>`<span><small>${i+1}</small>${escapeHtml(x)}</span>`).join('<b>→</b>'):'<em>Construye la cascada…</em>'}</div><div class="act-token-bank">${tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ Deshacer último</button>`;
+  }
+  if (activity.type === 'journal') {
+    const amount = v => Number(String(v||'0').replace(/\./g,'').replace(',','.')) || 0;
+    const debit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Debe'?amount(A[`amount-${i}`]):0),0);
+    const credit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Haber'?amount(A[`amount-${i}`]):0),0);
+    const balanced = debit>0 && Math.abs(debit-credit)<.005;
+    return `<div class="act-journal"><div class="act-jhead"><span>Cuenta</span><span>Debe / Haber</span><span>Importe</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(line[0])}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option${A[`side-${i}`]==='Debe'?' selected':''}>Debe</option><option${A[`side-${i}`]==='Haber'?' selected':''}>Haber</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ Debe <output>${debit.toFixed(2).replace('.',',')}</output> · Σ Haber <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?'✓ Cuadrado':'⚠ Diferencia '+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div></div>`;
+  }
+  return '';
+}
+
 function renderProveMode(state, skill) {
-  const challenge = skill.assessment;
-  const step = state.assessmentStep;
-  const choice = state.assessmentChoice;
-  const principle = state.assessmentPrinciple;
-  const shown = state.assessmentShown;
-  const finished = Boolean(state.assessmentResult);
-  const correct = choice === challenge.correct;
-  const principleCorrect = principle === challenge.principleCorrect;
-  const hint = challenge.hints?.[state.locale] || '';
-  return `<div class="sbl-prove">
-    <ol class="sbl-phase" aria-label="progress">
-      <li class="${step >= 0 ? 'is-on' : ''}">${t(state, 'stepDecide')}</li>
-      <li class="${step >= 1 ? 'is-on' : ''}">${t(state, 'stepCommit')}</li>
-      <li class="${step >= 2 ? 'is-on' : ''}">${t(state, 'stepReveal')}</li>
-    </ol>
-    ${step === 0 ? `
-      <h3>${local(challenge.prompt, state.locale)}</h3>
-      ${hint ? `<div class="sbl-hint"><strong>${t(state, 'hintLabel')}:</strong> ${escapeHtml(hint)}</div>` : ''}
-      <div class="sbl-choice-list">${challenge.optionsText[state.locale].map((option, index) => `<button type="button" class="btn" data-action="step-decide" data-index="${index}">${escapeHtml(option)}</button>`).join('')}</div>` : ''}
-    ${step === 1 && challenge.principles ? `
-      <h3>${t(state, 'commitPrinciple')}</h3>
-      <div class="sbl-choice-list">${challenge.principles.map((p, index) => `<button type="button" class="btn" data-action="step-principle" data-index="${index}">${local(p, state.locale)}</button>`).join('')}</div>` : ''}
-    ${step >= 2 ? `
-      ${!finished ? `<button type="button" class="btn btn-primary" data-action="reveal-reasoning" data-skill="${skill.id}" data-correct="${correct}" data-safety="${challenge.safe[choice] ?? true}" data-principle="${principleCorrect}">${t(state, 'stepReveal')}</button>` : ''}
-      ${shown || finished ? `
-        <div class="sbl-answer-feedback" data-correct="${correct}"><strong>${correct ? t(state, 'correct') : t(state, 'incorrect')}</strong>${principleCorrect ? ` <span class="viz-badge">+${t(state, "stepCommit")}</span>` : ''}<p>${local(challenge.why || challenge.rationale, state.locale)}</p></div>
-        ${renderSeniorPanel(state, challenge)}
-        ${renderDistractorPanel(state, { distractorWhy: challenge.distractorWhy })}
-        <button type="button" class="btn" data-action="clear-skill-assessment">${t(state, 'next')}</button>` : ''}` : ''}
-  </div>`;
+  const activity = getActivity(skill, state.locale);
+  const feedback = state.activityFeedback;
+  if (activity.unavailable) return `<p>Actividad en preparación.</p>`;
+  return `<section class="sbl-activity" data-activity-type="${activity.type}">
+    <header class="act-head"><span class="act-icon">${{simulator:'⌨',bughunt:'⌖',journal:'⚖',forensic:'⌕',consequence:'⟿',config:'⚙'}[activity.type]}</span><div><span class="viz-badge">${escapeHtml(activity.label)}</span><h3>${local(skill.title,state.locale)} · ${escapeHtml(activityInstructions(activity.type,state.locale))}</h3></div></header>
+    ${activity.mc?.screen && ['simulator','bughunt','journal','forensic'].includes(activity.type) ? `<div class="act-screen">${b1Window(activity.mc.screen,state.locale)}</div>`:''}
+    ${renderActivityBody(state,activity)}
+    ${feedback?`<div class="act-feedback ${feedback.correct?'is-correct':'is-wrong'}"><strong>${feedback.correct?'✓ Misión resuelta':'↻ Aún no'}</strong><p>${escapeHtml(feedback.message)}</p></div>`:''}
+    <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="check-activity">Comprobar decisión</button><button type="button" class="btn" data-action="reset-activity">Reiniciar</button></div>
+  </section>`;
+}
+
+function validateActivity(state, skill) {
+  const a = getActivity(skill,state.locale), A=state.activityAnswers||{}, seq=state.activitySequence||[];
+  let correct=false, message='Revisa la evidencia y vuelve a intentarlo.';
+  if(a.type==='simulator') correct=a.targets.every((f,i)=>A[`sim-${i}`]===f.expected);
+  if(a.type==='bughunt') correct=a.clues.every((c,i)=>Boolean(A[`clue-${i}`])===Boolean(c.error));
+  if(a.type==='forensic') correct=a.evidence[Number(A.broken)]?.broken===true;
+  if(a.type==='config') correct=JSON.stringify(seq)===JSON.stringify(a.route);
+  if(a.type==='consequence') correct=JSON.stringify(seq)===JSON.stringify(a.chain);
+  if(a.type==='journal') correct=a.lines.every((l,i)=>A[`side-${i}`]===l[1] && String(A[`amount-${i}`]||'').replace(/\s/g,'')===l[2]);
+  if(correct) message=a.resolution || 'Decisión correcta: la evidencia, el control y el resultado son coherentes.';
+  else if(a.type==='journal') message='El asiento no representa correctamente el evento o no cuadra. Comprueba naturaleza de cuenta, lado e importe.';
+  else if(a.type==='config') message='La ruta contiene un nivel incorrecto, falta un nivel o el orden no es el del menú real.';
+  else if(a.type==='consequence') message='Los hechos son correctos, pero la secuencia causal no. Empieza por la causa raíz, no por la solución.';
+  return {correct,message};
 }
 
 function renderSkillDetail(state, skill) {
@@ -5590,6 +5738,18 @@ function mountSapB1Lab(root) {
     if (action === 'nav') dispatch({ type: 'NAVIGATE', view: control.dataset.view });
     else if (action === 'select-skill') dispatch({ type: 'SELECT_SKILL', skillId: control.dataset.skill });
     else if (action === 'set-skill-mode') dispatch({ type: 'SET_SKILL_MODE', mode: control.dataset.mode });
+    else if (action === 'activity-toggle') dispatch({ type: 'ACTIVITY_TOGGLE', key: control.dataset.key });
+    else if (action === 'activity-answer') dispatch({ type: 'ACTIVITY_ANSWER', key: control.dataset.key, value: control.dataset.value });
+    else if (action === 'activity-sequence') dispatch({ type: 'ACTIVITY_SEQUENCE', value: control.dataset.value });
+    else if (action === 'activity-undo') dispatch({ type: 'ACTIVITY_SEQUENCE_UNDO' });
+    else if (action === 'reset-activity') dispatch({ type: 'RESET_ACTIVITY' });
+    else if (action === 'check-activity') {
+      const skill = SKILLS.find(s => s.id === state.selectedSkillId);
+      const alreadyPassed = state.activityFeedback?.correct === true;
+      const result = validateActivity(state, skill);
+      dispatch({ type: 'ACTIVITY_FEEDBACK', ...result });
+      if (result.correct && !alreadyPassed) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
+    }
     else if (action === 'step-decide') dispatch({ type: 'ANSWER_STEP_DECIDE', index: Number(control.dataset.index) });
     else if (action === 'step-principle') dispatch({ type: 'ANSWER_STEP_PRINCIPLE', index: Number(control.dataset.index) });
     else if (action === 'reveal-reasoning') {
@@ -5620,6 +5780,8 @@ function mountSapB1Lab(root) {
   });
 
   root.addEventListener('change', event => {
+    const direct = event.target;
+    if (direct.dataset.activityInput) { dispatch({ type: 'ACTIVITY_ANSWER', key: direct.dataset.activityInput, value: direct.value }); return; }
     const control = event.target.closest('[data-action]');
     if (!control) return;
     if (control.dataset.action === 'locale') dispatch({ type: 'SET_LOCALE', locale: control.value });

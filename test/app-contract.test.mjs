@@ -59,14 +59,13 @@ test('one correct answer cannot master a skill and mastery requires repeated ver
   assert.equal(state.progress[id].streak, 0);
 });
 
-test('skill assessment separates correctness from the safety gate', () => {
+test('practical assessment separates completion from the safety gate', () => {
   let state = createInitialState({ diagnosticCompleted: true, view: 'map', selectedSkillId: 'SYN-SK-L0-01', skillMode: 'prove' });
   state = reduceState(state, { type: 'SET_SKILL_MODE', mode: 'prove' });
-  state = reduceState(state, { type: 'ANSWER_STEP_DECIDE', index: 0 });
-  state = reduceState(state, { type: 'ANSWER_STEP_PRINCIPLE', index: 0 });
-  const html = renderAppMarkup(state);
-  assert.match(html, /data-safety="(true|false)"/);
-  assert.match(html, /data-principle="(true|false)"/);
+  state = reduceState(state, { type: 'ACTIVITY_FEEDBACK', correct: true, message: 'verified' });
+  state = reduceState(state, { type: 'ASSESS_SKILL', skillId: 'SYN-SK-L0-01', correct: true, safetyGatePassed: false });
+  assert.equal(state.progress['SYN-SK-L0-01'].mastered, false);
+  assert.match(renderAppMarkup(state), /data-activity-type=/);
 });
 
 test('different skills render distinct assessment prompts', () => {
