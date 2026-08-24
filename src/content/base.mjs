@@ -118,6 +118,20 @@ const RISK_BY_LEVEL = [1, 2, 2, 2, 3, 3, 2, 3, 3];
 // ex=ejemplo trabajado {q:pregunta, rows:[[debe,haber,importe]...] opcional, show:[líneas con cifras], a:respuesta}.
 export function sk(level, index, spec) {
   const id = `SYN-SK-L${level}-${String(index + 1).padStart(2, '0')}`;
+  const localizedList = value => Array.isArray(value)
+    ? Object.fromEntries(['es', 'en', 'de'].map(locale => {
+        const wrongReasons = value.map(entry => entry?.[locale]).filter(Boolean);
+        const optionCount = spec.a.opts?.[locale]?.length ?? wrongReasons.length;
+        let wrongIndex = 0;
+        return [locale, Array.from({ length: optionCount }, (_, optionIndex) => optionIndex === (spec.a.correct ?? 0)
+          ? spec.a.why?.[locale]
+          : wrongReasons[wrongIndex++]).filter(Boolean)];
+      }))
+    : value;
+  const localizedText = value => value && Object.fromEntries(['es', 'en', 'de'].map(locale => [
+    locale,
+    Array.isArray(value[locale]) ? value[locale].join(' ') : value[locale]
+  ]));
   return {
     id, classification: 'synthetic', level, track: LEVELS[level].track, title: spec.t,
     objective: spec.o, concept: spec.c, mindset: spec.m, practice: spec.p,
@@ -128,7 +142,7 @@ export function sk(level, index, spec) {
       prompt: spec.a.prompt ?? spec.a.p, optionsText: spec.a.opts, correct: spec.a.correct ?? 0,
       safe: [true, true, false], rationale: spec.a.why,
       why: spec.a.why, principles: spec.a.prin, principleCorrect: spec.a.prinOk ?? 0,
-      seniorSteps: spec.a.senior, distractorWhy: spec.a.dwhy, hints: spec.a.hints
+      seniorSteps: spec.a.senior, distractorWhy: localizedList(spec.a.dwhy), hints: localizedText(spec.a.hints)
     },
     riskWeight: spec.rw ?? RISK_BY_LEVEL[level],
     prerequisites: index === 0 && level > 0

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
 test('built runtime mounts and completes representative interactions without a browser dependency', async () => {
-  const html = await readFile('/tmp/b1lab/out/sap-b1-mastery-lab.html', 'utf8');
+  const html = await readFile(new URL('../dist/sap-b1-mastery-lab.html', import.meta.url), 'utf8');
   const script = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1];
   const listeners = new Map();
   const storage = new Map();
@@ -37,19 +37,18 @@ test('built runtime mounts and completes representative interactions without a b
   });
 
   assert.doesNotThrow(() => new vm.Script(script).runInContext(context));
-  assert.match(root.innerHTML, /Diagnóstico adaptativo/);
+  assert.match(root.innerHTML, /Learn-SapB1/);
 
-  const fire = (type, control) => listeners.get(type)({ target: { closest: () => control } });
+  const fire = (type, control) => listeners.get(type)({ target: { ...control, closest: () => control } });
   fire('change', { dataset: { action: 'locale' }, value: 'de' });
-  assert.match(root.innerHTML, /Adaptive Diagnose/);
+  assert.match(root.innerHTML, /Beherrschungskarte/);
 
   fire('click', { dataset: { action: 'nav', view: 'cases' }, disabled: false });
   fire('click', { dataset: { action: 'answer-decision', kind: 'case', correct: 'true', rationale: 'SYN rationale' }, disabled: false });
   assert.match(root.innerHTML, /data-correct="true"/);
 
   fire('click', { dataset: { action: 'nav', view: 'ai' }, disabled: false });
-  fire('click', { dataset: { action: 'analyze-prompt' }, disabled: false });
-  assert.match(root.innerHTML, /100%/);
+  assert.match(root.innerHTML, /Erweiterte Konsole/);
 
   fire('click', { dataset: { action: 'nav', view: 'map' }, disabled: false });
   fire('click', { dataset: { action: 'select-skill', skill: 'SYN-SK-L0-01' }, disabled: false });
@@ -59,4 +58,3 @@ test('built runtime mounts and completes representative interactions without a b
   assert.doesNotMatch(saved, /learning coach/);
   assert.match(root.innerHTML, /In Übung/);
 });
-

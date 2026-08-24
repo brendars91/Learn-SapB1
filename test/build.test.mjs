@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import vm from 'node:vm';
 
-const fragmentPath = '/tmp/b1lab/out/sap-b1-mastery-lab.html';
-const standalonePath = '/tmp/b1lab/out/SAP-Business-One-Mastery-Lab-Standalone.html';
+const fragmentPath = new URL('../dist/sap-b1-mastery-lab.html', import.meta.url);
+const standalonePath = new URL('../dist/SAP-Business-One-Mastery-Lab-Standalone.html', import.meta.url);
 
 test('fragment is a sub-1MiB HTML fragment with scoped root and inline runtime', async () => {
   const html = await readFile(fragmentPath, 'utf8');
   const info = await stat(fragmentPath);
   assert.ok(info.size < 1024 * 1024, `${info.size} bytes`);
-  assert.doesNotMatch(html, /<!doctype|<html|<head|<body/i);
+  assert.doesNotMatch(html, /<!doctype|<(?:html|head|body)\b/i);
   assert.match(html, /id="sap-b1-mastery-lab"/);
   assert.match(html, /<style>[\s\S]+<\/style>/);
   assert.match(html, /<script>[\s\S]+<\/script>/);

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SKILLS, CASES, INCIDENTS, BOSSES } from '/tmp/b1lab/src/content.mjs';
+import { SKILLS, CASES, INCIDENTS, BOSSES } from '../src/content.mjs';
 
 // El test anti-plantilla: si dos skills comparten texto de evaluación, el régimen
 // de generación por plantilla volvió y el contenido se ha degradado.

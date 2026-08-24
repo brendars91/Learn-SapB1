@@ -49,7 +49,7 @@ export const L0 = [
   }),
 
   sk(0, 1, {
-    t: { es: 'Socios de negocio', en: 'Business partners', de: 'Geschäftspartner' },
+    t: { es: 'Socios en el modelo del sistema', en: 'Partners in the system model', de: 'Geschäftspartner im Systemmodell' },
     an: { g: '🪪', es: 'El maestro de socios es la agenda del sistema: cada contacto con DNI fiscal. Si la agenda tiene duplicados, nadie sabe a quién llama.', en: 'The partner master is the system\'s address book: every contact with a tax ID. If the book has duplicates, nobody knows who is being called.' },
     pa: ['Socios de negocio', 'Maestro de socios', 'Crear/Ver duplicados'],
     ex: {
@@ -94,7 +94,7 @@ export const L0 = [
   }),
 
   sk(0, 2, {
-    t: { es: 'Artículos', en: 'Items', de: 'Artikel' },
+    t: { es: 'Artículos en el modelo del sistema', en: 'Items in the system model', de: 'Artikel im Systemmodell' },
     an: { g: '🏷️', es: 'El maestro de artículos es un catálogo de librería: cada libro con su ficha única, ISBN, editorial y precio. Sin ISBN (código), cada cajero inventa el suyo.', en: 'The item master is a bookstore catalogue: each book with one card, ISBN, publisher, price. Without the ISBN (code), every cashier invents their own.' },
     pa: ['Artículos', 'Maestro de artículos', 'Definir grupo/método valoración'],
     ex: {
