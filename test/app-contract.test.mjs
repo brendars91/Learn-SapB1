@@ -118,3 +118,27 @@ test('German console and evidence views contain localized content', () => {
   assert.match(evidence, /Logistik-Lernpfad/);
   assert.doesNotMatch(evidence, /logistics learning path/);
 });
+
+test('English practical mode never leaks Spanish interface labels', () => {
+  const html = renderAppMarkup(createInitialState({ locale: 'en', view: 'map', selectedSkillId: 'SYN-SK-L0-01', skillMode: 'prove' }));
+  for (const leaked of ['Práctica guiada', 'Comprobar', 'Reiniciar', 'Selecciona', 'Misión resuelta', 'Aún no', '¿Qué es esto?', 'Tu tarea', 'Se evalúa']) {
+    assert.doesNotMatch(html, new RegExp(leaked), leaked);
+  }
+  assert.match(html, /Check|Reset/);
+});
+
+test('German learning view never falls back to Spanish or English masterclass copy', () => {
+  const html = renderAppMarkup(createInitialState({ locale: 'de', view: 'map', selectedSkillId: 'SYN-SK-L0-04', skillMode: 'learn' }));
+  for (const leaked of ['Configuración exacta', 'Proceso end-to-end', 'Síntoma', 'Causa raíz', 'Resolución', 'Buenas prácticas senior', 'Real order in OK mode', 'Create delivery']) {
+    assert.doesNotMatch(html, new RegExp(leaked, 'i'), leaked);
+  }
+  assert.match(html, /Vertiefung|Konfiguration|Praxis/);
+});
+
+test('German advanced console does not fall back to Spanish or English prose', () => {
+  const html = renderAppMarkup(createInitialState({ locale: 'de', view: 'ai' }));
+  for (const leaked of ['Back to list', 'Why does it work', 'Customer aging', 'Real B1 SQL', 'Consultas expertas', '¿Por qué funciona?', 'Trampa']) {
+    assert.doesNotMatch(html, new RegExp(leaked, 'i'), leaked);
+  }
+  assert.match(html, /Expertenabfragen|Warum funktioniert das|Stolperstein/);
+});
