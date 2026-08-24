@@ -1,12 +1,12 @@
-// career.mjs — Modo Carrera: la empresa Nordwind Handel GmbH.
+// career.mjs — Modo Carrera: empresa completamente sintética SYN-Nordlicht Demo GmbH.
 // Cada skill dominada resuelve un ticket real; los KPIs de la empresa evolucionan con el usuario.
 
 export const CAREER = {
-  company: { es: 'Nordwind Handel GmbH', en: 'Nordwind Trading Ltd.', de: 'Nordwind Handel GmbH' },
+  company: { es: 'SYN-Nordlicht Demo GmbH', en: 'SYN-Nordlicht Demo Ltd.', de: 'SYN-Nordlicht Demo GmbH' },
   intro: {
-    es: 'Eres el nuevo consultor de Nordwind Handel GmbH. Cada skill que dominas resuelve un ticket real de la empresa y mueve sus KPIs. Tu cargo evoluciona con los tickets cerrados.',
-    en: 'You are Nordwind Trading\'s new consultant. Each mastered skill resolves a real ticket and moves company KPIs. Your title evolves as you close tickets.',
-    de: 'Du bist der neue Berater der Nordwind Handel GmbH. Jede gemeisterte Skill löst ein echtes Ticket und bewegt die KPIs. Deine Rolle wächst mit jedem geschlossenen Ticket.'
+    es: 'Eres el nuevo consultor de la empresa ficticia SYN-Nordlicht Demo GmbH. Cada skill que dominas resuelve un ticket sintético y mueve sus KPIs de aprendizaje. Tu cargo evoluciona con los tickets cerrados.',
+    en: 'You are the new consultant for the fictional SYN-Nordlicht Demo Ltd. Each mastered skill resolves a synthetic ticket and moves its learning KPIs. Your title evolves as you close tickets.',
+    de: 'Du bist der neue Berater des fiktiven Unternehmens SYN-Nordlicht Demo GmbH. Jede gemeisterte Skill löst ein synthetisches Ticket und bewegt die Lern-KPIs. Deine Rolle wächst mit jedem geschlossenen Ticket.'
   },
   roles: [
     { at: 0,  es: 'Becario', en: 'Intern', de: 'Praktikant' },
@@ -33,7 +33,7 @@ export function skillIndexNumber(id) {
 export function departmentFor(level, locale = 'es', levelsMeta) {
   const t = levelsMeta?.[level]?.title;
   const v = t?.[locale] ?? t?.es ?? '';
-  return v || 'Nordwind';
+  return v || 'SYN-Nordlicht';
 }
 
 // Ticket derivado del war story del skill: síntoma → petición del cliente.

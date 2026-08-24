@@ -41,10 +41,10 @@ export const MASTERCLASS = {
 },
 'SYN-SK-L0-02': {
   screen: { title: { es: 'Socios de negocio – Datos maestros', en: 'Business Partners – Master Data' }, tabs: ['General', 'Relaciones', 'Moneda', 'Pagos'], activeTab: 0,
-    header: [['Código', 'C20000', 'sys'], ['Nombre', 'Sonntag Licht AG', 'sys'], ['Tipo', 'Proveedor', 'sys'], ['NIF', 'DE811907980', 'sys'], ['Grupo', 'Local', 'sys'], ['Saldo', '12.480,00', 'lock']],
+    header: [['Código', 'SYN-C20000', 'sys'], ['Nombre', 'SYN-Licht Demo AG', 'sys'], ['Tipo', 'Proveedor', 'sys'], ['NIF', 'SYN-DEMO-TAX', 'sys'], ['Grupo', 'Local', 'sys'], ['Saldo', '12.480,00', 'lock']],
     cols: ['Dirección', 'Calle', 'CP', 'Ciudad', 'País'], rows: [
-      ['Facturación', 'Hauptstr. 14', '51465', 'Bergisch Gladbach', 'DE'],
-      ['Entrega', 'Industriestr. 2', '51465', 'Bergisch Gladbach', 'DE']
+      ['Facturación', 'SYN-Demostrasse 14', '00000', 'Demo-City', 'DE'],
+      ['Entrega', 'SYN-Testweg 2', '00000', 'Demo-City', 'DE']
     ],
     status: ['Modo: Actualizar', 'Conectado a: SBODEMOGE'],
     note: { es: 'Ficha real de socio: los campos blancos/sys son del sistema, los amarillos editables. El código lo asigna B1 por serie.', en: 'Real partner card: white/sys fields are system, yellow editable. Code is assigned by B1 series.' } },
