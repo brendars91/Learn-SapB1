@@ -4,9 +4,10 @@ import { calculateMastery, recommendNext, scanSensitiveInput, lintPrompt, valida
 import { b1Window } from './ui-b1.mjs';
 import { MASTERCLASS } from './masterclass.mjs';
 import { getActivity } from './activities.mjs';
+import { ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS } from './advanced.mjs';
 
 const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
-const VIEWS = ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'review', 'evidence'];
+const VIEWS = ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence'];
 
 export function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, character => ({
@@ -23,13 +24,14 @@ export function createInitialState(saved = {}) {
     progress: saved.progress && typeof saved.progress === 'object' ? structuredClone(saved.progress) : {},
     diagnosticIndex: Number(saved.diagnosticIndex) || 0,
     diagnosticScore: Number(saved.diagnosticScore) || 0,
-    diagnosticCompleted: Boolean(saved.diagnosticCompleted),
+    diagnosticCompleted: saved.diagnosticCompleted === undefined ? true : Boolean(saved.diagnosticCompleted),
     diagnosticFeedback: null,
     recommendedLevel: Number.isInteger(saved.recommendedLevel) ? saved.recommendedLevel : 0,
     selectedSkillId: saved.selectedSkillId || 'SYN-SK-L0-01',
     skillMode: saved.skillMode === 'prove' ? 'prove' : 'learn',
     assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false,
     activityAnswers: {}, activitySequence: [], activityFeedback: null,
+    consoleTab: 'queries', consoleQuery: null, consoleOpen: null,
     levelFilter: saved.levelFilter ?? 'all',
     trackFilter: saved.trackFilter || 'all',
     assessmentResult: null,
@@ -67,6 +69,10 @@ export function reduceState(state, action) {
     case 'ANSWER_STEP_PRINCIPLE': return { ...state, assessmentPrinciple: action.index, assessmentStep: Math.max(state.assessmentStep, 2) };
     case 'REVEAL_REASONING': return { ...state, assessmentShown: true, assessmentStep: 3 };
     case 'SET_LEVEL_FILTER': return { ...state, levelFilter: action.value, toast: '' };
+    case 'SET_CONSOLE_TAB': return ['queries','dashboards','vibe'].includes(action.tab) ? { ...state, consoleTab: action.tab, consoleQuery: null, toast: '' } : state;
+    case 'OPEN_CONSOLE_QUERY': return { ...state, consoleQuery: action.id, toast: '' };
+    case 'CLOSE_CONSOLE_QUERY': return { ...state, consoleQuery: null, toast: '' };
+    case 'TOGGLE_CONSOLE_CARD': return { ...state, consoleOpen: state.consoleOpen === action.id ? null : action.id, toast: '' };
     case 'SET_TRACK_FILTER': return { ...state, trackFilter: action.value, toast: '' };
     case 'ANSWER_DIAGNOSTIC':
       if (state.diagnosticFeedback) return state;
@@ -285,7 +291,7 @@ function renderChrome(state) {
       </div>
     </div>
     <nav class="sbl-nav" aria-label="${escapeHtml(I18N[state.locale].appLabel)}">
-      ${navButton(state, 'home', 'navHome')}${navButton(state, 'map', 'navMap')}${navButton(state, 'cases', 'navCases')}${navButton(state, 'incidents', 'navIncidents')}${navButton(state, 'simulator', 'navSimulator')}${navButton(state, 'ai', 'navAI')}${navButton(state, 'review', 'navReview')}${navButton(state, 'evidence', 'navEvidence')}
+      ${navButton(state, 'home', 'navHome')}${navButton(state, 'map', 'navMap')}${navButton(state, 'cases', 'navCases')}${navButton(state, 'incidents', 'navIncidents')}${navButton(state, 'simulator', 'navSimulator')}${navButton(state, 'ai', 'navAI')}${navButton(state, 'evidence', 'navEvidence')}
     </nav>`;
 }
 
@@ -346,28 +352,44 @@ function progressStats(state) {
 }
 
 function renderHome(state) {
-  if (!state.diagnosticCompleted) return renderDiagnostic(state);
   const stats = progressStats(state);
   const nextSkill = recommendNext(SKILLS, state.progress, new Date(), { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
-  const boss = BOSSES[state.bossIndex];
+  const byTrack = trackId => SKILLS.filter(s => s.track === trackId || s.track === 'dual');
+  const trackPct = list => Math.round(list.filter(s => state.progress[s.id]?.mastered).length / Math.max(1, list.length) * 100);
+  const funcPct = trackPct(byTrack('functional'));
+  const techPct = trackPct(byTrack('dual').concat(byTrack('technical')));
   return `<div class="sbl-stack">
     <section class="sbl-cover">
-      <span class="sbl-kicker">SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS</span>
+      <span class="sbl-kicker">SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · NIVEL EXPERTO</span>
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>
       <div class="viz-grid">
         <div class="card viz-stat"><span class="text-muted">${t(state, 'mastery')}</span><span class="viz-stat-value">${stats.percent}%</span><span class="text-small">${stats.mastered}/72</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
-        <div class="card viz-stat"><span class="text-muted">${t(state, 'dueReview')}</span><span class="viz-stat-value">${stats.due}</span><span class="text-small">${t(state, 'localOnly')}</span></div>
+        <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Funktionale Spur' : state.locale === 'en' ? 'Functional track' : 'Ruta funcional'}</span><span class="viz-stat-value">${funcPct}%</span><span class="text-small">L0-L5</span></div>
+        <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Technische + KI-Spur' : state.locale === 'en' ? 'Technical + AI track' : 'Ruta técnica + IA'}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
+      </div>
+      <div class="sbl-actions">
+        <button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${t(state, 'begin')} · ${local(nextSkill.title, state.locale)}</button>
+        <button type="button" class="btn" data-action="nav" data-view="ai">${state.locale === 'de' ? 'Erweiterte Konsole öffnen' : state.locale === 'en' ? 'Open advanced console' : 'Abrir consola avanzada'}</button>
       </div>
     </section>
     ${renderHeatmap(state)}
-    <section class="card sbl-stack"><span class="viz-badge">${t(state, 'recommended')}</span><h2>${local(nextSkill.title, state.locale)}</h2><p>${local(nextSkill.objective, state.locale)}</p><div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${t(state, 'begin')}</button></div></section>
-    <section class="sbl-stack" aria-labelledby="boss-title"><h2 id="boss-title">${t(state, 'bossTitle')}</h2><div class="sbl-toolbar">${BOSSES.map(item => `<button type="button" class="btn${item.level === state.bossIndex ? ' btn-primary' : ''}" data-action="select-boss" data-index="${item.level}" aria-pressed="${item.level === state.bossIndex}">${t(state, 'level')} ${item.level}</button>`).join('')}</div>${renderDecision(state, boss, 'boss')}</section>
+    ${renderLevelBars(state)}
   </div>`;
 }
 
+function renderLevelBars(state) {
+  return `<section class="card sbl-stack" aria-labelledby="lvl-bars">
+    <h2 id="lvl-bars">${state.locale === 'de' ? 'Fortschritt nach Niveau' : state.locale === 'en' ? 'Progress by level' : 'Progreso por nivel'}</h2>
+    <div class="csl-levelbars">${LEVELS.map(level => {
+      const list = SKILLS.filter(s => s.level === level.id);
+      const pct = Math.round(list.filter(s => state.progress[s.id]?.mastered).length / Math.max(1, list.length) * 100);
+      return `<div class="csl-lvlrow"><span class="csl-lvlname">L${level.id} · ${local(level.title, state.locale)}</span><div class="csl-lvltrack"><div class="csl-lvlfill" style="width:${pct}%"></div></div><span class="csl-lvlpct">${pct}%</span></div>`;
+    }).join('')}</div>
+  </section>`;
+}
 function skillStatus(state, skill) {
   const record = state.progress[skill.id];
   if (record?.mastered) return t(state, 'masteredStatus');
@@ -416,7 +438,6 @@ function renderLearnMode(state, skill) {
   const anHtml = an ? `<div class="sbl-anchor"><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
   return `<div class="sbl-learn">
     ${anHtml}
-    ${svgDiagram(skill.diagram, state.locale)}
     ${renderMasterclass(state, skill)}
     ${pathHtml}
     <div class="sbl-detail-grid">
@@ -572,14 +593,61 @@ function renderEvidence(state) {
   return `<section class="sbl-stack" aria-labelledby="evidence-title"><h2 id="evidence-title">${t(state, 'evidenceTitle')}</h2><div class="table-responsive"><table class="table table-sm"><thead><tr><th>${t(state, 'sourceOfficial')}</th><th>${t(state, 'applicability')}</th><th>${t(state, 'verifiedAt')}</th><th></th></tr></thead><tbody>${EVIDENCE.map(item => `<tr><td>${escapeHtml(item.title)}</td><td>${local(item.applicability, state.locale)}</td><td class="text-nowrap">${escapeHtml(item.verifiedAt)}</td><td><a class="btn" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${t(state, 'openSource')}</a></td></tr>`).join('')}</tbody></table></div></section>`;
 }
 
+function renderConsole(state) {
+  const tab = state.consoleTab || 'queries';
+  const L = state.locale;
+  const loc = v => v?.[L] ?? v?.es ?? '';
+  const open = state.consoleOpen;
+  const tabBtn = (id, label) => `<button type="button" class="btn${tab===id?' btn-primary':''}" data-action="console-tab" data-tab="${id}">${escapeHtml(label)}</button>`;
+  let body = '';
+  if (tab === 'queries') {
+    const sel = ADVANCED_QUERIES.find(q => q.id === state.consoleQuery);
+    if (sel) {
+      body = `<article class="card sbl-stack csl-detail">
+        <div class="csl-toprow"><button type="button" class="btn" data-action="console-close">← ${escapeHtml(loc({es:'Volver a la lista',en:'Back to list'}))}</button>
+        <span class="viz-badge">${sel.engines.join(' · ')}</span></div>
+        <h3>${escapeHtml(loc(sel.domain))}</h3>
+        <p class="csl-ask">${escapeHtml(loc(sel.ask))}</p>
+        <pre class="csl-sql"><code>${escapeHtml(sel.sql)}</code></pre>
+        <div class="csl-why"><strong>¿Por qué funciona?</strong><p>${escapeHtml(loc(sel.why))}</p></div>
+        <div class="csl-pitfall"><strong>⚠️ Trampa</strong><p>${escapeHtml(loc(sel.pitfall))}</p></div>
+      </article>`;
+    } else {
+      body = `<div class="csl-grid">${ADVANCED_QUERIES.map(q => `
+        <button type="button" class="card csl-card" data-action="console-query" data-id="${q.id}">
+          <span class="viz-badge">${q.engines.join(' · ')}</span>
+          <strong>${escapeHtml(loc(q.domain))}</strong>
+          <span class="text-small">${escapeHtml(loc(q.ask).slice(0,90))}…</span>
+        </button>`).join('')}</div>`;
+    }
+  } else if (tab === 'dashboards') {
+    body = DASHBOARD_PATTERNS.map(d => `
+      <article class="card sbl-stack csl-panel">
+        <button type="button" class="csl-toggle" data-action="console-toggle" data-id="${d.id}"><strong>${escapeHtml(loc(d.name))}</strong><span>${open===d.id?'−':'+'}</span></button>
+        ${open===d.id?`<p class="csl-ask">${escapeHtml(loc(d.build))}</p><ol class="csl-steps">${d.how.map(h=>`<li>${escapeHtml(loc(h))}</li>`).join('')}</ol><div class="csl-why"><strong>Nivel</strong><p>${escapeHtml(loc(d.level))}</p></div>`:''}
+      </article>`).join('');
+  } else {
+    body = VIBE_PATTERNS.map(v => `
+      <article class="card sbl-stack csl-panel">
+        <button type="button" class="csl-toggle" data-action="console-toggle" data-id="${v.id}"><strong>${escapeHtml(loc(v.name))}</strong><span>${open===v.id?'−':'+'}</span></button>
+        ${open===v.id?`<p>${escapeHtml(loc(v.idea))}</p><pre class="csl-sql csl-prompt"><code>${escapeHtml(v.template)}</code></pre><ul class="csl-check">${v.check.map(c=>`<li>☐ ${escapeHtml(c)}</li>`).join('')}</ul>`:''}
+      </article>`).join('');
+  }
+  return `<section class="sbl-console" aria-labelledby="console-title">
+    <header class="csl-head"><h2 id="console-title">${escapeHtml(loc({es:'Consola avanzada',en:'Advanced console',de:'Erweiterte Konsole'}))}</h2>
+    <p class="text-small">${escapeHtml(loc({es:'SQL real de SAP B1, dashboards de gestión y vibecoding aplicado. Todo con tablas reales: OINV, JDT1, OITW, ITT1…',en:'Real B1 SQL, management dashboards and applied vibecoding.'}))}</p>
+    <div class="csl-tabs">${tabBtn('queries',loc({es:'Consultas expertas',en:'Expert queries'}))}${tabBtn('dashboards',loc({es:'Dashboards & KPI',en:'Dashboards & KPI'}))}${tabBtn('vibe',loc({es:'Vibecoding B1',en:'B1 vibecoding'}))}</div></header>
+    ${body}
+  </section>`;
+}
+
 function renderView(state) {
   switch (state.view) {
     case 'map': return renderMap(state);
     case 'cases': return `<div class="sbl-stack"><h2>${t(state, 'caseLabTitle')}</h2>${renderDecision(state, CASES[state.caseIndex], 'case')}</div>`;
     case 'incidents': return `<div class="sbl-stack"><h2>${t(state, 'incidentTitle')}</h2>${renderDecision(state, INCIDENTS[state.incidentIndex], 'incident')}</div>`;
     case 'simulator': return renderSimulator(state);
-    case 'ai': return renderAI(state);
-    case 'review': return renderReview(state);
+    case 'ai': return renderConsole(state);
     case 'evidence': return renderEvidence(state);
     default: return renderHome(state);
   }
@@ -641,6 +709,10 @@ export function mountSapB1Lab(root) {
     if (action === 'nav') dispatch({ type: 'NAVIGATE', view: control.dataset.view });
     else if (action === 'select-skill') dispatch({ type: 'SELECT_SKILL', skillId: control.dataset.skill });
     else if (action === 'set-skill-mode') dispatch({ type: 'SET_SKILL_MODE', mode: control.dataset.mode });
+    else if (action === 'console-tab') dispatch({ type: 'SET_CONSOLE_TAB', tab: control.dataset.tab });
+    else if (action === 'console-query') dispatch({ type: 'OPEN_CONSOLE_QUERY', id: control.dataset.id });
+    else if (action === 'console-close') dispatch({ type: 'CLOSE_CONSOLE_QUERY' });
+    else if (action === 'console-toggle') dispatch({ type: 'TOGGLE_CONSOLE_CARD', id: control.dataset.id });
     else if (action === 'activity-toggle') dispatch({ type: 'ACTIVITY_TOGGLE', key: control.dataset.key });
     else if (action === 'activity-answer') dispatch({ type: 'ACTIVITY_ANSWER', key: control.dataset.key, value: control.dataset.value });
     else if (action === 'activity-sequence') dispatch({ type: 'ACTIVITY_SEQUENCE', value: control.dataset.value });

@@ -34,17 +34,19 @@ const mcd4 = await readFile(path.join(projectRoot, 'src/masterclass-data-4.mjs')
 const mcd5 = await readFile(path.join(projectRoot, 'src/masterclass-data-5.mjs'), 'utf8');
 const mcd6 = await readFile(path.join(projectRoot, 'src/masterclass-data-6.mjs'), 'utf8');
 const activities = await readFile(path.join(projectRoot, 'src/activities.mjs'), 'utf8');
+const advanced = await readFile(path.join(projectRoot, 'src/advanced.mjs'), 'utf8');
 const activitiesCss = await readFile(path.join(projectRoot, 'src/activities.css'), 'utf8');
+const consoleCss = await readFile(path.join(projectRoot, 'src/console.css'), 'utf8');
 
 const strip = source => source
   .replace(/^import[^;]+;\s*$/gm, '')
   .replace(/^export\s+/gm, '');
 
-const contentBundle = [base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, contentSource].map(strip).join('\n\n');
+const contentBundle = [base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, advanced, contentSource].map(strip).join('\n\n');
 const uib1Css = await readFile(path.join(projectRoot, 'src/ui-b1.css'), 'utf8');
 const runtime = [contentBundle, strip(domainSource), strip(appSource)].join('\n\n');
 
-const fragment = `${shell.trim()}\n<style>\n${styles.trim()}\n${uib1Css.trim()}\n${activitiesCss.trim()}\n</style>\n<script>\n(() => {\n'use strict';\n${runtime}\nconst sapB1LabRoot = document.getElementById('sap-b1-mastery-lab');\nmountSapB1Lab(sapB1LabRoot);\n})();\n</script>\n`;
+const fragment = `${shell.trim()}\n<style>\n${styles.trim()}\n${uib1Css.trim()}\n${activitiesCss.trim()}\n${consoleCss.trim()}\n</style>\n<script>\n(() => {\n'use strict';\n${runtime}\nconst sapB1LabRoot = document.getElementById('sap-b1-mastery-lab');\nmountSapB1Lab(sapB1LabRoot);\n})();\n</script>\n`;
 
 const standalone = `<!doctype html>
 <html lang="es">

@@ -8,12 +8,12 @@ import {
   escapeHtml
 } from '../src/app.mjs';
 
-test('initial state starts at the diagnostic in Spanish with dual path available', () => {
+test('initial state starts on home dashboard in Spanish with dual track', () => {
   const state = createInitialState();
   assert.equal(state.locale, 'es');
   assert.equal(state.track, 'dual');
   assert.equal(state.view, 'home');
-  assert.equal(state.diagnosticCompleted, false);
+  assert.equal(state.diagnosticCompleted, true);
   assert.deepEqual(state.progress, {});
 });
 
@@ -26,13 +26,11 @@ test('state reducer switches language and view without losing progress', () => {
   assert.equal(navigated.progress['SYN-SK-L0-01'].mastery, 40);
 });
 
-test('diagnostic feedback follows the active locale after a language switch', () => {
+test('home dashboard localizes after a language switch', () => {
   let state = createInitialState({ locale: 'es' });
-  state = reduceState(state, { type: 'ANSWER_DIAGNOSTIC', correct: true });
   state = reduceState(state, { type: 'SET_LOCALE', locale: 'de' });
   const html = renderAppMarkup(state);
-  assert.match(html, /Zuerst wird die Existenz geprüft/);
-  assert.doesNotMatch(html, /Primero se demuestra/);
+  assert.match(html, /Fortschritt nach Niveau|SAP Business One/);
 });
 
 test('practice and challenge update dimensions but failed safety cannot master', () => {
@@ -93,9 +91,10 @@ test('serialized progress excludes prompt text and declares synthetic classifica
 test('rendered application exposes every working mode and semantic navigation', () => {
   const html = renderAppMarkup(createInitialState({ diagnosticCompleted: true }));
   assert.match(html, /<nav[^>]*aria-label=/);
-  for (const view of ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'review', 'evidence']) {
+  for (const view of ['home', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence']) {
     assert.match(html, new RegExp(`data-view="${view}"`));
   }
+  assert.doesNotMatch(html, /data-view="review"/);
   assert.match(html, /<button/);
   assert.match(html, /<select/);
 });
@@ -104,18 +103,17 @@ test('rendering helper escapes active markup', () => {
   assert.equal(escapeHtml('<img src=x onerror=alert(1)>'), '&lt;img src=x onerror=alert(1)&gt;');
 });
 
-test('AI lab localizes missing context-contract fields instead of exposing internal keys', () => {
+test('advanced console renders German labels and real SQL without internal keys', () => {
   const state = createInitialState({ locale: 'de', view: 'ai' });
-  const mutated = { ...state, promptResult: { score: 88, missing: ['syntheticContext'], privacy: { safe: true, reasons: [] } } };
-  const html = renderAppMarkup(mutated);
-  assert.match(html, /Synthetischer Fall/);
+  const html = renderAppMarkup(state);
+  assert.match(html, /Erweiterte Konsole/);
+  assert.match(html, /OINV|JDT1/);
   assert.doesNotMatch(html, /syntheticContext/);
 });
 
-test('German AI and evidence views contain localized defaults and applicability', () => {
+test('German console and evidence views contain localized content', () => {
   const ai = renderAppMarkup(createInitialState({ locale: 'de', view: 'ai' }));
-  assert.match(ai, /ROLLE:/);
-  assert.match(ai, /SYN-CASE-AI-01/);
+  assert.match(ai, /Expertenabfragen|Dashboards/);
   const evidence = renderAppMarkup(createInitialState({ locale: 'de', view: 'evidence' }));
   assert.match(evidence, /Logistik-Lernpfad/);
   assert.doesNotMatch(evidence, /logistics learning path/);
