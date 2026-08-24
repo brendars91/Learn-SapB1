@@ -20,10 +20,10 @@ jobs:
           node-version: '22'
       - name: Apply deterministic standalone locale patch
         run: node scripts/enforce-strict-locale.mjs
-      - name: Run tests
-        run: npm test
       - name: Build offline standalone
         run: npm run build
+      - name: Run tests
+        run: npm test
       - name: Verify generated offline artifacts
         run: |
           test -s dist/SAP-Business-One-Mastery-Lab-Standalone.html

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
 test('built runtime mounts and completes representative interactions without a browser dependency', async () => {
-  const html = await readFile('/tmp/b1lab/out/sap-b1-mastery-lab.html', 'utf8');
+  const html = await readFile(new URL('../dist/sap-b1-mastery-lab.html', import.meta.url), 'utf8');
   const script = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1];
   const listeners = new Map();
   const storage = new Map();
@@ -59,4 +59,3 @@ test('built runtime mounts and completes representative interactions without a b
   assert.doesNotMatch(saved, /learning coach/);
   assert.match(root.innerHTML, /In Übung/);
 });
-
