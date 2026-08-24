@@ -6,7 +6,7 @@
 
 🇪🇸 [Español](#español) · 🇬🇧 [English](#english)
 
-[![tests](https://img.shields.io/badge/tests-38%2F38%20PASS-brightgreen)](#verificación) [![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/archivo-%3C1%20MiB-orange)](#cómo-usarla)
+[![tests](https://img.shields.io/badge/tests-43%2F43%20PASS-brightgreen)](#verificación) [![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/archivo-%3C1%20MiB-orange)](#cómo-usarla)
 
 ### ➡️ [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/)
 
@@ -57,8 +57,9 @@ Herramienta de estudio **personal, offline y sin cuentas** para aprender SAP Bus
 ### Verificación
 
 ```
-node --test test/*.test.mjs   →  38/38 PASS
+node --test test/*.test.mjs   →  43/43 PASS
 node scripts/build.mjs        →  reconstruye el standalone desde src/
+npm run test:browser:local    →  recorre vistas y 72 skills × 3 modos en Chromium
 ```
 
 Incluye test **anti-plantilla**: falla si dos competencias vuelven a compartir texto de evaluación (garantiza autoría única por skill).
@@ -117,8 +118,9 @@ Synthetic-only data (`SYN-*`), progress stays in your browser's `localStorage`, 
 ### Verification
 
 ```
-node --test test/*.test.mjs   →  38/38 PASS
+node --test test/*.test.mjs   →  43/43 PASS
 node scripts/build.mjs        →  rebuilds the standalone from src/
+npm run test:browser:local    →  exercises views and 72 skills × 3 modes in Chromium
 ```
 
 Includes an **anti-template test**: fails if two skills ever share assessment text again.

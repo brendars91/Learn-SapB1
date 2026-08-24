@@ -7,7 +7,7 @@
 <style>
   :root { color-scheme: light; }
   body { margin: 0; min-height: 100vh; background: #efe7d5; color: #1f1a13; font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif; }
-  .page { max-width: 1180px; margin: 0 auto; padding: clamp(.6rem, 2vw, 1.4rem); }
+  .page { box-sizing: border-box; width: 100%; max-width: 1180px; margin: 0 auto; padding: clamp(.6rem, 2vw, 1.4rem); }
 </style>
 </head>
 <body>
@@ -54,7 +54,9 @@
   font-family: var(--serif);
   font-size: var(--step-0);
   line-height: 1.55;
+  box-sizing: border-box;
   width: 100%;
+  min-width: 0;
   padding: clamp(0.75rem, 2vw, 2rem);
   border-radius: 0;                     /* editorial: sharp */
 }
@@ -717,7 +719,7 @@ const EVIDENCE = [
   { id: 'EV-SDK', sourceType: 'official', title: 'SAP Business One SDK Help', url: 'https://help.sap.com/doc/089315d8d0f8475a9fc84fb919b501a3/10.0/en-US/SDKHelp/index.html', verifiedAt: '2026-08-23', applicability: { es: 'SAP Business One 10.0; tablas, DI API y UI API', en: 'SAP Business One 10.0; database tables, DI API, and UI API', de: 'SAP Business One 10.0; Datenbanktabellen, DI API und UI API' }, confidence: 'high' },
   { id: 'EV-SERVICE-LAYER', sourceType: 'official', title: 'Service Layer API Reference', url: 'https://help.sap.com/doc/056f69366b5345a386bb8149f1700c19/10.0/en-US/Service%20Layer%20API%20Reference.html', verifiedAt: '2026-08-23', applicability: { es: 'SAP Business One 10.0; OData v4 como protocolo principal desde FP 2405', en: 'SAP Business One 10.0; OData v4 as primary protocol from FP 2405', de: 'SAP Business One 10.0; OData v4 als primäres Protokoll ab FP 2405' }, confidence: 'high' },
   { id: 'EV-SERVICE-LAYER-GUIDE', sourceType: 'official', title: 'Working with SAP Business One Service Layer 1.28', url: 'https://help.sap.com/doc/fc2f5477516c404c8bf9ad1315a17238/10.0/en-US/Working_with_SAP_Business_One_Service_Layer.pdf', verifiedAt: '2026-08-23', applicability: { es: 'SAP Business One 10.0; guía oficial versión 1.28 (2026-01-07); CRUD, lotes, UDO, capa semántica', en: 'SAP Business One 10.0; official guide version 1.28 (2026-01-07); CRUD, batches, UDOs, semantic layer', de: 'SAP Business One 10.0; offizielle Leitfaden-Version 1.28 (07.01.2026); CRUD, Chargen, UDO, semantische Schicht' }, confidence: 'high' },
-  { id: 'EV-CRYSTAL', sourceType: 'official', title: 'How to Work with SAP Crystal Reports in SAP Business One', url: 'https://help.sap.com/doc/eb06711f528a49edb523234fe48192d8/10.0/en-US/How_to_Work_with_SAP_Crystal_Reports_in_SAP_Business_One.pdf', verifiedAt: '2026-08-23', applicability: { es: 'SAP Business One 10.0; integración y flujos de informes Crystal', en: 'SAP Business One 10.0; Crystal Reports integration and report workflows', de: 'SAP Business One 10.0; Crystal-Reports-Integration und Berichtsabläufe' }, confidence: 'high' }
+  { id: 'EV-CRYSTAL', sourceType: 'official', title: 'How to Work with SAP Crystal Reports in SAP Business One — Document Version 1.9 (2026-08-12)', url: 'https://help.sap.com/doc/eb06711f528a49edb523234fe48192d8/10.0/en-US/How_to_Work_with_SAP_Crystal_Reports_in_SAP_Business_One.pdf', verifiedAt: '2026-08-24', applicability: { es: 'SAP Business One 10.0; guía oficial v1.9 para integración y flujos de informes Crystal', en: 'SAP Business One 10.0; official v1.9 guide for Crystal Reports integration and workflows', de: 'SAP Business One 10.0; offizieller Leitfaden v1.9 für Crystal-Reports-Integration und Abläufe' }, confidence: 'high' }
 ];
 
 // Constructor de decisión interactiva (casos, incidentes, bosses). v2 añade
@@ -737,14 +739,14 @@ const PROCESS_STEPS = {
   sales: [
     { id: 'SYN-PROC-S-1', labels: { es: 'Oferta', en: 'Quotation', de: 'Angebot' }, checks: { es: ['Validez', 'Precios y descuentos'], en: ['Validity', 'Prices and discounts'], de: ['Gültigkeit', 'Preise und Rabatte'] }, effects: { stock: { es: 'Ninguno (no compromete)', en: 'None (no commitment)', de: 'Keiner (keine Bindung)' }, accounting: { es: 'Sin asiento', en: 'No journal entry', de: 'Keine Buchung' }, balance: { es: 'Sin efecto', en: 'No effect', de: 'Kein Effekt' } } },
     { id: 'SYN-PROC-S-2', labels: { es: 'Pedido', en: 'Sales order', de: 'Kundenauftrag' }, checks: { es: ['Fechas', 'Cantidades abiertas'], en: ['Dates', 'Open quantities'], de: ['Termine', 'Offene Mengen'] }, effects: { stock: { es: 'Comprometido (committed)', en: 'Committed', de: 'Reserviert' }, accounting: { es: 'Sin asiento', en: 'No journal entry', de: 'Keine Buchung' }, balance: { es: 'Sin efecto', en: 'No effect', de: 'Kein Effekt' } } },
-    { id: 'SYN-PROC-S-3', labels: { es: 'Entrega', en: 'Delivery', de: 'Lieferung' }, checks: { es: ['Almacén', 'Stock disponible'], en: ['Warehouse', 'Available stock'], de: ['Lager', 'Verfügbarer Bestand'] }, effects: { stock: { es: 'Sale (-)', en: 'Out (-)', de: 'Abgang (-)' }, accounting: { es: 'Coste de ventas (COGS)', en: 'Cost of goods sold', de: 'Wareneinsatz' }, balance: { es: 'Sin efecto', en: 'No effect', de: 'Kein Effekt' } } },
+    { id: 'SYN-PROC-S-3', labels: { es: 'Entrega', en: 'Delivery', de: 'Lieferung' }, checks: { es: ['Almacén', 'Stock disponible'], en: ['Warehouse', 'Available stock'], de: ['Lager', 'Verfügbarer Bestand'] }, effects: { stock: { es: 'Salida (-)', en: 'Out (-)', de: 'Abgang (-)' }, accounting: { es: 'Coste de ventas, si aplica inventario permanente', en: 'Cost of goods sold under perpetual inventory', de: 'Wareneinsatz bei permanenter Bestandsführung' }, balance: { es: 'Sin efecto en saldo de cliente', en: 'No customer-balance effect', de: 'Keine Auswirkung auf Debitorensaldo' } } },
     { id: 'SYN-PROC-S-4', labels: { es: 'Factura', en: 'Invoice', de: 'Rechnung' }, checks: { es: ['Base-destino', 'Impuestos'], en: ['Base-target link', 'Taxes'], de: ['Basis-Ziel-Bezug', 'Steuern'] }, effects: { stock: { es: 'Ninguno adicional', en: 'None additional', de: 'Kein weiterer' }, accounting: { es: 'Cliente + ingresos + IVA', en: 'Receivables + revenue + VAT', de: 'Debitor + Erlös + USt' }, balance: { es: 'Aumenta saldo del cliente', en: 'Raises customer balance', de: 'Erhöht Debitorsaldo' } } },
-    { id: 'SYN-PROC-S-5', labels: { es: 'Cobro', en: 'Incoming payment', de: 'Eingangszahlung' }, checks: { es: ['Cuenta bancaria', 'Medio de pago'], en: ['Bank account', 'Payment means'], de: ['Bankkonto', 'Zahlungsart'] }, effects: { stock: { es: 'Ninguno', en: 'None', de: 'Keiner' }, accounting: { es: 'Banco + contra cliente', en: 'Bank + against customer', de: 'Bank + gegen Debitor' }, balance: { es: 'Reduce saldo; cierra la factura', en: 'Reduces balance; closes invoice', de: 'Reduziert Saldo; schließt Rechnung' } } }
+    { id: 'SYN-PROC-S-5', labels: { es: 'Cobro', en: 'Incoming payment', de: 'Eingangszahlung' }, checks: { es: ['Cuenta bancaria', 'Medio de pago'], en: ['Bank account', 'Payment means'], de: ['Bankkonto', 'Zahlungsart'] }, effects: { stock: { es: 'Ninguno', en: 'None', de: 'Keiner' }, accounting: { es: 'Banco + contra cliente', en: 'Bank + against customer', de: 'Bank + gegen Debitor' }, balance: { es: 'Reduce saldo; cierra la factura si se aplica por completo', en: 'Reduces balance; closes the invoice when fully applied', de: 'Reduziert Saldo; schließt die Rechnung bei vollständiger Zuordnung' } } }
   ],
   purchase: [
     { id: 'SYN-PROC-P-1', labels: { es: 'Solicitud', en: 'Purchase request', de: 'Bestellanforderung' }, checks: { es: ['Autorizador', 'Necesidad real'], en: ['Approver', 'Real need'], de: ['Prüfer', 'Echter Bedarf'] }, effects: { stock: { es: 'Ninguno', en: 'None', de: 'Keiner' }, accounting: { es: 'Sin asiento', en: 'No journal entry', de: 'Keine Buchung' }, balance: { es: 'Sin efecto', en: 'No effect', de: 'Kein Effekt' } } },
     { id: 'SYN-PROC-P-2', labels: { es: 'Pedido', en: 'Purchase order', de: 'Bestellung' }, checks: { es: ['Proveedor', 'Precios y condiciones'], en: ['Supplier', 'Prices and terms'], de: ['Lieferant', 'Preise und Konditionen'] }, effects: { stock: { es: 'Pedido entrante', en: 'Ordered inbound', de: 'Bestellt' }, accounting: { es: 'Sin asiento', en: 'No journal entry', de: 'Keine Buchung' }, balance: { es: 'Sin efecto', en: 'No effect', de: 'Kein Effekt' } } },
-    { id: 'SYN-PROC-P-3', labels: { es: 'Entrada de mercancía', en: 'Goods receipt', de: 'Warenausgang' }, checks: { es: ['Cantidades', 'Almacén'], en: ['Quantities', 'Warehouse'], de: ['Mengen', 'Lager'] }, effects: { stock: { es: 'Entrada (+)', en: 'In (+)', de: 'Zugang (+)' }, accounting: { es: 'Stock + tránsito/proveedor', en: 'Inventory + GR/IR', de: 'Bestand + Wareneingang' }, balance: { es: 'Sin efecto hasta factura', en: 'No effect until invoice', de: 'Kein Effekt bis Rechnung' } } },
+    { id: 'SYN-PROC-P-3', labels: { es: 'Entrada de mercancía', en: 'Goods receipt PO', de: 'Wareneingang' }, checks: { es: ['Cantidades', 'Almacén'], en: ['Quantities', 'Warehouse'], de: ['Mengen', 'Lager'] }, effects: { stock: { es: 'Entrada (+)', en: 'In (+)', de: 'Zugang (+)' }, accounting: { es: 'Stock + cuenta puente, si aplica inventario permanente', en: 'Inventory + clearing account under perpetual inventory', de: 'Bestand + Verrechnungskonto bei permanenter Bestandsführung' }, balance: { es: 'Sin saldo de proveedor hasta factura', en: 'No supplier balance until invoice', de: 'Kein Kreditorsaldo bis zur Rechnung' } } },
     { id: 'SYN-PROC-P-4', labels: { es: 'Factura de proveedor', en: 'Supplier invoice', de: 'Lieferantenrechnung' }, checks: { es: ['Conciliación con entrada', 'Impuestos'], en: ['Match with receipt', 'Taxes'], de: ['Abgleich mit Eingang', 'Steuern'] }, effects: { stock: { es: 'Ninguno adicional', en: 'None additional', de: 'Kein weiterer' }, accounting: { es: 'Proveedor + compras + IVA soportado', en: 'Payables + purchases + input VAT', de: 'Kreditor + Einkauf + VSt' }, balance: { es: 'Aumenta saldo del proveedor', en: 'Raises supplier balance', de: 'Erhöht Kreditorsaldo' } } },
     { id: 'SYN-PROC-P-5', labels: { es: 'Pago', en: 'Outgoing payment', de: 'Ausgangszahlung' }, checks: { es: ['Vencimiento', 'Descuentos'], en: ['Due date', 'Discounts'], de: ['Fälligkeit', 'Skonto'] }, effects: { stock: { es: 'Ninguno', en: 'None', de: 'Keiner' }, accounting: { es: 'Banco + contra proveedor', en: 'Bank + against supplier', de: 'Bank + gegen Kreditor' }, balance: { es: 'Reduce saldo; cierra la factura', en: 'Reduces balance; closes invoice', de: 'Reduziert Saldo; schließt Rechnung' } } }
   ],
@@ -826,7 +828,7 @@ const L0 = [
       a: { es: 'Dos historiales parten una relación de 60.000: negocias con datos a la baja y el aging se reparte entre dos fichas.', en: 'Two histories split a 60,000 relationship: you negotiate on understated data and aging splits across two cards.' }
     },
     o: { es: 'Gestionar clientes y proveedores como maestro único con control de duplicados.', en: 'Manage customers and vendors as a single master with duplicate control.', de: 'Kunden und Lieferanten als einheitliches Stammdatenobjekt mit Dublettenkontrolle verwalten.' },
-    c: { es: 'Todo socio tiene una ficha única (código, fiscal, condiciones de pago, cuenta de mayor asociada). Un socio puede ser cliente y proveedor a la vez; el control de duplicados por NIF evita partir su historial en dos. La cuenta contable asociada decide dónde caen sus saldos.', en: 'Every partner has one card (code, tax data, payment terms, linked G/L account). A partner can be customer and vendor simultaneously; duplicate control by tax ID prevents splitting history. The linked account decides where balances land.', de: 'Jeder Geschäftspartner hat eine Karte (Code, Steuerdaten, Zahlungsbedingungen, verknüpftes Sachkonto). Ein Partner kann gleichzeitig Kunde und Lieferant sein; die Dublettenkontrolle per Steuer-ID verhindert geteilte Historien. Das verknüpfte Konto bestimmt, wohin die Salden fallen.' },
+    c: { es: 'Cada ficha de socio tiene un tipo —cliente, proveedor o lead— además de código, datos fiscales, condiciones de pago y cuenta asociada. Una misma entidad jurídica puede operar como cliente y proveedor, pero normalmente se representa mediante registros separados por tipo, gobernados para evitar duplicados accidentales. La cuenta asociada determina dónde se registran sus saldos.', en: 'Each business-partner master record has a type —customer, vendor, or lead— plus code, tax data, payment terms, and a linked account. The same legal entity may trade as both customer and vendor, but is normally represented by separate type-specific records governed to prevent accidental duplicates. The linked account determines where balances are posted.', de: 'Jeder Geschäftspartner-Stammsatz hat einen Typ —Kunde, Lieferant oder Interessent— sowie Code, Steuerdaten, Zahlungsbedingungen und Abstimmkonto. Dieselbe Rechtsperson kann Kunde und Lieferant sein, wird dafür jedoch normalerweise über getrennte typbezogene Stammsätze abgebildet.' },
     m: { es: 'Piensa «una ficha, un socio, un historial».', en: 'Think "one card, one partner, one history".', de: 'Denke „eine Karte, ein Partner, eine Historie“.' },
     p: { es: 'Revisa un maestro de socios real: busca duplicados por NIF y fusiona.', en: 'Audit a real partner master: hunt duplicates by tax ID and merge.', de: 'Prüfe echte Stammdaten: suche Dubletten per Steuer-ID und führe sie zusammen.' },
     v: { es: 'Puedes explicar qué rompe un duplicado (aging, ranking, conciliación).', en: 'You can explain what a duplicate breaks (aging, ranking, reconciliation).', de: 'Du kannst erklären, was eine Dublette zerstört (Aging, Ranking, Abstimmung).' },
@@ -2126,7 +2128,7 @@ const L7 = [
       why: { es: 'Service Layer es la vía soportada para integraciones nuevas: REST/OData, servidor, sin el lastre COM de cliente.', en: 'Service Layer is the supported path for new integrations: REST/OData, server-side, without client COM burden.', de: 'Service Layer ist der Weg.' },
       prin: [{ es: 'Lo nuevo en la vía soportada', en: 'New on the supported path' }, { es: 'Lo conocido es lo correcto', en: 'Known = correct' }, { es: 'SQL directo es pragmático', en: 'Direct SQL is pragmatic' }], prinOk: 0,
       senior: [{ es: 'Confirma alcance y entidades necesarias', en: 'Confirm scope and needed entities' }, { es: 'Diseña sobre Service Layer con autenticación dedicada', en: 'Design on Service Layer with dedicated auth' }, { es: 'Planifica idempotencia y errores', en: 'Plan idempotency and errors' }],
-      dwhy: { es: ['DI API ata deployment a Windows/COM y escala en el cliente.', 'SQL directo rompe el contrato de datos y validaciones.', 'Service Layer es la única vía moderna y soportada.'], en: ['DI API binds deployment to Windows/COM and scales client-side.', 'Direct SQL breaks the data contract and validations.', 'Service Layer is the only modern supported path.'], de: ['COM bindet.', 'SQL bricht Vertrag.', 'Nur Service Layer modern.'] },
+      dwhy: { es: ['DI API exige componentes COM/Windows y añade acoplamiento operativo para este escenario web.', 'La escritura SQL directa evita reglas y validaciones de la aplicación y no es una API de integración soportada.', 'Service Layer encaja mejor aquí, aunque DI API continúa soportada para casos con requisitos distintos.'], en: ['DI API requires COM/Windows components and adds operational coupling for this web scenario.', 'Direct SQL writes bypass application rules and validations and are not a supported integration API.', 'Service Layer fits this case better, although DI API remains supported for different requirements.'], de: ['DI API koppelt diesen Web-Fall an COM/Windows.', 'Direktes Schreiben per SQL umgeht Anwendungsregeln.', 'Service Layer passt hier besser; DI API bleibt unterstützt.'] },
       hints: { es: '¿Dónde corre tu integración cuando el volumen se multiplique?' } } }),
   sk(7, 4, { t: { es: 'UI API', en: 'UI API', de: 'UI API' },
     o: { es: 'Extender el cliente de escritorio con UI API donde aporte valor real.', en: 'Extend the desktop client with UI API where it adds real value.', de: 'Desktop erweitern, wo es sich lohnt.' },
@@ -2400,7 +2402,7 @@ const DEEP = {
     show: ['Stock: −30 físicas', 'CMV: 30 × 4,00 = 120,00 al Debe', 'Stock en tránsito/almacén: 120,00 al Haber'],
     a: 'Stock baja 30; asiento CMV 120 contra stock 120. La renta llega con la factura, no con la caja que sale.'
   }],
-  'SYN-SK-L1-03': ['🧾', 'La factura es el acto notarial del ERP: hasta que no se firma, no existe para Hacienda.', 'The invoice is the ERP\'s notarial act: until signed, it does not exist for the tax authority.', 'Ventas › Factura de cliente › Crear desde entrega', {
+  'SYN-SK-L1-03': ['🧾', 'Al añadir la factura, SAP Business One crea el documento definitivo y su contabilización según la configuración; los requisitos fiscales dependen de la localización y la normativa.', 'When the invoice is added, SAP Business One creates the final document and its posting according to configuration; fiscal requirements depend on localization and applicable law.', 'Ventas › Factura de cliente › Crear desde entrega', {
     q: 'Factura 360,00 + IVA 21%. ¿Asiento?',
     show: ['Cliente (Debe): 435,60', 'Ventas (Haber): 360,00', 'IVA repercutido (Haber): 75,60'],
     a: 'Debe Cliente 435,60; Haber Ventas 360 + IVA 75,60. El IVA es deuda con Hacienda desde el minuto uno.'
@@ -2412,7 +2414,7 @@ const DEEP = {
   }],
   'SYN-SK-L1-05': ['🔁', 'La devolución es el espejo: cada documento de retorno refleja su original con signo invertido.', 'A return is the mirror: each return document reflects its original with inverted sign.', 'Ventas › Devolución › Crear desde factura', {
     q: 'Devolución de 10 uds de la venta de 60 a 6,00. ¿Efecto en ventas y stock?',
-    show: ['Ventas: −60,00 (Haber)', 'IVA: −12,60', 'Stock: +10 físicas', 'CMV: −40,00 (a coste original)'],
+    show: ['Ventas: 60,00 (Debe)', 'IVA repercutido: 12,60 (Debe)', 'Stock: +10 físicas', 'CMV: 40,00 (Haber, a coste original)'],
     a: 'Se abona venta 60 + IVA; el stock vuelve al coste ORIGINAL de la capa FIFO, no al precio de venta.'
   }],
   'SYN-SK-L1-06': ['🧮', 'El asiento manual es cirugía: solo cuando la operación documental no puede expresarlo.', 'A manual journal entry is surgery: only when document-driven operation cannot express it.', 'Finanzas › Asiento manual › Crear', {
@@ -2834,11 +2836,11 @@ const MC_BATCH1 = {
   screen: { title: { es: 'Factura de cliente (ventana)', en: 'A/R Invoice (window)' }, tabs: ['Contenido', 'Logística', 'Contabilidad'], activeTab: 2,
     header: [['Nº doc.', '1001-2026', 'sys'], ['Cliente', 'C20000', 'sys'], ['Fecha contable', '23.08.26', 'in'], ['Moneda', 'EUR', 'sys']],
     cols: ['Cuenta', 'D/C', 'Débito', 'Crédito'], numeric: [2, 3], rows: [
-      ['C20000 (Deudores)', 'D', '870,00', ''],
+      ['C20000 (Deudores)', 'D', '871,20', ''],
       ['400000 Ventas', '', '', '720,00'],
-      ['1940 IVA soportado 21%', '', '', '150,20']
+      ['477000 IVA repercutido 21%', '', '', '151,20']
     ],
-    totals: [['Total asiento', '870,20']],
+    totals: [['Total asiento', '871,20']],
     status: ['Asiento generado automáticamente'],
     note: { es: 'Pestaña Contabilidad de la factura: el asiento que B1 genera automáticamente al añadir. D Cliente / H Ventas + IVA.', en: 'Invoice\'s Accounting tab: the journal B1 auto-generates on add. D Customer / H Sales + VAT.' } },
   cfg: [
@@ -2853,11 +2855,11 @@ const MC_BATCH1 = {
   e2e: [
     { es: '1. Factura del 28.08 con fecha contable 30.08: el ingreso pertenece al periodo de agosto aunque el documento diga 7.8.', en: '1. Invoice issued 28.08 with posting date 30.08: revenue belongs to August\'s period even though the document says 7.8.' },
     { es: '2. Aging report construido sobre fecha de vencimiento: moverla mueve la cobranza entre buckets.', en: '2. Aging report builds on due date: moving it moves collections between buckets.' },
-    { asiento: true, es: '3. Asiento: D Cliente 870,20 / H Ventas 720,00 + H IVA 150,20. Cuadra al céntimo.', en: '3. Journal: D Customer 870.20 / H Sales 720.00 + H VAT 150.20. Balances to the cent.' }
+    { asiento: true, es: '3. Asiento: D Cliente 871,20 / H Ventas 720,00 + H IVA repercutido 151,20. Cuadra al céntimo.', en: '3. Journal: D Customer 871.20 / H Sales 720.00 + H output VAT 151.20. Balances to the cent.' }
   ],
   war: { q: { es: 'Cierre de julio: un supervisor mueve la fecha contable de 20 facturas de agosto a julio para "cerrar objetivos".', en: 'July close: a supervisor moves 20 August invoices\' posting dates to July to "hit targets".' },
     sympt: [{ es: 'Julio sobre-cumple, agosto llega con ingresos que no cuadran con entregas.', en: 'July over-performs, August arrives with revenue not matching deliveries.' }],
-    root: [{ es: 'Autorización de "fecha contable" abierta a too muchos perfiles + presión de objetivos.', en: 'Posting-date authorization open to too many profiles + target pressure.' }],
+    root: [{ es: 'Autorización para modificar la fecha contable concedida a demasiados perfiles, unida a presión por objetivos.', en: 'Posting-date authorization open to too many profiles + target pressure.' }],
     fix: [{ es: 'Periodo contable de julio bloqueado (status locking) tras el cierre + auditoría de cambios de fecha contable (change log).', en: 'July fiscal period locked after close + posting-date change audit (change log).' }] },
   bp: [
     { es: 'Nunca usar la fecha de entrega como fecha contable para "adelantar" ingresos.', en: 'Never use the delivery date as posting date to "accelerate" revenue.' },
@@ -2870,7 +2872,7 @@ const MC_BATCH1 = {
     cols: ['Documento', 'Fecha', 'Cantidad', 'Estado'], numeric: [2], rows: [
       ['Pedido 162', '20.08.26', '10', 'Abierto'],
       ['Entrega 5001', '21.08.26', '6', 'Cerrado'],
-      ['Factura 1001-2026', '23.08.28', '6', 'Abierto']
+      ['Factura 1001-2026', '23.08.26', '6', 'Abierto']
     ],
     status: ['Botón "Flujo de documentos" en cualquier documento'],
     note: { es: 'Pantalla de flujo real de B1: desde cualquier documento, el botón recorre toda su cadena madre-hijas.', en: 'Real B1 document flow screen: from any document, the button walks its whole mother-daughters chain.' } },
@@ -2883,7 +2885,7 @@ const MC_BATCH1 = {
     { es: '2. Cantidades abiertas: pedido 10, entregado 6, quedan 4 pendientes.', en: '2. Open quantities: order 10, delivered 6, 4 remain pending.' },
     { es: '3. La factura parcial (6) deja el pedido en estado "Abierto" hasta entregar las 4 restantes.', en: '3. The partial invoice (6) keeps the order "Open" until the remaining 4 are delivered.' }
   ],
-  war: { q: { es: 'Soporle pide: ¿con qué pedido se lleva la factura 1001-2026?', en: 'Support asks: which order does invoice 1001-2026 go with?' },
+  war: { q: { es: 'Soporte pregunta: ¿a qué pedido está vinculada la factura 1001-2026?', en: 'Support asks: which order does invoice 1001-2026 go with?' },
     sympt: [{ es: 'Sin botón de flujo, buscar a mano en tablas ORDR/ODLN/OINV por DocEntry enlazado.', en: 'Without the flow button, manually search ORDR/ODLN/OINV by linked DocEntry.' }],
     root: [{ es: 'Desconocimiento del drilldown: la función existe en TODOS los documentos de marketing.', en: 'Drilldown unawareness: the feature exists on ALL marketing documents.' }],
     fix: [{ es: 'Formación: el flujo de documentos es un clic. La cadena completa, en pantalla.', en: 'Training: document flow is one click. The full chain, on screen.' }] },
@@ -2948,7 +2950,7 @@ const MC_BATCH1 = {
   war: { q: { es: 'Un cliente nuevo facturado sin condiciones de pago.', en: 'A new customer invoiced without payment terms.' },
     sympt: [{ es: 'Facturas con vencimiento inmediato, aging distorsionado, cobros caóticos.', en: 'Invoices with immediate due, distorted aging, chaotic collections.' }],
     root: [{ es: 'Campo de condiciones vacío al alta (permitido por el sistema) + checklist de alta incompleto.', en: 'Empty terms field at create (allowed by the system) + incomplete create checklist.' }],
-    ffex: [{ es: 'Resolución: obligar el campo por Query Manager (validación de transaction) + regularización de las facturas existentes.', en: 'Fix: make the field mandatory via transaction validation + regularize existing invoices.' }],
+
     fix: [{ es: 'Resolución: obligar el campo por validación (TransactionNotification) + regularización de facturas existentes.', en: 'Fix: make the field mandatory via transaction validation + regularize existing invoices.' }] },
   bp: [
     { es: 'Un socio = un NIF. Los duplicados rompen análisis y conciliación.', en: 'One partner = one tax ID. Duplicates break analysis and reconciliation.' },
@@ -3158,11 +3160,11 @@ const MC_BATCH2 = {
     note: { es: 'O2C completo en una ventana: pedido → entrega → factura. El asiento nace al añadir la factura: D Cliente 856,80 / H Ventas 720,00 + H IVA 136,80.', en: 'Full O2C in one window: order → delivery → invoice. The journal is born on invoice add: D Customer 856.80 / H Sales 720.00 + H VAT 136.80.' } },
   cfg: [
     { es: 'La cadena O2C: Pedido (reserva) → Entrega (mueve stock, coste) → Factura (contabiliza) → Cobro (cierra).', en: 'The O2C chain: Order (reserves) → Delivery (moves stock, cost) → Invoice (posts) → Payment (closes).' },
-    { es: 'Factura "con entrega": una sola ventana hace entrega+factura. Rápido pero pierde el eslabón logístico.', en: 'Invoice "with delivery": one window does delivery+invoice. Fast but loses the logistics link.' }
+    { es: 'Factura de clientes directa, sin entrega base: para artículos de inventario puede contabilizar en un solo documento la salida de stock y coste, además de cliente, ingreso e impuesto. Es un flujo abreviado y no crea una entrega independiente.', en: 'Direct A/R invoice without a base delivery: for inventory items it can post stock and cost together with receivables, revenue, and tax in one document. It is an abbreviated flow and does not create a separate delivery.' }
   ],
   e2e: [
     { es: '1. Pedido 162: 10× LED + 5× PIR, total 720,00 neto.', en: '1. Order 162: 10× LED + 5× PIR, total 720.00 net.' },
-    { es: '2. Entrega 5001: 6× LED (parcial). Coste de ventas contabilizado a valoración de coste.', en: '2. Delivery 5001: 6× LED (partial). COGS posted at cost valuation.' },
+    { es: '2. Entrega 5001: 10× LED + 5× PIR, neto 720,00. Coste de ventas contabilizado según la valoración configurada.', en: '2. Delivery 5001: 10× LED + 5× PIR, net 720.00. COGS posted according to the configured valuation.' },
     { es: '3. Factura 1001-2026: D Cliente 856,80 / H Ventas 720,00 / H IVA 136,80 (19% alemán).', en: '3. Invoice 1001-2026: D Customer 856.80 / H Sales 720.00 / H VAT 136.80 (19% German).' },
     { es: '4. Cobro entrante 856,80: D Banco / H Cliente. La factura queda cerrada.', en: '4. Incoming payment 856.80: D Bank / H Customer. Invoice closed.' }
   ],
@@ -3198,11 +3200,11 @@ const MC_BATCH2 = {
     { es: '4. Pago saliente: D Proveedor / H Banco. Cadena P2P cerrada.', en: '4. Outgoing payment: D Vendor / H Bank. P2P chain closed.' }
   ],
   war: { q: { es: 'La cuenta GR/IR lleva meses con saldo creciente.', en: 'The GR/IR account carries a growing balance for months.' },
-    sympt: [{ es: 'GR/IR (bestimmte cuentas de tránsito) sube cada mes: entradas sin factura durante >60 días.', en: 'GR/IR rises monthly: receipts without invoice for >60 days.' }],
+    sympt: [{ es: 'La cuenta puente de mercancías recibidas no facturadas aumenta cada mes: hay entradas pendientes de factura desde hace más de 60 días.', en: 'The goods-received-not-invoiced clearing account rises monthly: some receipts have awaited invoices for more than 60 days.' }],
     root: [{ es: 'Facturas de proveedor que llegan tarde (o se pierden): la mercancía entra, la deuda no se reconoce.', en: 'Late (or lost) vendor invoices: goods enter, debt unrecognized.' }],
     fix: [{ es: 'Informe mensual GR/IR con antigüedad + contacto con proveedores. La cuenta puente es un KPI de proceso, no un error.', en: 'Monthly GR/IR aging report + supplier contact. The bridge is a process KPI, not an error.' }] },
   bp: [
-    { es: 'GR/IR a cero = proceso P2P sano. Cualquier saldo es material sin factura o factura sin material.', en: 'GR/IR at zero = healthy P2P. Any balance is material without invoice or invoice without material.' },
+    { es: 'La antigüedad y conciliación de la cuenta puente son indicadores del proceso P2P; un saldo no es automáticamente un error, pero sí exige explicar entradas, facturas y diferencias pendientes.', en: 'Clearing-account ageing and reconciliation are P2P indicators; a balance is not automatically an error, but pending receipts, invoices, and differences must be explained.' },
     { es: 'El 3-vías: pedido vs entrada vs factura. Cualquier diferencia es una excepción que gestionar.', en: 'The 3-way match: order vs receipt vs invoice. Any difference is an exception to manage.' }
   ]
 },
@@ -3297,7 +3299,7 @@ const MC_BATCH2 = {
     note: { es: 'Pago saliente con asignación a factura de proveedor: D Proveedor / H Banco.', en: 'Outgoing payment assigned to vendor invoice: D Vendor / H Bank.' } },
   cfg: [ { es: 'Finanzas > Pagos > Pago saliente: D Proveedor / H Banco, asignado a facturas concretas.', en: 'Finanzas > Pagos > Pago saliente: D Vendor / H Bank, assigned to specific invoices.' } ],
   e2e: [
-    { es: '1. Pago 571,20 asignado a la factura 7001-2026: D Proveedor / H Banco.', en: '1. Payment 571.20 assigned to invoice 7001-2026: D Vendor / H account.' },
+    { es: '1. Pago 571,20 asignado a la factura 7001-2026: D Proveedor / H Banco.', en: '1. Payment 571.20 assigned to invoice 7001-2026: D Vendor / H Bank.' },
     { es: '2. Factura de proveedor queda cerrada y el compromiso se libera.', en: '2. Vendor invoice closed and commitment released.' },
     { es: '3. Extracto bancario: la línea del extracto concilia contra este pago.', en: '3. Bank statement: the statement line reconciles against this payment.' }
   ],
@@ -3319,7 +3321,7 @@ const MC_BATCH2 = {
     totals: [['Total', '160,00']],
     status: ['Existencias → Traspasos'],
     note: { es: 'Traspaso real: mueve 40 unidades de 01 a 02 a coste 4,00. Sin asiento si ambas cuentas de stock son la misma.', en: 'Real transfer: moves 40 units 01→02 at 4.00 cost. No journal if both stock accounts are the same.' } },
-  cfg: [ { es: 'Existencias > Traspaso de stock: mueve stock entre almacenes a coste. Con "valoration" distinta por almacén, genera asiento.', en: 'Inventory > Stock transfer: moves stock between warehouses at cost. With different per-warehouse valuation, posts a journal.' } ],
+  cfg: [ { es: 'Existencias > Traspaso de stock: mueve stock entre almacenes a coste. Si la determinación contable usa cuentas de inventario distintas por almacén, genera el asiento entre esas cuentas.', en: 'Inventory > Stock Transfer: moves stock between warehouses at cost. If G/L account determination uses different inventory accounts by warehouse, it posts between those accounts.' } ],
   e2e: [
     { es: '1. Traspaso 40× A00001 de 01 a 02 a coste 4,00 = 160,00 de valor movido.', en: '1. Transfer 40× A00001 from 01 to 02 at 4.00 cost = 160.00 value moved.' },
     { es: '2. El stock físico cambia de almacén; el total global queda igual.', en: '2. Physical stock changes warehouse; global total stays equal.' },
@@ -3805,7 +3807,7 @@ const MC_BATCH4 = {
   screen: { title: { es: 'Blueprint – mapa de brechas', en: 'Blueprint – gap map' }, menu: false, tabs: ['General'], activeTab: 0,
     header: [['Proyecto', 'B1 Rollout Mittelstand', 'in'], ['Versión blueprint', '1.2', 'in']],
     cols: ['Requisito', 'Solución B1 estándar', 'Brecha', 'Abordaje'], rows: [
-      ['Facturación electrónica DE (XRechnung)', 'Add-on estándar', 'Ninguna', 'Estándar'],
+      ['Facturación electrónica DE (XRechnung)', 'Validar localización, versión y Electronic Document Framework', 'Por confirmar', 'Configuración, proveedor o add-on según alcance'],
       ['Aprobación de pedidos >10k', 'Aprobaciones estándar', 'Ninguna', 'Estándar'],
       ['Cálculo de comisiones escalonadas', 'No estándar', 'Sí', 'UDT+query o add-on']
     ],
@@ -3845,7 +3847,7 @@ const MC_BATCH4 = {
     { es: '2. Seleccionar plan SKR03 + esquema fiscal alemán (IVA 19/7/0).', en: '2. Select SKR03 chart + German tax schema (VAT 19/7/0).' },
     { es: '3. Probar con una factura end-to-end antes de continuar configurando.', en: '3. Test with one end-to-end invoice before configuring further.' }
   ],
-  war: { q: { es: 'La empresa usa cuentas "genéricas" y no SKR03: el asesor fiscal no puede leer el balance.', en: 'The company uses "generic" accounts, not SKR03: the tax advisor can\'t read the balance.' },
+  war: { q: { es: 'La empresa improvisó un plan de cuentas sin acordar estructura ni mapeo con el asesor fiscal.', en: 'The company improvised a chart of accounts without agreeing its structure or mapping with the tax adviser.' },
     sympt: [{ es: 'Cierre mensual requiere reclasificar a mano cada informe fiscal.', en: 'Monthly close requires hand-reclassifying every fiscal report.' }],
     root: [{ es: 'Plan de cuentas improvisado al instalar sin consultar al Steuerberater.', en: 'Improvised chart at install without consulting the tax advisor.' }],
     fix: [{ es: 'Migración a SKR03 en el arranque del ejercicio + mapeo de cuentas antiguas.', en: 'SKR03 migration at fiscal-year start + old-account mapping.' }] },
@@ -4293,7 +4295,6 @@ const MC_BATCH6 = {
   ]
 },
 'SYN-SK-L7-05': {
-  unused: true,
   screen: { title: { es: 'UI API', en: 'UI API' }, menu: false, tabs: ['General'], activeTab: 0,
     header: [['Add-on', 'Captura serie obligatoria', 'in'], ['Evento', 'ITEM_PRESSED', 'in']],
     cols: ['Evento', 'Origen', 'Acción'], rows: [
@@ -4330,7 +4331,7 @@ const MC_BATCH6 = {
     note: { es: 'Service Layer real: REST puro. Login → cookie de sesión → POST/GET sobre entidades OData.', en: 'Real Service Layer: pure REST. Login → session cookie → POST/GET over OData entities.' } },
   cfg: [
     { es: 'Service Layer expone B1 como OData: /Orders, /Invoices, /BusinessPartners. v2 endpoint /b1s/v2.', en: 'Service Layer exposes B1 as OData: /Orders, /Invoices, /BusinessPartners. v2 endpoint /b1s/v2.' },
-    { es: 'Autenticación: Basic (cada request) o Login+cookie de sesión (eficiente para lotes).', en: 'Authentication: Basic (each request) or Login+session cookie (efficient for batches).' }
+    { es: 'Para entidades de negocio, inicia sesión mediante POST /Login y reutiliza la cookie B1SESSION hasta su expiración. La autenticación Basic se documenta para el servicio de Semantic Layer, no como alternativa general para Orders o BusinessPartners.', en: 'For business entities, authenticate through POST /Login and reuse the B1SESSION cookie until it expires. Basic Authentication is documented for the Semantic Layer service, not as a general alternative for Orders or BusinessPartners.' }
   ],
   e2e: [
     { es: '1. POST /Login con credenciales → B1SESSION cookie.', en: '1. POST /Login with credentials → B1SESSION cookie.' },
@@ -4350,15 +4351,15 @@ const MC_BATCH6 = {
     header: [['Sesión', 'b1-session-...', 'sys'], ['TTL', '30 min', 'sys']],
     cols: ['Patrón', 'Uso', 'Cuidado'], rows: [
       ['Sesión persistente', 'Integraciones', 'Renovar al expirar'],
-      ['$batch', 'Cargas masivas', 'Atómico: todo o nada'],
-      ['ChangeSets', 'Grupos dentro de batch', 'Aislamiento por grupo']
+      ['$batch', 'Agrupar operaciones HTTP', 'No implica atomicidad global'],
+      ['Change sets', 'Escrituras dentro de batch', 'Unidad atómica por conjunto']
     ],
     status: ['Patrones de integración'],
     note: { es: 'Patrones reales: sesión persistente para integrar, $batch con changesets para carga atómica.', en: 'Real patterns: persistent session to integrate, $batch with changesets for atomic bulk.' } },
   cfg: [ { es: '$batch = transacción: si una operación falla, todo el changeset se revierte.', en: '$batch = transaction: if one operation fails, the whole changeset rolls back.' } ],
   e2e: [
     { es: '1. Integración nocturna: login 1 vez, 3.000 pedidos en 60 $batch de 50.', en: '1. Nightly integration: login once, 3,000 orders in 60 $batch of 50.' },
-    { es: '2. Cada $batch es atómico: fallo en la línea 30 → revert el batch, log, reintento.', en: '2. Each $batch is atomic: failure at line 30 → batch rolls back, log, retry.' },
+    { es: '2. Cada change set es atómico: si falla una operación, revierte ese conjunto, registra el error y reintenta de forma idempotente.', en: '2. Each change set is atomic: if one operation fails, roll back that set, log the error, and retry idempotently.' },
     { es: '3. Los changesets agrupan: cabecera+líneas de un pedido en el mismo set.', en: '3. Changesets group: one order\'s header+lines in the same set.' }
   ],
   war: { q: { es: 'Carga masiva a mitad: 1.200 de 3.000 pedidos, luego cae la red.', en: 'Bulk load half-way: 1,200 of 3,000 orders, then network drops.' },
@@ -4791,7 +4792,20 @@ function activityBrief(skill, locale) {
   return { what: L(skill.objective), task: verb[loc] || verb.es || '', graded: evals[loc] || evals.es || '' };
 }
 
-function text(v, locale) { return v?.[locale] ?? v?.es ?? String(v ?? ''); }
+function text(v, locale) {
+  const normalize = value => {
+    if (value == null) return '';
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (Array.isArray(value)) return value.map(normalize).filter(Boolean).join(' · ');
+    if (typeof value === 'object') {
+      const localized = value[locale] ?? value.en ?? value.es;
+      if (localized !== undefined && localized !== value) return normalize(localized);
+      return normalize(value.text ?? value.label ?? value.value ?? value.title ?? value.description ?? value.k ?? value.v ?? '');
+    }
+    return '';
+  };
+  return normalize(v);
+}
 function asArray(v) { return Array.isArray(v) ? v : v ? [v] : []; }
 function shuffledDeterministic(items) { return items.map((v,i)=>({v,k:(i*7+3)%items.length})).sort((a,b)=>a.k-b.k).map(x=>x.v); }
 function skillIndex(id) { const m=/L(\d+)-(\d+)/.exec(id); return m ? Number(m[1])*8+Number(m[2]) : 0; }

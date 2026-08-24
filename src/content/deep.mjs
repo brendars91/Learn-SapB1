@@ -36,7 +36,7 @@ export const DEEP = {
     show: ['Stock: −30 físicas', 'CMV: 30 × 4,00 = 120,00 al Debe', 'Stock en tránsito/almacén: 120,00 al Haber'],
     a: 'Stock baja 30; asiento CMV 120 contra stock 120. La renta llega con la factura, no con la caja que sale.'
   }],
-  'SYN-SK-L1-03': ['🧾', 'La factura es el acto notarial del ERP: hasta que no se firma, no existe para Hacienda.', 'The invoice is the ERP\'s notarial act: until signed, it does not exist for the tax authority.', 'Ventas › Factura de cliente › Crear desde entrega', {
+  'SYN-SK-L1-03': ['🧾', 'Al añadir la factura, SAP Business One crea el documento definitivo y su contabilización según la configuración; los requisitos fiscales dependen de la localización y la normativa.', 'When the invoice is added, SAP Business One creates the final document and its posting according to configuration; fiscal requirements depend on localization and applicable law.', 'Ventas › Factura de cliente › Crear desde entrega', {
     q: 'Factura 360,00 + IVA 21%. ¿Asiento?',
     show: ['Cliente (Debe): 435,60', 'Ventas (Haber): 360,00', 'IVA repercutido (Haber): 75,60'],
     a: 'Debe Cliente 435,60; Haber Ventas 360 + IVA 75,60. El IVA es deuda con Hacienda desde el minuto uno.'
@@ -48,7 +48,7 @@ export const DEEP = {
   }],
   'SYN-SK-L1-05': ['🔁', 'La devolución es el espejo: cada documento de retorno refleja su original con signo invertido.', 'A return is the mirror: each return document reflects its original with inverted sign.', 'Ventas › Devolución › Crear desde factura', {
     q: 'Devolución de 10 uds de la venta de 60 a 6,00. ¿Efecto en ventas y stock?',
-    show: ['Ventas: −60,00 (Haber)', 'IVA: −12,60', 'Stock: +10 físicas', 'CMV: −40,00 (a coste original)'],
+    show: ['Ventas: 60,00 (Debe)', 'IVA repercutido: 12,60 (Debe)', 'Stock: +10 físicas', 'CMV: 40,00 (Haber, a coste original)'],
     a: 'Se abona venta 60 + IVA; el stock vuelve al coste ORIGINAL de la capa FIFO, no al precio de venta.'
   }],
   'SYN-SK-L1-06': ['🧮', 'El asiento manual es cirugía: solo cuando la operación documental no puede expresarlo.', 'A manual journal entry is surgery: only when document-driven operation cannot express it.', 'Finanzas › Asiento manual › Crear', {

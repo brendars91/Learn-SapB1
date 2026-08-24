@@ -62,11 +62,11 @@ export const MC_BATCH1 = {
   screen: { title: { es: 'Factura de cliente (ventana)', en: 'A/R Invoice (window)' }, tabs: ['Contenido', 'Logística', 'Contabilidad'], activeTab: 2,
     header: [['Nº doc.', '1001-2026', 'sys'], ['Cliente', 'C20000', 'sys'], ['Fecha contable', '23.08.26', 'in'], ['Moneda', 'EUR', 'sys']],
     cols: ['Cuenta', 'D/C', 'Débito', 'Crédito'], numeric: [2, 3], rows: [
-      ['C20000 (Deudores)', 'D', '870,00', ''],
+      ['C20000 (Deudores)', 'D', '871,20', ''],
       ['400000 Ventas', '', '', '720,00'],
-      ['1940 IVA soportado 21%', '', '', '150,20']
+      ['477000 IVA repercutido 21%', '', '', '151,20']
     ],
-    totals: [['Total asiento', '870,20']],
+    totals: [['Total asiento', '871,20']],
     status: ['Asiento generado automáticamente'],
     note: { es: 'Pestaña Contabilidad de la factura: el asiento que B1 genera automáticamente al añadir. D Cliente / H Ventas + IVA.', en: 'Invoice\'s Accounting tab: the journal B1 auto-generates on add. D Customer / H Sales + VAT.' } },
   cfg: [
@@ -81,11 +81,11 @@ export const MC_BATCH1 = {
   e2e: [
     { es: '1. Factura del 28.08 con fecha contable 30.08: el ingreso pertenece al periodo de agosto aunque el documento diga 7.8.', en: '1. Invoice issued 28.08 with posting date 30.08: revenue belongs to August\'s period even though the document says 7.8.' },
     { es: '2. Aging report construido sobre fecha de vencimiento: moverla mueve la cobranza entre buckets.', en: '2. Aging report builds on due date: moving it moves collections between buckets.' },
-    { asiento: true, es: '3. Asiento: D Cliente 870,20 / H Ventas 720,00 + H IVA 150,20. Cuadra al céntimo.', en: '3. Journal: D Customer 870.20 / H Sales 720.00 + H VAT 150.20. Balances to the cent.' }
+    { asiento: true, es: '3. Asiento: D Cliente 871,20 / H Ventas 720,00 + H IVA repercutido 151,20. Cuadra al céntimo.', en: '3. Journal: D Customer 871.20 / H Sales 720.00 + H output VAT 151.20. Balances to the cent.' }
   ],
   war: { q: { es: 'Cierre de julio: un supervisor mueve la fecha contable de 20 facturas de agosto a julio para "cerrar objetivos".', en: 'July close: a supervisor moves 20 August invoices\' posting dates to July to "hit targets".' },
     sympt: [{ es: 'Julio sobre-cumple, agosto llega con ingresos que no cuadran con entregas.', en: 'July over-performs, August arrives with revenue not matching deliveries.' }],
-    root: [{ es: 'Autorización de "fecha contable" abierta a too muchos perfiles + presión de objetivos.', en: 'Posting-date authorization open to too many profiles + target pressure.' }],
+    root: [{ es: 'Autorización para modificar la fecha contable concedida a demasiados perfiles, unida a presión por objetivos.', en: 'Posting-date authorization open to too many profiles + target pressure.' }],
     fix: [{ es: 'Periodo contable de julio bloqueado (status locking) tras el cierre + auditoría de cambios de fecha contable (change log).', en: 'July fiscal period locked after close + posting-date change audit (change log).' }] },
   bp: [
     { es: 'Nunca usar la fecha de entrega como fecha contable para "adelantar" ingresos.', en: 'Never use the delivery date as posting date to "accelerate" revenue.' },
@@ -98,7 +98,7 @@ export const MC_BATCH1 = {
     cols: ['Documento', 'Fecha', 'Cantidad', 'Estado'], numeric: [2], rows: [
       ['Pedido 162', '20.08.26', '10', 'Abierto'],
       ['Entrega 5001', '21.08.26', '6', 'Cerrado'],
-      ['Factura 1001-2026', '23.08.28', '6', 'Abierto']
+      ['Factura 1001-2026', '23.08.26', '6', 'Abierto']
     ],
     status: ['Botón "Flujo de documentos" en cualquier documento'],
     note: { es: 'Pantalla de flujo real de B1: desde cualquier documento, el botón recorre toda su cadena madre-hijas.', en: 'Real B1 document flow screen: from any document, the button walks its whole mother-daughters chain.' } },
@@ -111,7 +111,7 @@ export const MC_BATCH1 = {
     { es: '2. Cantidades abiertas: pedido 10, entregado 6, quedan 4 pendientes.', en: '2. Open quantities: order 10, delivered 6, 4 remain pending.' },
     { es: '3. La factura parcial (6) deja el pedido en estado "Abierto" hasta entregar las 4 restantes.', en: '3. The partial invoice (6) keeps the order "Open" until the remaining 4 are delivered.' }
   ],
-  war: { q: { es: 'Soporle pide: ¿con qué pedido se lleva la factura 1001-2026?', en: 'Support asks: which order does invoice 1001-2026 go with?' },
+  war: { q: { es: 'Soporte pregunta: ¿a qué pedido está vinculada la factura 1001-2026?', en: 'Support asks: which order does invoice 1001-2026 go with?' },
     sympt: [{ es: 'Sin botón de flujo, buscar a mano en tablas ORDR/ODLN/OINV por DocEntry enlazado.', en: 'Without the flow button, manually search ORDR/ODLN/OINV by linked DocEntry.' }],
     root: [{ es: 'Desconocimiento del drilldown: la función existe en TODOS los documentos de marketing.', en: 'Drilldown unawareness: the feature exists on ALL marketing documents.' }],
     fix: [{ es: 'Formación: el flujo de documentos es un clic. La cadena completa, en pantalla.', en: 'Training: document flow is one click. The full chain, on screen.' }] },
@@ -176,7 +176,7 @@ export const MC_BATCH1 = {
   war: { q: { es: 'Un cliente nuevo facturado sin condiciones de pago.', en: 'A new customer invoiced without payment terms.' },
     sympt: [{ es: 'Facturas con vencimiento inmediato, aging distorsionado, cobros caóticos.', en: 'Invoices with immediate due, distorted aging, chaotic collections.' }],
     root: [{ es: 'Campo de condiciones vacío al alta (permitido por el sistema) + checklist de alta incompleto.', en: 'Empty terms field at create (allowed by the system) + incomplete create checklist.' }],
-    ffex: [{ es: 'Resolución: obligar el campo por Query Manager (validación de transaction) + regularización de las facturas existentes.', en: 'Fix: make the field mandatory via transaction validation + regularize existing invoices.' }],
+
     fix: [{ es: 'Resolución: obligar el campo por validación (TransactionNotification) + regularización de facturas existentes.', en: 'Fix: make the field mandatory via transaction validation + regularize existing invoices.' }] },
   bp: [
     { es: 'Un socio = un NIF. Los duplicados rompen análisis y conciliación.', en: 'One partner = one tax ID. Duplicates break analysis and reconciliation.' },

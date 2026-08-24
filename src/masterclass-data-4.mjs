@@ -29,7 +29,7 @@ export const MC_BATCH4 = {
   screen: { title: { es: 'Blueprint – mapa de brechas', en: 'Blueprint – gap map' }, menu: false, tabs: ['General'], activeTab: 0,
     header: [['Proyecto', 'B1 Rollout Mittelstand', 'in'], ['Versión blueprint', '1.2', 'in']],
     cols: ['Requisito', 'Solución B1 estándar', 'Brecha', 'Abordaje'], rows: [
-      ['Facturación electrónica DE (XRechnung)', 'Add-on estándar', 'Ninguna', 'Estándar'],
+      ['Facturación electrónica DE (XRechnung)', 'Validar localización, versión y Electronic Document Framework', 'Por confirmar', 'Configuración, proveedor o add-on según alcance'],
       ['Aprobación de pedidos >10k', 'Aprobaciones estándar', 'Ninguna', 'Estándar'],
       ['Cálculo de comisiones escalonadas', 'No estándar', 'Sí', 'UDT+query o add-on']
     ],
@@ -69,7 +69,7 @@ export const MC_BATCH4 = {
     { es: '2. Seleccionar plan SKR03 + esquema fiscal alemán (IVA 19/7/0).', en: '2. Select SKR03 chart + German tax schema (VAT 19/7/0).' },
     { es: '3. Probar con una factura end-to-end antes de continuar configurando.', en: '3. Test with one end-to-end invoice before configuring further.' }
   ],
-  war: { q: { es: 'La empresa usa cuentas "genéricas" y no SKR03: el asesor fiscal no puede leer el balance.', en: 'The company uses "generic" accounts, not SKR03: the tax advisor can\'t read the balance.' },
+  war: { q: { es: 'La empresa improvisó un plan de cuentas sin acordar estructura ni mapeo con el asesor fiscal.', en: 'The company improvised a chart of accounts without agreeing its structure or mapping with the tax adviser.' },
     sympt: [{ es: 'Cierre mensual requiere reclasificar a mano cada informe fiscal.', en: 'Monthly close requires hand-reclassifying every fiscal report.' }],
     root: [{ es: 'Plan de cuentas improvisado al instalar sin consultar al Steuerberater.', en: 'Improvised chart at install without consulting the tax advisor.' }],
     fix: [{ es: 'Migración a SKR03 en el arranque del ejercicio + mapeo de cuentas antiguas.', en: 'SKR03 migration at fiscal-year start + old-account mapping.' }] },
