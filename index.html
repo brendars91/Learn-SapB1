@@ -3780,7 +3780,7 @@ const MC_BATCH3 = {
 const MC_BATCH4 = {
 'SYN-SK-L5-01': {
   screen: { title: { es: 'Discovery – mapa de procesos', en: 'Discovery – process map' }, menu: false, tabs: ['General'], activeTab: 0,
-    header: [['Cliente', 'Mittelstand AG', 'in'], ['Sede', 'Bonn', 'in'], ['Usuarios', '35', 'in']],
+    header: [['Cliente', 'SYN-Nordlicht Demo GmbH', 'in'], ['Sede', 'Demo-City', 'in'], ['Usuarios', '35', 'in']],
     cols: ['Proceso', 'Volumen', 'Dolor actual', 'Prioridad'], rows: [
       ['O2C', '1.200 facturas/mes', 'Facturas en papel, 3 días de retraso', 'Alta'],
       ['P2P', '800 pedidos/mes', 'Doble entrada con Excel', 'Alta'],
@@ -3829,7 +3829,7 @@ const MC_BATCH4 = {
 },
 'SYN-SK-L5-03': {
   screen: { title: { es: 'Configuración de empresa', en: 'Company Configuration' }, menu: false, tabs: ['General'], activeTab: 0,
-    header: [['Nombre empresa', 'Mittelstand AG', 'in'], ['Moneda local', 'EUR', 'in'], ['País', 'DE', 'in']],
+    header: [['Nombre empresa', 'SYN-Nordlicht Demo GmbH', 'in'], ['Moneda local', 'EUR', 'in'], ['País', 'DE', 'in']],
     cols: ['Parámetro', 'Valor', 'Impacto'], rows: [
       ['Plan de cuentas', 'SKR03 (datev)', 'Toda la contabilidad'],
       ['Esquema de numeración', 'Por año y tipo', 'Auditoría'],
@@ -4638,10 +4638,10 @@ const MASTERCLASS = {
 },
 'SYN-SK-L0-02': {
   screen: { title: { es: 'Socios de negocio – Datos maestros', en: 'Business Partners – Master Data' }, tabs: ['General', 'Relaciones', 'Moneda', 'Pagos'], activeTab: 0,
-    header: [['Código', 'C20000', 'sys'], ['Nombre', 'Sonntag Licht AG', 'sys'], ['Tipo', 'Proveedor', 'sys'], ['NIF', 'DE811907980', 'sys'], ['Grupo', 'Local', 'sys'], ['Saldo', '12.480,00', 'lock']],
+    header: [['Código', 'SYN-C20000', 'sys'], ['Nombre', 'SYN-Licht Demo AG', 'sys'], ['Tipo', 'Proveedor', 'sys'], ['NIF', 'SYN-DEMO-TAX', 'sys'], ['Grupo', 'Local', 'sys'], ['Saldo', '12.480,00', 'lock']],
     cols: ['Dirección', 'Calle', 'CP', 'Ciudad', 'País'], rows: [
-      ['Facturación', 'Hauptstr. 14', '51465', 'Bergisch Gladbach', 'DE'],
-      ['Entrega', 'Industriestr. 2', '51465', 'Bergisch Gladbach', 'DE']
+      ['Facturación', 'SYN-Demostrasse 14', '00000', 'Demo-City', 'DE'],
+      ['Entrega', 'SYN-Testweg 2', '00000', 'Demo-City', 'DE']
     ],
     status: ['Modo: Actualizar', 'Conectado a: SBODEMOGE'],
     note: { es: 'Ficha real de socio: los campos blancos/sys son del sistema, los amarillos editables. El código lo asigna B1 por serie.', en: 'Real partner card: white/sys fields are system, yellow editable. Code is assigned by B1 series.' } },
@@ -5210,15 +5210,15 @@ Toda escritura (UPDATE/INSERT/DELETE, Service Layer POST) requiere confirmación
 ];
 
 
-// career.mjs — Modo Carrera: la empresa Nordwind Handel GmbH.
+// career.mjs — Modo Carrera: empresa completamente sintética SYN-Nordlicht Demo GmbH.
 // Cada skill dominada resuelve un ticket real; los KPIs de la empresa evolucionan con el usuario.
 
 const CAREER = {
-  company: { es: 'Nordwind Handel GmbH', en: 'Nordwind Trading Ltd.', de: 'Nordwind Handel GmbH' },
+  company: { es: 'SYN-Nordlicht Demo GmbH', en: 'SYN-Nordlicht Demo Ltd.', de: 'SYN-Nordlicht Demo GmbH' },
   intro: {
-    es: 'Eres el nuevo consultor de Nordwind Handel GmbH. Cada skill que dominas resuelve un ticket real de la empresa y mueve sus KPIs. Tu cargo evoluciona con los tickets cerrados.',
-    en: 'You are Nordwind Trading\'s new consultant. Each mastered skill resolves a real ticket and moves company KPIs. Your title evolves as you close tickets.',
-    de: 'Du bist der neue Berater der Nordwind Handel GmbH. Jede gemeisterte Skill löst ein echtes Ticket und bewegt die KPIs. Deine Rolle wächst mit jedem geschlossenen Ticket.'
+    es: 'Eres el nuevo consultor de la empresa ficticia SYN-Nordlicht Demo GmbH. Cada skill que dominas resuelve un ticket sintético y mueve sus KPIs de aprendizaje. Tu cargo evoluciona con los tickets cerrados.',
+    en: 'You are the new consultant for the fictional SYN-Nordlicht Demo Ltd. Each mastered skill resolves a synthetic ticket and moves its learning KPIs. Your title evolves as you close tickets.',
+    de: 'Du bist der neue Berater des fiktiven Unternehmens SYN-Nordlicht Demo GmbH. Jede gemeisterte Skill löst ein synthetisches Ticket und bewegt die Lern-KPIs. Deine Rolle wächst mit jedem geschlossenen Ticket.'
   },
   roles: [
     { at: 0,  es: 'Becario', en: 'Intern', de: 'Praktikant' },
@@ -5245,7 +5245,7 @@ function skillIndexNumber(id) {
 function departmentFor(level, locale = 'es', levelsMeta) {
   const t = levelsMeta?.[level]?.title;
   const v = t?.[locale] ?? t?.es ?? '';
-  return v || 'Nordwind';
+  return v || 'SYN-Nordlicht';
 }
 
 // Ticket derivado del war story del skill: síntoma → petición del cliente.
