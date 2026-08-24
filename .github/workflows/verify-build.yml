@@ -18,17 +18,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Apply deterministic locale patch
+      - name: Apply deterministic standalone locale patch
         run: node scripts/enforce-strict-locale.mjs
       - name: Run tests
         run: npm test
-      - name: Build standalone and Pages index
+      - name: Build offline standalone
         run: npm run build
-      - name: Ensure generated artifacts are synchronized
+      - name: Verify generated offline artifacts
         run: |
-          cmp index.html dist/SAP-Business-One-Mastery-Lab-Standalone.html
+          test -s dist/SAP-Business-One-Mastery-Lab-Standalone.html
           test -s dist/sap-b1-mastery-lab.html
-      - name: Commit generated source and artifacts on main
+          grep -q "mountStrictSapB1Lab" index.html
+      - name: Commit generated standalone artifacts on main
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           if git diff --quiet; then
@@ -36,6 +37,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/app.mjs index.html dist/SAP-Business-One-Mastery-Lab-Standalone.html dist/sap-b1-mastery-lab.html
-          git commit -m "build: synchronize localized app artifacts"
+          git add src/app.mjs dist/SAP-Business-One-Mastery-Lab-Standalone.html dist/sap-b1-mastery-lab.html
+          git commit -m "build: synchronize localized offline artifacts"
           git push
