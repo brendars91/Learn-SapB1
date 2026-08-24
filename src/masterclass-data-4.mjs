@@ -2,7 +2,7 @@
 export const MC_BATCH4 = {
 'SYN-SK-L5-01': {
   screen: { title: { es: 'Discovery – mapa de procesos', en: 'Discovery – process map' }, menu: false, tabs: ['General'], activeTab: 0,
-    header: [['Cliente', 'Mittelstand AG', 'in'], ['Sede', 'Bonn', 'in'], ['Usuarios', '35', 'in']],
+    header: [['Cliente', 'SYN-Nordlicht Demo GmbH', 'in'], ['Sede', 'Demo-City', 'in'], ['Usuarios', '35', 'in']],
     cols: ['Proceso', 'Volumen', 'Dolor actual', 'Prioridad'], rows: [
       ['O2C', '1.200 facturas/mes', 'Facturas en papel, 3 días de retraso', 'Alta'],
       ['P2P', '800 pedidos/mes', 'Doble entrada con Excel', 'Alta'],
@@ -51,7 +51,7 @@ export const MC_BATCH4 = {
 },
 'SYN-SK-L5-03': {
   screen: { title: { es: 'Configuración de empresa', en: 'Company Configuration' }, menu: false, tabs: ['General'], activeTab: 0,
-    header: [['Nombre empresa', 'Mittelstand AG', 'in'], ['Moneda local', 'EUR', 'in'], ['País', 'DE', 'in']],
+    header: [['Nombre empresa', 'SYN-Nordlicht Demo GmbH', 'in'], ['Moneda local', 'EUR', 'in'], ['País', 'DE', 'in']],
     cols: ['Parámetro', 'Valor', 'Impacto'], rows: [
       ['Plan de cuentas', 'SKR03 (datev)', 'Toda la contabilidad'],
       ['Esquema de numeración', 'Por año y tipo', 'Auditoría'],
