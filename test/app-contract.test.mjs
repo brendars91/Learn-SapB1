@@ -123,16 +123,20 @@ test('German console and evidence views contain localized content', () => {
 });
 
 test('Pages entrypoint mounts the strict locale runtime', async () => {
-  const [index, runtime] = await Promise.all([
+  const [index, runtime, strictLocale] = await Promise.all([
     readFile(new URL('../index.html', import.meta.url), 'utf8'),
-    readFile(new URL('../src/runtime-strict.mjs', import.meta.url), 'utf8')
+    readFile(new URL('../src/runtime-strict.mjs', import.meta.url), 'utf8'),
+    readFile(new URL('../src/strict-locale.mjs', import.meta.url), 'utf8')
   ]);
   assert.match(index, /mountStrictSapB1Lab/);
   assert.match(index, /runtime-strict\.mjs/);
-  assert.match(runtime, /Guided practice/);
-  assert.match(runtime, /Geführte Praxis/);
-  assert.match(runtime, /Warum funktioniert das\?/);
-  assert.match(runtime, /Stolperstein/);
+  assert.match(runtime, /strict-locale\.mjs/);
+  assert.match(runtime, /strictTranslateText/);
+  assert.match(runtime, /hasLegacySpanish/);
+  assert.match(strictLocale, /Guided practice/);
+  assert.match(strictLocale, /Geführte Praxis/);
+  assert.match(strictLocale, /Warum funktioniert das\?/);
+  assert.match(strictLocale, /Stolperstein/);
 });
 
 test('practical activities provide localized English and German field content', () => {
