@@ -35,6 +35,7 @@ const mcd5 = await readFile(path.join(projectRoot, 'src/masterclass-data-5.mjs')
 const mcd6 = await readFile(path.join(projectRoot, 'src/masterclass-data-6.mjs'), 'utf8');
 const activities = await readFile(path.join(projectRoot, 'src/activities.mjs'), 'utf8');
 const advanced = await readFile(path.join(projectRoot, 'src/advanced.mjs'), 'utf8');
+const career = await readFile(path.join(projectRoot, 'src/career.mjs'), 'utf8');
 const activitiesCss = await readFile(path.join(projectRoot, 'src/activities.css'), 'utf8');
 const consoleCss = await readFile(path.join(projectRoot, 'src/console.css'), 'utf8');
 
@@ -42,7 +43,7 @@ const strip = source => source
   .replace(/^import[^;]+;\s*$/gm, '')
   .replace(/^export\s+/gm, '');
 
-const contentBundle = [base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, advanced, contentSource].map(strip).join('\n\n');
+const contentBundle = [base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, advanced, career, contentSource].map(strip).join('\n\n');
 const uib1Css = await readFile(path.join(projectRoot, 'src/ui-b1.css'), 'utf8');
 const runtime = [contentBundle, strip(domainSource), strip(appSource)].join('\n\n');
 
