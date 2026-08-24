@@ -1,14 +1,27 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { chromium } = require('/home/ubuntu/.npm-global/lib/node_modules/promptfoo/node_modules/playwright-core');
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const browser = await chromium.launch({ headless: true, executablePath: '/home/ubuntu/.cache/ms-playwright/chromium-1234/chrome-linux/chrome', args: ['--no-sandbox'] });
+function loadPlaywright() {
+  const localRequire = createRequire(import.meta.url);
+  try { return localRequire('playwright'); }
+  catch (error) {
+    const runtimeModules = process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES;
+    if (!runtimeModules) throw new Error('Playwright is required. Run: npm install --no-save playwright@1.55.0', { cause: error });
+    return createRequire(path.join(runtimeModules, '__learn_sapb1_resolver.cjs'))('playwright');
+  }
+}
+
+const { chromium } = loadPlaywright();
+
+const browser = await chromium.launch({ headless: true, executablePath: chromium.executablePath(), args: ['--no-sandbox'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 const errors = [];
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 page.on('pageerror', e => errors.push(e.message));
-await page.goto('file:///home/ubuntu/Learn-SapB1-repo/index.html?local-browser-gate');
+const entrypoint = pathToFileURL(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../index.html')).href;
+await page.goto(`${entrypoint}?local-browser-gate`);
 await page.locator('#sap-b1-mastery-lab').waitFor();
 const views = ['home','career','map','cases','incidents','simulator','ai','evidence'];
 for (const view of views) { await page.locator(`[data-view="${view}"]`).click(); assert.ok((await page.locator('main').innerText()).trim().length > 20, view); }
