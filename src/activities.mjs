@@ -80,7 +80,20 @@ export function activityBrief(skill, locale) {
   return { what: L(skill.objective), task: verb[loc] || verb.es || '', graded: evals[loc] || evals.es || '' };
 }
 
-function text(v, locale) { return v?.[locale] ?? v?.es ?? String(v ?? ''); }
+function text(v, locale) {
+  const normalize = value => {
+    if (value == null) return '';
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (Array.isArray(value)) return value.map(normalize).filter(Boolean).join(' · ');
+    if (typeof value === 'object') {
+      const localized = value[locale] ?? value.en ?? value.es;
+      if (localized !== undefined && localized !== value) return normalize(localized);
+      return normalize(value.text ?? value.label ?? value.value ?? value.title ?? value.description ?? value.k ?? value.v ?? '');
+    }
+    return '';
+  };
+  return normalize(v);
+}
 function asArray(v) { return Array.isArray(v) ? v : v ? [v] : []; }
 function shuffledDeterministic(items) { return items.map((v,i)=>({v,k:(i*7+3)%items.length})).sort((a,b)=>a.k-b.k).map(x=>x.v); }
 function skillIndex(id) { const m=/L(\d+)-(\d+)/.exec(id); return m ? Number(m[1])*8+Number(m[2]) : 0; }
