@@ -317,7 +317,7 @@ export const MC_BATCH1 = {
   ]
 },
 'SYN-SK-L1-07': {
-  screen: {  es: 'Condiciones de pago', title: { es: 'Condiciones de pago', en: 'Payment Terms' }, menu: false, tabs: ['General'], activeTab: 0,
+  screen: { title: { es: 'Condiciones de pago', en: 'Payment Terms' }, menu: false, tabs: ['General'], activeTab: 0,
     header: [['Código', '2P10N30', 'sys'], ['Nombre', '2% 10 Neto 30', 'in']],
     cols: ['Condiciones', 'Condiciones de grupo', 'Meses/días', 'Porcentaje'], numeric: [2, 3], rows: [
       ['2% 10 Neto 30', '1', '10', '2,000'],

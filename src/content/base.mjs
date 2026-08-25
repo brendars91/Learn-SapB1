@@ -101,7 +101,7 @@ export const I18N = {
     kicker: 'SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · EXPERT LEVEL'
   },
   de: {
-    appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Home', navCareer: 'Career', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
+    appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Start', navCareer: 'Karriere', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
     language: 'Sprache', track: 'Lernpfad', trackFunctional: 'Funktional', trackTechnical: 'Technik + KI', trackDual: 'Doppelpfad',
     startDiagnostic: 'Diagnose starten', resume: 'Fortsetzen', reset: 'Fortschritt löschen', export: 'Fortschritt exportieren', import: 'Fortschritt importieren',
     mastery: 'Beherrschung', dueReview: 'Wiederholungen', skillsExplored: 'Kompetenzen', recommended: 'Nächste Mission', begin: 'Starten',
