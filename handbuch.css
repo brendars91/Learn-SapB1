@@ -1,8 +1,8 @@
 /* ══════════════════════════════════════════════════════════════════════════
-   Handbuch der Belegkette · tema del manual técnico
-   Dos familias: una grotesca para la voz y la prosa, una monoespaciada que
-   solo aparece donde hay datos (asientos, códigos, cotas). Retícula visible,
-   papel para leer, tinta para el pico. Los capítulos cortan, no funden.
+   Handbook of the Document Chain · technical manual theme
+   Two families: one grotesque for voice and prose, one mono-spaced that
+   only appears where there are data (ledgers, codes, quotas). Visible grid,
+   paper to read, ink for the peak. Chapters cut, they don't merge.
    ══════════════════════════════════════════════════════════════════════════ */
 
 :root {
@@ -364,4 +364,231 @@
 @media (prefers-reduced-motion: reduce) {
   .beleg, .fenster { transition: none; }
   .hauptbuch__lines li { animation: none; }
+}
+
+/* Decorative rules and icons */
+.hb-title__rule,
+.hb-kolophon__rule-svg {
+  stroke: var(--sc-ink-soft);
+}
+.hb-title__rule circle:nth-child(2),
+.hb-title__rule circle:nth-child(4) {
+  fill: var(--sc-ink-soft);
+}
+.hb-masse line,
+.hb-atem__masse line,
+.hb-kolophon__rule-svg line {
+  stroke: var(--sc-ink-soft);
+}
+.hb-masse text,
+.hb-atem__masse text {
+  fill: var(--sc-ink-soft);
+  font-family: var(--sc-font-text);
+  font-size: 0.875rem;
+}
+
+/* Ticket styling */
+.hb-ticket {
+  background: var(--sc-surface);
+  border: 1px solid var(--sc-ink-soft);
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin: 1rem 0;
+}
+.hb-ticket__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.hb-ticket__head svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--sc-accent);
+}
+.hb-ticket__body {
+  font-style: italic;
+  color: var(--sc-ink-soft);
+  margin: 0.5rem 0;
+}
+.hb-ticket__foot {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--sc-ink-soft);
+}
+.hb-ticket__priority svg {
+  width: 10px;
+  height: 10px;
+  margin-right: 0.25rem;
+}
+
+/* Cost section icons */
+.hb-cost__icon {
+  width: 40px;
+  height: 40px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+.hb-cost__icon circle {
+  stroke: var(--sc-ink-soft);
+  fill: none;
+}
+.hb-cost__icon text {
+  fill: var(--sc-ink-soft);
+  font-family: var(--sc-font-text);
+}
+
+/* Diagram styling */
+.hb-zeichnung {
+  width: 100%;
+  max-width: 600px;
+  margin: 1rem auto;
+  display: block;
+}
+.hb-zeichnung__grid path {
+  stroke: var(--sc-ink-soft);
+  stroke-width: 0.5;
+}
+.hb-zeichnung__draw path,
+.hb-zeichnung__draw polygon,
+.hb-zeichnung__draw rect {
+  fill: none;
+  stroke: var(--sc-ink);
+  stroke-width: 1.5;
+}
+.hb-zeichnung__draw .hb-draw {
+  stroke: var(--sc-accent);
+  stroke-width: 2;
+}
+.hb-zeichnung__labels text {
+  fill: var(--sc-ink);
+  font-family: var(--sc-font-text);
+}
+.hb-zeichnung__eff {
+  fill: var(--sc-accent);
+}
+.hb-zeichnung__abb {
+  fill: var(--sc-ink-soft);
+  font-size: 0.75rem;
+}
+
+/* Window (live SAP window) styling */
+.fenster {
+  background: var(--sc-surface);
+  border: 1px solid var(--sc-ink-soft);
+  border-radius: 4px;
+  margin: 1.5rem 0;
+}
+.fenster__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: var(--sc-ink);
+  color: var(--sc-surface);
+  border-radius: 3px 3px 0 0;
+}
+.fenster__bar span {
+  font-size: 0.875rem;
+}
+.fenster__ctrl {
+  unicode-bidi: bidi-override;
+  direction: rtl;
+}
+.fenster__body {
+  padding: 1rem;
+}
+.fenster__field {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.fenster__field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  color: var(--sc-ink);
+}
+.fenster__field input,
+.fenster__field select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--sc-ink-soft);
+  border-radius: 3px;
+  background: var(--sc-surface);
+  color: var(--sc-ink);
+  font-family: var(--sc-font-text);
+}
+.fenster__buchung {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+.fenster__buchung th,
+.fenster__buchung td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--sc-ink-soft);
+}
+.fenster__buchung caption {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--sc-ink);
+}
+.fenster__hint {
+  font-size: 0.875rem;
+  color: var(--sc-ink-soft);
+  font-style: italic;
+}
+
+/* Stufen (levels) cards */
+.hb-stufen {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  margin: 1.5rem 0;
+}
+.stufe {
+  background: var(--sc-surface);
+  border: 1px solid var(--sc-ink-soft);
+  border-radius: 4px;
+  padding: 1rem;
+}
+.stufe__nr {
+  display: inline-block;
+  background: var(--sc-accent);
+  color: var(--sc-surface);
+  width: 2rem;
+  height: 2rem;
+  line-height: 2rem;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  border-radius: 50%;
+}
+.stufe h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  color: var(--sc-ink);
+}
+.stufe p {
+  color: var(--sc-ink-soft);
+  line-height: 1.5;
+}
+
+/* Colophon section */
+.hb-kolophon__inner {
+  background: var(--sc-surface);
+  border: 1px solid var(--sc-ink-soft);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+.hb-kolophon__rule-svg line {
+  stroke: var(--sc-ink-soft);
+}
+.hb-kolophon__rule-svg circle:nth-child(2),
+.hb-kolophon__rule-svg circle:nth-child(4) {
+  fill: var(--sc-ink-soft);
 }
