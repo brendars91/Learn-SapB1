@@ -39,7 +39,7 @@ test('built runtime mounts and completes representative interactions without a b
   assert.doesNotThrow(() => new vm.Script(script).runInContext(context));
   assert.match(root.innerHTML, /Learn-SapB1/);
 
-  const fire = (type, control) => listeners.get(type)({ target: { ...control, closest: () => control } });
+  const fire = (type, control) => listeners.get(type)({ target: { ...control, dataset: control.dataset || {}, closest: () => control } });
   fire('change', { dataset: { action: 'locale' }, value: 'de' });
   assert.match(root.innerHTML, /Beherrschungskarte/);
 

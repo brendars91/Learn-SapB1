@@ -122,17 +122,20 @@ test('German console and evidence views contain localized content', () => {
   assert.doesNotMatch(evidence, /logistics learning path/);
 });
 
-test('Pages entrypoint mounts the strict locale runtime', async () => {
+test('Pages entrypoint mounts the locale runtime and renders B1 windows in every language', async () => {
   const [index, runtime] = await Promise.all([
     readFile(new URL('../index.html', import.meta.url), 'utf8'),
     readFile(new URL('../src/runtime-strict.mjs', import.meta.url), 'utf8')
   ]);
   assert.match(index, /mountStrictSapB1Lab/);
   assert.match(index, /runtime-strict\.mjs/);
-  assert.match(runtime, /Guided practice/);
-  assert.match(runtime, /Geführte Praxis/);
-  assert.match(runtime, /Warum funktioniert das\?/);
-  assert.match(runtime, /Stolperstein/);
+  assert.match(runtime, /document\.documentElement\.lang = locale/);
+  // Las ventanas de SAP B1 se traducen; ya no se ocultan ni se sustituyen por avisos.
+  assert.doesNotMatch(runtime, /figure\.b1|replaceWith|innerHTML/);
+  const german = renderAppMarkup(createInitialState({ locale: 'de', view: 'map' }));
+  assert.match(german, /Hauptmenü von SAP Business One/);
+  assert.match(german, /Verkauf – A\/R/);
+  assert.doesNotMatch(german, /Menú principal de SAP Business One/);
 });
 
 test('practical activities provide localized English and German field content', () => {

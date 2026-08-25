@@ -18,7 +18,7 @@ export const MASTERCLASS = {
       ['Recursos humanos', '✔', ''],
       ['Administración', '✔', '']
     ],
-    status: ['Conectido a: SBODEMOGE', 'Usuario: manager'],
+    status: ['Conectado a: SBODEMOGE', 'Usuario: manager'],
     note: { es: 'Menú de módulos real de B1 10.0: todo cuelga de aquí. Cada skill de este nivel te enseña a moverte por este árbol sin perderte.', en: 'Real B1 10.0 module menu: everything hangs from here. Each skill in this level teaches you to navigate this tree without getting lost.' } },
   cfg: [
     { es: 'El menú principal es un árbol por módulo: Ventas–CRM, Compras–CRM, Comprobantes, Socios, Existencias, Finanzas, Administración.', en: 'The main menu is a per-module tree: Sales–CRM, Purchasing–CRM, Documents, Partners, Inventory, Finance, Administration.' },

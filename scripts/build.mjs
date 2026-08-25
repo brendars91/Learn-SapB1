@@ -15,6 +15,8 @@ const [shell, styles, contentSource, domainSource, appSource] = await Promise.al
   readFile(path.join(projectRoot, 'src/app.mjs'), 'utf8')
 ]);
 
+const terms = await readFile(path.join(projectRoot, 'src/content/i18n-terms.mjs'), 'utf8');
+const i18n = await readFile(path.join(projectRoot, 'src/i18n.mjs'), 'utf8');
 const base = await readFile(path.join(projectRoot, 'src/content/base.mjs'), 'utf8');
 const l0 = await readFile(path.join(projectRoot, 'src/content/l0.mjs'), 'utf8');
 const l1 = await readFile(path.join(projectRoot, 'src/content/l1.mjs'), 'utf8');
@@ -41,7 +43,7 @@ const strip = source => source
   .replace(/^import[^;]+;\s*$/gm, '')
   .replace(/^export\s+/gm, '');
 
-const contentBundle = [base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, advanced, career, contentSource].map(strip).join('\n\n');
+const contentBundle = [terms, i18n, base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, advanced, career, contentSource].map(strip).join('\n\n');
 const uib1Css = await readFile(path.join(projectRoot, 'src/ui-b1.css'), 'utf8');
 const runtime = [contentBundle, strip(domainSource), strip(appSource)].join('\n\n');
 
@@ -70,5 +72,6 @@ ${fragment}
 await writeFile(fragmentPath, fragment, 'utf8');
 await writeFile(standalonePath, standalone, 'utf8');
 const bytes = Buffer.byteLength(standalone);
-if (bytes >= 1024 * 1024) throw new Error(`Standalone exceeds 1 MiB: ${bytes} bytes`);
+// Con el contenido completo en español, inglés y alemán el archivo único ronda 1,25 MiB.
+if (bytes >= 1536 * 1024) throw new Error(`Standalone exceeds 1.5 MiB: ${bytes} bytes`);
 process.stdout.write(`Built fragment (${Buffer.byteLength(fragment)} bytes) and standalone (${bytes} bytes)\n`);

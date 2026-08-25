@@ -1,3 +1,5 @@
+import { trNode } from './i18n.mjs';
+
 // career.mjs — Modo Carrera: empresa completamente sintética SYN-Nordlicht Demo GmbH.
 // Cada skill dominada resuelve un ticket real; los KPIs de la empresa evolucionan con el usuario.
 
@@ -31,14 +33,13 @@ export function skillIndexNumber(id) {
 
 // Departamento emisor del ticket, derivado del nivel del skill.
 export function departmentFor(level, locale = 'es', levelsMeta) {
-  const t = levelsMeta?.[level]?.title;
-  const v = t?.[locale] ?? t?.es ?? '';
+  const v = trNode(levelsMeta?.[level]?.title, locale);
   return v || 'SYN-Nordlicht';
 }
 
 // Ticket derivado del war story del skill: síntoma → petición del cliente.
 export function getTicket(skill, mc, locale = 'es', levelsMeta) {
-  const L = v => Array.isArray(v) ? v.map(L).join(' ') : (v?.[locale] ?? v?.es ?? (v === undefined || v === null ? '' : String(v)));
+  const L = v => Array.isArray(v) ? v.map(L).join(' ') : trNode(v, locale);
   const war = mc?.war;
   if (!war) return null;
   const sympt = Array.isArray(war.sympt) ? war.sympt.map(L).join(' ') : L(war.sympt);
@@ -55,7 +56,7 @@ export function getTicket(skill, mc, locale = 'es', levelsMeta) {
 export function careerProgress(masteredCount, locale = 'es', totalSkills = 72) {
   const role = [...CAREER.roles].reverse().find(r => masteredCount >= r.at) || CAREER.roles[0];
   const pct = Math.round(masteredCount / totalSkills * 100);
-  return { role: role[locale] || role.es, pct };
+  return { role: trNode(role, locale), pct };
 }
 
 // KPIs vivos: mejoran con el dominio (memoria realista: no llegan a cero/perfección).

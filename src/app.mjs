@@ -2,6 +2,7 @@
 import { I18N, LEVELS, SKILLS, CASES, INCIDENTS, BOSSES, EVIDENCE, DIAGNOSTIC, PROCESS_STEPS, translate } from './content.mjs';
 import { calculateMastery, recommendNext, scanSensitiveInput, lintPrompt, validateProgressImport, nextReviewDate } from './domain.mjs';
 import { b1Window } from './ui-b1.mjs';
+import { trText, trNode, trList } from './i18n.mjs';
 import { MASTERCLASS } from './masterclass.mjs';
 import { getActivity, validateActivityDetailed } from './activities.mjs';
 import { ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS } from './advanced.mjs';
@@ -152,7 +153,7 @@ export function serializeProgress(state, exportedAt = new Date().toISOString()) 
 }
 
 function t(state, key) { return escapeHtml(translate(state.locale, key)); }
-function local(value, locale) { return escapeHtml(value?.[locale] ?? value?.es ?? ''); }
+function local(value, locale) { return escapeHtml(trNode(value, locale)); }
 
 function navButton(state, view, key) {
   const selected = state.view === view;
@@ -323,7 +324,7 @@ function renderDecision(state, entry, kind) {
     <div class="sbl-card-head"><span class="viz-badge">${escapeHtml(entry.id)}</span><span class="text-small">${t(state, 'level')} ${entry.level}</span></div>
     <h2 id="decision-title">${local(entry.prompt, state.locale)}</h2>
     <p class="text-muted">${t(state, 'choose')}</p>
-    <div class="sbl-choice-list">${entry.optionsText[state.locale].map((option, index) => `<button type="button" class="btn${index === entry.correct && answered ? ' btn-primary' : ''}" data-action="answer-decision" data-kind="${kind}" data-correct="${index === entry.correct}" data-rationale="${escapeHtml(entry.rationale[state.locale])}"${answered ? ' disabled' : ''}>${escapeHtml(option)}</button>`).join('')}</div>
+    <div class="sbl-choice-list">${trList(entry.optionsText, state.locale).map((option, index) => `<button type="button" class="btn${index === entry.correct && answered ? ' btn-primary' : ''}" data-action="answer-decision" data-kind="${kind}" data-correct="${index === entry.correct}" data-rationale="${escapeHtml(trNode(entry.rationale, state.locale))}"${answered ? ' disabled' : ''}>${escapeHtml(option)}</button>`).join('')}</div>
     ${answered ? renderFeedback(state, entry) : ''}
     ${answered ? renderSeniorPanel(state, entry) : ''}
     ${answered ? renderDistractorPanel(state, entry) : ''}
@@ -340,7 +341,7 @@ function renderDiagnostic(state) {
     <h2 id="diagnostic-title">${t(state, 'diagnosticTitle')}</h2><p>${t(state, 'diagnosticIntro')}</p>
     <div class="sbl-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><div class="sbl-progress-fill" style="width:${percent}%"></div></div>
     <h3>${local(entry.prompt, state.locale)}</h3>
-    <div class="sbl-choice-list">${entry.optionsText[state.locale].map((option, index) => `<button type="button" class="btn" data-action="answer-diagnostic" data-correct="${index === entry.correct}"${answered ? ' disabled' : ''}>${escapeHtml(option)}</button>`).join('')}</div>
+    <div class="sbl-choice-list">${trList(entry.optionsText, state.locale).map((option, index) => `<button type="button" class="btn" data-action="answer-diagnostic" data-correct="${index === entry.correct}"${answered ? ' disabled' : ''}>${escapeHtml(option)}</button>`).join('')}</div>
     ${answered ? `<div class="sbl-answer-feedback" data-correct="${state.diagnosticFeedback.correct}"><strong>${state.diagnosticFeedback.correct ? t(state, 'correct') : t(state, 'incorrect')}</strong><p>${local(entry.rationale, state.locale)}</p></div><button type="button" class="btn btn-primary" data-action="next-diagnostic">${state.diagnosticIndex === DIAGNOSTIC.length - 1 ? t(state, 'finish') : t(state, 'next')}</button>` : ''}
   </section>`;
 }
@@ -362,7 +363,7 @@ function renderHome(state) {
   const techPct = trackPct(byTrack('dual').concat(byTrack('technical')));
   return `<div class="sbl-stack">
     <section class="sbl-cover">
-      <span class="sbl-kicker">SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · NIVEL EXPERTO</span>
+      <span class="sbl-kicker">${t(state, 'kicker')}</span>
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>
@@ -370,7 +371,7 @@ function renderHome(state) {
         <div class="card viz-stat"><span class="text-muted">${t(state, 'mastery')}</span><span class="viz-stat-value">${stats.percent}%</span><span class="text-small">${stats.mastered}/72</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
         <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Funktionale Spur' : state.locale === 'en' ? 'Functional track' : 'Ruta funcional'}</span><span class="viz-stat-value">${funcPct}%</span><span class="text-small">L0-L5</span></div>
-        <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Technische + KI-Spur' : state.locale === 'en' ? 'Technical + AI track' : 'Ruta técnica + IA'}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
+        <div class="card viz-stat"><span class="text-muted">${t(state, 'techTrackLabel')}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
       </div>
       <div class="sbl-actions">
         <button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${t(state, 'begin')} · ${local(nextSkill.title, state.locale)}</button>
@@ -405,7 +406,7 @@ function renderMasterclass(state, skill) {
   const mc = MASTERCLASS[skill.id];
   if (!mc) return '';
   const L = state.locale;
-  const loc = v => v?.[L] ?? v?.en ?? v?.es ?? '';
+  const loc = v => trNode(v, L);
   const screen = b1Window(mc.screen, L);
   const cfg = (mc.cfg || []).map(c => `<li>${escapeHtml(loc(c))}</li>`).join('');
   const e2e = (mc.e2e || []).map(step => `<li>${escapeHtml(loc(step))}</li>`).join('');
@@ -413,30 +414,30 @@ function renderMasterclass(state, skill) {
   const war = mc.war;
   const warHtml = war ? `<div class="sbl-war" data-correct="false">
     <h4>⚠️ ${escapeHtml(loc(war.q))}</h4>
-    <p class="war-line"><strong>Síntoma</strong> ${(war.sympt || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
-    <p class="war-line"><strong>Causa raíz</strong> ${(war.root || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
-    <p class="war-line"><strong>Resolución</strong> ${(war.fix || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
+    <p class="war-line"><strong>${t(state, 'warSymptom')}</strong> ${(war.sympt || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
+    <p class="war-line"><strong>${t(state, 'warRootCause')}</strong> ${(war.root || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
+    <p class="war-line"><strong>${t(state, 'warResolution')}</strong> ${(war.fix || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
   </div>` : '';
-  return `<section class="sbl-masterclass" aria-label="Masterclass">
-    <h3 class="mc-title">🎓 Masterclass</h3>
+  return `<section class="sbl-masterclass" aria-label="${t(state, 'mcTitle')}">
+    <h3 class="mc-title">🎓 ${t(state, 'mcTitle')}</h3>
     ${screen}
     <div class="mc-grid">
-      <div class="mc-block"><h4>⚙️ Configuración exacta</h4><ul>${cfg}</ul></div>
-      <div class="mc-block"><h4>🔗 Proceso end-to-end</h4><ol>${e2e}</ol></div>
+      <div class="mc-block"><h4>⚙️ ${t(state, 'mcConfig')}</h4><ul>${cfg}</ul></div>
+      <div class="mc-block"><h4>🔗 ${t(state, 'mcE2E')}</h4><ol>${e2e}</ol></div>
     </div>
     ${warHtml}
-    <div class="mc-block mc-bp"><h4>🏆 Buenas prácticas senior</h4><ul>${bp}</ul></div>
+    <div class="mc-block mc-bp"><h4>🏆 ${t(state, 'mcBestPractices')}</h4><ul>${bp}</ul></div>
   </section>`;
 }
 
 function renderLearnMode(state, skill) {
   const record = state.progress[skill.id] || {};
-  const tips = (skill.tips?.[state.locale] || []).map(tip => `<li>${escapeHtml(tip)}</li>`).join('');
+  const tips = trList(skill.tips, state.locale).map(tip => `<li>${escapeHtml(tip)}</li>`).join('');
   const steps = (skill.verifySteps || []).map((s, i) => `<li><span class="sbl-step-n">${i + 1}</span><span>${local(s, state.locale)}</span></li>`).join('');
   const an = skill.anchor;
-  const pathHtml = (skill.path || []).length ? `<div class="sbl-detail-grid__full"><h4>${t(state, 'pathLabel')}</h4><div class="sbl-path">${skill.path.map((crumb, i) => `${i ? '<span class="sep">›</span>' : ''}<span class="crumb">${escapeHtml(crumb)}</span>`).join('')}</div></div>` : '';
+  const pathHtml = (skill.path || []).length ? `<div class="sbl-detail-grid__full"><h4>${t(state, 'pathLabel')}</h4><div class="sbl-path">${skill.path.map((crumb, i) => `${i ? '<span class="sep">›</span>' : ''}<span class="crumb">${escapeHtml(trText(crumb, state.locale))}</span>`).join('')}</div></div>` : '';
   const ex = skill.example;
-  const exHtml = ex ? `<div class="sbl-example"><h4>${t(state, 'exampleLabel')}</h4><p><strong>${escapeHtml(local(ex.q, state.locale) || ex.q)}</strong></p><pre class="sbl-figure">${(ex.show || []).map(l => escapeHtml(l)).join('\n')}</pre>${ex.a ? `<p class="text-small"><em>${escapeHtml(local(ex.a, state.locale) || ex.a)}</em></p>` : ''}</div>` : '';
+  const exHtml = ex ? `<div class="sbl-example"><h4>${t(state, 'exampleLabel')}</h4><p><strong>${escapeHtml(trNode(ex.q, state.locale))}</strong></p><pre class="sbl-figure">${(ex.show || []).map(l => escapeHtml(trText(l, state.locale))).join('\n')}</pre>${ex.a ? `<p class="text-small"><em>${escapeHtml(trNode(ex.a, state.locale))}</em></p>` : ''}</div>` : '';
   const anHtml = an ? `<div class="sbl-anchor"><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
   return `<div class="sbl-learn">
     ${anHtml}
@@ -474,24 +475,24 @@ function activityInstructions(type, locale) {
 
 function renderActivityBody(state, activity) {
   const A = state.activityAnswers || {};
-  if (activity.type === 'simulator') return `<div class="act-form">${activity.targets.map((f,i)=>`<label><strong>${escapeHtml(f.label)}</strong><select class="form-select" data-activity-input="sim-${i}"><option value="">— Selecciona —</option>${f.options.map(v=>`<option value="${escapeHtml(v)}"${A[`sim-${i}`]===v?' selected':''}>${escapeHtml(v)}</option>`).join('')}</select></label>`).join('')}</div>`;
+  if (activity.type === 'simulator') return `<div class="act-form">${activity.targets.map((f,i)=>`<label><strong>${escapeHtml(f.label)}</strong><select class="form-select" data-activity-input="sim-${i}"><option value="">${t(state, 'actSelect')}</option>${f.options.map(v=>`<option value="${escapeHtml(v)}"${A[`sim-${i}`]===v?' selected':''}>${escapeHtml(v)}</option>`).join('')}</select></label>`).join('')}</div>`;
   if (activity.type === 'bughunt') return `<div class="act-evidence">${activity.clues.map((c,i)=>`<button type="button" class="act-clue${A[`clue-${i}`]?' is-marked':''}" data-action="activity-toggle" data-key="clue-${i}"><span>${A[`clue-${i}`]?'⚑':'○'}</span>${escapeHtml(c.label)}</button>`).join('')}</div>`;
   if (activity.type === 'forensic') return `<div class="act-chain">${activity.evidence.map((e,i)=>`<button type="button" class="act-link${A.broken===String(i)?' is-marked':''}" data-action="activity-answer" data-key="broken" data-value="${i}"><span>${i+1}</span>${escapeHtml(e.label)}</button>`).join('<b>→</b>')}</div>`;
   if (activity.type === 'config') {
     const sequence = state.activitySequence || [];
-    return `<div class="act-route-built">${sequence.length?sequence.map(x=>`<span>${escapeHtml(x)}</span>`).join('<b>›</b>'):'<em>La ruta aparece aquí…</em>'}</div><div class="act-token-bank">${activity.tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ Deshacer último</button>`;
+    return `<div class="act-route-built">${sequence.length?sequence.map(x=>`<span>${escapeHtml(x)}</span>`).join('<b>›</b>'):`<em>${t(state, 'actRouteHere')}</em>`}</div><div class="act-token-bank">${activity.tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ ${t(state, 'actUndo')}</button>`;
   }
   if (activity.type === 'consequence') {
     const sequence = state.activitySequence || [];
     const tokens = [...activity.chain].reverse();
-    return `<div class="act-trigger"><strong>Evento observado</strong><p>${escapeHtml(activity.trigger)}</p></div><div class="act-route-built">${sequence.length?sequence.map((x,i)=>`<span><small>${i+1}</small>${escapeHtml(x)}</span>`).join('<b>→</b>'):'<em>Construye la cascada…</em>'}</div><div class="act-token-bank">${tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ Deshacer último</button>`;
+    return `<div class="act-trigger"><strong>${t(state, 'actEventSeen')}</strong><p>${escapeHtml(activity.trigger)}</p></div><div class="act-route-built">${sequence.length?sequence.map((x,i)=>`<span><small>${i+1}</small>${escapeHtml(x)}</span>`).join('<b>→</b>'):`<em>${t(state, 'actBuildCascade')}</em>`}</div><div class="act-token-bank">${tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ ${t(state, 'actUndo')}</button>`;
   }
   if (activity.type === 'journal') {
     const amount = v => Number(String(v||'0').replace(/\./g,'').replace(',','.')) || 0;
     const debit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Debe'?amount(A[`amount-${i}`]):0),0);
     const credit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Haber'?amount(A[`amount-${i}`]):0),0);
     const balanced = debit>0 && Math.abs(debit-credit)<.005;
-    return `<div class="act-journal"><div class="act-jhead"><span>Cuenta</span><span>Debe / Haber</span><span>Importe</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(line[0])}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option${A[`side-${i}`]==='Debe'?' selected':''}>Debe</option><option${A[`side-${i}`]==='Haber'?' selected':''}>Haber</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ Debe <output>${debit.toFixed(2).replace('.',',')}</output> · Σ Haber <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?'✓ Cuadrado':'⚠ Diferencia '+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div></div>`;
+    return `<div class="act-journal"><div class="act-jhead"><span>${t(state, 'actAccount')}</span><span>${t(state, 'actSide')}</span><span>${t(state, 'actAmount')}</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(trText(line[0], state.locale))}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option value="Debe"${A[`side-${i}`]==='Debe'?' selected':''}>${t(state, 'actDebit')}</option><option value="Haber"${A[`side-${i}`]==='Haber'?' selected':''}>${t(state, 'actCredit')}</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ ${t(state, 'actDebit')} <output>${debit.toFixed(2).replace('.',',')}</output> · Σ ${t(state, 'actCredit')} <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?`✓ ${t(state, 'actBalanced')}`:`⚠ ${t(state, 'actDifference')} `+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div></div>`;
   }
   return '';
 }
@@ -502,31 +503,31 @@ function renderProveMode(state, skill) {
   const guided = state.skillMode === 'guided';
   const hints = state.activityHints || 0;
   const skillHints = asArrayHints(skill.assessment?.hints);
-  if (activity.unavailable) return `<p>Actividad en preparación.</p>`;
+  if (activity.unavailable) return `<p>${t(state, 'actUnavailable')}</p>`;
   const briefHtml = activity.brief ? `<div class="act-brief">
-    <div><strong>¿Qué es esto?</strong><span>${escapeHtml(activity.brief.what)}</span></div>
-    <div><strong>Tu tarea</strong><span>${escapeHtml(activity.brief.task)}</span></div>
-    <div><strong>Se evalúa</strong><span>${escapeHtml(activity.brief.graded)}</span></div>
+    <div><strong>${t(state, 'actWhatIsThis')}</strong><span>${escapeHtml(activity.brief.what)}</span></div>
+    <div><strong>${t(state, 'actYourTask')}</strong><span>${escapeHtml(activity.brief.task)}</span></div>
+    <div><strong>${t(state, 'actGraded')}</strong><span>${escapeHtml(activity.brief.graded)}</span></div>
   </div>` : '';
-  const guidedHtml = guided ? `<div class="act-guided"><strong>Modo guiado</strong><span>Errores no cuentan. Pide pista cuando lo necesites.</span>
+  const guidedHtml = guided ? `<div class="act-guided"><strong>${t(state, 'actGuidedMode')}</strong><span>${t(state, 'actGuidedHelp')}</span>
     ${hints > 0 ? `<ol class="act-hints">${skillHints.slice(0, hints).map(h => `<li>${escapeHtml(localizeHint(h, state.locale))}</li>`).join('')}</ol>` : ''}</div>` : '';
-  const detailsHtml = feedback?.details?.length ? `<ul class="act-details">${feedback.details.map(d => `<li class="${d.ok ? 'ok' : 'ko'}">${d.ok ? '✓' : '✗'} ${escapeHtml(d.item)}${d.ok ? '' : ` — <em>correcto: ${escapeHtml(String(d.expected)).slice(0,60)}</em>`}</li>`).join('')}</ul>` : '';
+  const detailsHtml = feedback?.details?.length ? `<ul class="act-details">${feedback.details.map(d => `<li class="${d.ok ? 'ok' : 'ko'}">${d.ok ? '✓' : '✗'} ${escapeHtml(trText(d.item, state.locale))}${d.ok ? '' : ` — <em>${t(state, 'actCorrectAnswer')}: ${escapeHtml(trText(String(d.expected), state.locale)).slice(0,60)}</em>`}</li>`).join('')}</ul>` : '';
   return `<section class="sbl-activity" data-activity-type="${activity.type}">
-    <header class="act-head"><span class="act-icon">${{simulator:'⌨',bughunt:'⌖',journal:'⚖',forensic:'⌕',consequence:'⟿',config:'⚙'}[activity.type]}</span><div><span class="viz-badge">${escapeHtml(activity.label)}${guided ? ' · guiado' : ''}</span><h3>${local(skill.title,state.locale)}</h3></div></header>
+    <header class="act-head"><span class="act-icon">${{simulator:'⌨',bughunt:'⌖',journal:'⚖',forensic:'⌕',consequence:'⟿',config:'⚙'}[activity.type]}</span><div><span class="viz-badge">${escapeHtml(activity.label)}${guided ? ` · ${t(state, 'actGuidedTag')}` : ''}</span><h3>${local(skill.title,state.locale)}</h3></div></header>
     ${briefHtml}
     ${guidedHtml}
     ${activity.mc?.screen && ['simulator','bughunt','journal','forensic'].includes(activity.type) ? `<div class="act-screen">${b1Window(activity.mc.screen,state.locale)}</div>`:''}
     ${renderActivityBody(state,activity)}
-    ${feedback?`<div class="act-feedback ${feedback.correct?'is-correct':'is-wrong'}"><strong>${feedback.correct?'✓ Misión resuelta':'↻ Aún no — te digo exactamente qué falló'}</strong><p>${escapeHtml(feedback.message)}</p>${detailsHtml}</div>`:''}
+    ${feedback?`<div class="act-feedback ${feedback.correct?'is-correct':'is-wrong'}"><strong>${feedback.correct?`✓ ${t(state, 'actSolved')}`:`↻ ${t(state, 'actNotYet')}`}</strong><p>${escapeHtml(feedback.message)}</p>${detailsHtml}</div>`:''}
     <div class="sbl-actions">
-      <button type="button" class="btn btn-primary" data-action="check-activity">Comprobar</button>
-      ${guided && skillHints.length && hints < skillHints.length ? `<button type="button" class="btn" data-action="activity-hint">💡 Pista (${hints}/${skillHints.length})</button>`:''}
-      <button type="button" class="btn" data-action="reset-activity">Reiniciar</button>
+      <button type="button" class="btn btn-primary" data-action="check-activity">${t(state, 'actCheck')}</button>
+      ${guided && skillHints.length && hints < skillHints.length ? `<button type="button" class="btn" data-action="activity-hint">💡 ${t(state, 'actHint')} (${hints}/${skillHints.length})</button>`:''}
+      <button type="button" class="btn" data-action="reset-activity">${t(state, 'actReset')}</button>
     </div>
   </section>`;
 }
 function asArrayHints(v) { return Array.isArray(v) ? v : v ? [v] : []; }
-function localizeHint(h, locale) { return h?.[locale] ?? h?.es ?? String(h ?? ''); }
+function localizeHint(h, locale) { return trNode(h, locale); }
 function renderSkillDetail(state, skill) {
   const record = state.progress[skill.id] || {};
   const mode = state.skillMode;
@@ -534,7 +535,7 @@ function renderSkillDetail(state, skill) {
     <div class="sbl-card-head"><span class="viz-badge">${escapeHtml(skill.id)}</span>
       <div class="sbl-mode-toggle" role="tablist">
         <button type="button" class="btn${mode === 'learn' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="learn" aria-pressed="${mode === 'learn'}">${t(state, 'learnMode')}</button>
-        <button type="button" class="btn${mode === 'guided' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="guided" aria-pressed="${mode === 'guided'}">Práctica guiada</button>
+        <button type="button" class="btn${mode === 'guided' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="guided" aria-pressed="${mode === 'guided'}">${t(state, 'guidedPractice')}</button>
         <button type="button" class="btn${mode === 'prove' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="prove" aria-pressed="${mode === 'prove'}">${t(state, 'proveSkill')}</button>
       </div></div>
     <h2 id="skill-title">${local(skill.title, state.locale)}</h2>
@@ -564,7 +565,7 @@ function renderSimulator(state) {
   return `<section class="sbl-stack" aria-labelledby="sim-title"><h2 id="sim-title">${t(state, 'simulatorTitle')}</h2><p class="text-muted">${t(state, 'chainExplorer')}</p><div class="sbl-toolbar">${keys.map(key => `<button type="button" class="btn${state.process === key ? ' btn-primary' : ''}" data-action="select-process" data-process="${key}" aria-pressed="${state.process === key}">${t(state, labelKeys[key])}</button>`).join('')}</div>
   <div class="sbl-process" role="list">${steps.map((item, index) => `<button type="button" class="btn sbl-process-stage" data-action="select-process-step" data-index="${index}" aria-current="${index === state.processStep ? 'step' : 'false'}"><span>${index + 1}. ${local(item.labels, state.locale)}</span><span class="sbl-process-mark" aria-hidden="true"></span></button>`).join('')}</div>
   <div class="card sbl-stack"><strong>${local(step.labels, state.locale)}</strong>
-    <div class="sbl-checks">${(step.checks?.[state.locale] || []).map(c => `<span class="viz-badge">${escapeHtml(c)}</span>`).join('')}</div>
+    <div class="sbl-checks">${trList(step.checks, state.locale).map(c => `<span class="viz-badge">${escapeHtml(c)}</span>`).join('')}</div>
     <div class="sbl-effects-grid">
       ${effectRow(t(state, 'effectStock'), step.effects.stock)}
       ${effectRow(t(state, 'effectAccounting'), step.effects.accounting)}
@@ -601,7 +602,7 @@ function renderEvidence(state) {
 function renderConsole(state) {
   const tab = state.consoleTab || 'queries';
   const L = state.locale;
-  const loc = v => v?.[L] ?? v?.es ?? '';
+  const loc = v => trNode(v, L);
   const open = state.consoleOpen;
   const tabBtn = (id, label) => `<button type="button" class="btn${tab===id?' btn-primary':''}" data-action="console-tab" data-tab="${id}">${escapeHtml(label)}</button>`;
   let body = '';
@@ -609,13 +610,13 @@ function renderConsole(state) {
     const sel = ADVANCED_QUERIES.find(q => q.id === state.consoleQuery);
     if (sel) {
       body = `<article class="card sbl-stack csl-detail">
-        <div class="csl-toprow"><button type="button" class="btn" data-action="console-close">← ${escapeHtml(loc({es:'Volver a la lista',en:'Back to list'}))}</button>
+        <div class="csl-toprow"><button type="button" class="btn" data-action="console-close">← ${t(state, 'cslBack')}</button>
         <span class="viz-badge">${sel.engines.join(' · ')}</span></div>
         <h3>${escapeHtml(loc(sel.domain))}</h3>
         <p class="csl-ask">${escapeHtml(loc(sel.ask))}</p>
         <pre class="csl-sql"><code>${escapeHtml(sel.sql)}</code></pre>
-        <div class="csl-why"><strong>¿Por qué funciona?</strong><p>${escapeHtml(loc(sel.why))}</p></div>
-        <div class="csl-pitfall"><strong>⚠️ Trampa</strong><p>${escapeHtml(loc(sel.pitfall))}</p></div>
+        <div class="csl-why"><strong>${t(state, 'cslWhy')}</strong><p>${escapeHtml(loc(sel.why))}</p></div>
+        <div class="csl-pitfall"><strong>⚠️ ${t(state, 'cslTrap')}</strong><p>${escapeHtml(loc(sel.pitfall))}</p></div>
       </article>`;
     } else {
       body = `<div class="csl-grid">${ADVANCED_QUERIES.map(q => `
@@ -629,26 +630,26 @@ function renderConsole(state) {
     body = DASHBOARD_PATTERNS.map(d => `
       <article class="card sbl-stack csl-panel">
         <button type="button" class="csl-toggle" data-action="console-toggle" data-id="${d.id}"><strong>${escapeHtml(loc(d.name))}</strong><span>${open===d.id?'−':'+'}</span></button>
-        ${open===d.id?`<p class="csl-ask">${escapeHtml(loc(d.build))}</p><ol class="csl-steps">${d.how.map(h=>`<li>${escapeHtml(loc(h))}</li>`).join('')}</ol><div class="csl-why"><strong>Nivel</strong><p>${escapeHtml(loc(d.level))}</p></div>`:''}
+        ${open===d.id?`<p class="csl-ask">${escapeHtml(loc(d.build))}</p><ol class="csl-steps">${d.how.map(h=>`<li>${escapeHtml(loc(h))}</li>`).join('')}</ol><div class="csl-why"><strong>${t(state, 'cslLevel')}</strong><p>${escapeHtml(loc(d.level))}</p></div>`:''}
       </article>`).join('');
   } else {
     body = VIBE_PATTERNS.map(v => `
       <article class="card sbl-stack csl-panel">
         <button type="button" class="csl-toggle" data-action="console-toggle" data-id="${v.id}"><strong>${escapeHtml(loc(v.name))}</strong><span>${open===v.id?'−':'+'}</span></button>
-        ${open===v.id?`<p>${escapeHtml(loc(v.idea))}</p><pre class="csl-sql csl-prompt"><code>${escapeHtml(v.template)}</code></pre><ul class="csl-check">${v.check.map(c=>`<li>☐ ${escapeHtml(c)}</li>`).join('')}</ul>`:''}
+        ${open===v.id?`<p>${escapeHtml(loc(v.idea))}</p><pre class="csl-sql csl-prompt"><code>${escapeHtml(trText(v.template, L))}</code></pre><ul class="csl-check">${v.check.map(c=>`<li>☐ ${escapeHtml(trText(c, L))}</li>`).join('')}</ul>`:''}
       </article>`).join('');
   }
   return `<section class="sbl-console" aria-labelledby="console-title">
-    <header class="csl-head"><h2 id="console-title">${escapeHtml(loc({es:'Consola avanzada',en:'Advanced console',de:'Erweiterte Konsole'}))}</h2>
-    <p class="text-small">${escapeHtml(loc({es:'SQL real de SAP B1, dashboards de gestión y vibecoding aplicado. Todo con tablas reales: OINV, JDT1, OITW, ITT1…',en:'Real B1 SQL, management dashboards and applied vibecoding.'}))}</p>
-    <div class="csl-tabs">${tabBtn('queries',loc({es:'Consultas expertas',en:'Expert queries'}))}${tabBtn('dashboards',loc({es:'Dashboards & KPI',en:'Dashboards & KPI'}))}${tabBtn('vibe',loc({es:'Vibecoding B1',en:'B1 vibecoding'}))}</div></header>
+    <header class="csl-head"><h2 id="console-title">${t(state, 'navAI')}</h2>
+    <p class="text-small">${t(state, 'cslSubtitle')}</p>
+    <div class="csl-tabs">${tabBtn('queries',translate(L, 'cslQueries'))}${tabBtn('dashboards',translate(L, 'cslDashboards'))}${tabBtn('vibe',translate(L, 'cslVibecoding'))}</div></header>
     ${body}
   </section>`;
 }
 
 function renderCareer(state) {
   const L = state.locale;
-  const loc = v => v?.[L] ?? v?.es ?? '';
+  const loc = v => trNode(v, L);
   const mastered = SKILLS.filter(s => state.progress[s.id]?.mastered).length;
   const cp = careerProgress(mastered, L);
   const kpis = kpiSnapshot(mastered);
@@ -656,7 +657,7 @@ function renderCareer(state) {
   const nextMc = MASTERCLASS[nextSkill.id];
   const ticket = nextMc ? getTicket(nextSkill, nextMc, L, LEVELS) : null;
   const roleUp = [...CAREER.roles].reverse().find(r => mastered < r.at);
-  const nextRole = roleUp ? roleUp[L] || roleUp.es : '';
+  const nextRole = roleUp ? trNode(roleUp, L) : '';
   const nextAt = roleUp ? roleUp.at : 72;
   return `<section class="sbl-stack" aria-labelledby="career-title">
     <header class="cr-head">
@@ -664,25 +665,25 @@ function renderCareer(state) {
       <h2 id="career-title">${escapeHtml(loc(CAREER.company))}</h2>
       <p class="text-small">${escapeHtml(loc(CAREER.intro))}</p></div>
       <div class="cr-role">
-        <span class="text-small">${L==='de'?'Aktuelle Rolle':L==='en'?'Current role':'Cargo actual'}</span>
+        <span class="text-small">${t(state, 'crCurrentRole')}</span>
         <strong>${escapeHtml(cp.role)}</strong>
-        <span class="text-small">${mastered}/72 · ${L==='de'?`nächste Rolle: ${nextRole} bei ${nextAt}`:L==='en'?`next: ${nextRole} at ${nextAt}`:`siguiente: ${nextRole} a las ${nextAt}`}</span>
+        <span class="text-small">${mastered}/72 · ${t(state, 'crNextRole')}: ${escapeHtml(nextRole)} ${t(state, 'crAt')} ${nextAt}</span>
       </div>
     </header>
     <div class="cr-kpis">${kpis.map(k => `<div class="card viz-stat"><span class="text-muted">${escapeHtml(loc(k.label))}</span><span class="viz-stat-value">${k.value}${k.unit}</span></div>`).join('')}</div>
     ${ticket ? `<section class="card cr-ticket">
-      <header><span class="viz-badge">${L==='de'?'NÄCHSTES TICKET':L==='en'?'NEXT TICKET':'SIGUIENTE TICKET'}</span><strong>${escapeHtml(ticket.id)} · ${escapeHtml(ticket.from)}</strong></header>
+      <header><span class="viz-badge">${t(state, 'crNextTicket')}</span><strong>${escapeHtml(ticket.id)} · ${escapeHtml(ticket.from)}</strong></header>
       <h3>${escapeHtml(ticket.subject)}</h3>
       <p>${escapeHtml(ticket.body)}</p>
-      <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${ticket.skillId}">${L==='de'?'Ticket bearbeiten':L==='en'?'Work this ticket':'Atender este ticket'}</button></div>
+      <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${ticket.skillId}">${t(state, 'crWorkTicket')}</button></div>
     </section>` : ''}
     <section class="card sbl-stack">
-      <h3>${L==='de'?'Ticket-Verlauf':L==='en'?'Ticket log':'Registro de tickets'}</h3>
+      <h3>${t(state, 'crTicketLog')}</h3>
       <div class="cr-log">${SKILLS.filter(s => state.progress[s.id]?.mastered).slice(0, 30).reverse().map(s => {
         const mc = MASTERCLASS[s.id];
         const tk = mc ? getTicket(s, mc, L, LEVELS) : null;
-        return tk ? `<div class="cr-log-row"><span class="cr-log-id">${tk.id}</span><span>${escapeHtml(tk.subject)}</span><span class="cr-log-ok">✓ ${L==='de'?'gelöst':L==='en'?'resolved':'resuelto'}</span></div>` : '';
-      }).join('') || `<em>${L==='de'?'Noch keine Tickets gelöst.':L==='en'?'No tickets resolved yet.':'Aún no hay tickets resueltos.'}</em>`}</div>
+        return tk ? `<div class="cr-log-row"><span class="cr-log-id">${tk.id}</span><span>${escapeHtml(tk.subject)}</span><span class="cr-log-ok">✓ ${t(state, 'crResolved')}</span></div>` : '';
+      }).join('') || `<em>${t(state, 'crNoTickets')}</em>`}</div>
     </section>
   </section>`;
 }
@@ -769,9 +770,9 @@ export function mountSapB1Lab(root) {
       const skill = SKILLS.find(s => s.id === state.selectedSkillId);
       if (!skill) return;
       const activity = getActivity(skill, state.locale);
-      const result = validateActivityDetailed(activity, state.activityAnswers, state.activitySequence);
+      const result = validateActivityDetailed(activity, state.activityAnswers, state.activitySequence, state.locale);
       const passed = result.correct;
-      dispatch({ type: 'ACTIVITY_FEEDBACK', correct: passed, message: passed ? (activity.resolution || 'Decisión correcta: la evidencia, el control y el resultado son coherentes.') : 'Revisa los elementos marcados y vuelve a intentarlo.', details: result.details });
+      dispatch({ type: 'ACTIVITY_FEEDBACK', correct: passed, message: passed ? (activity.resolution || translate(state.locale, 'actRightPrompt')) : translate(state.locale, 'actWrongPrompt'), details: result.details });
       if (passed && state.skillMode === 'prove' && state.activityFeedback?.correct !== true) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
     }
     else if (action === 'activity-hint') dispatch({ type: 'ACTIVITY_HINT' });

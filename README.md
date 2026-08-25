@@ -6,7 +6,7 @@
 
 🇪🇸 [Español](#español) · 🇬🇧 [English](#english)
 
-[![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/standalone-%3C1%20MiB-orange)](#cómo-usarla)
+[![tests](https://img.shields.io/badge/tests-56%2F56%20PASS-brightgreen)](#verificación) [![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/standalone-%3C1%2C5%20MiB-orange)](#cómo-usarla)
 
 ### ➡️ [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/)
 
@@ -59,11 +59,15 @@ La interfaz permite **Español, English y Deutsch**. La versión web aplica una 
 ### Verificación local
 
 ```bash
-node scripts/enforce-strict-locale.mjs
-npm test
-npm run build
-npm run test:browser:local
+npm run build                 →  reconstruye el standalone desde src/
+npm test                      →  56/56 PASS
+npm run test:browser:local    →  recorre las 8 vistas y 72 competencias × 3 modos en
+                                 Chromium, en los tres idiomas
 ```
+
+Incluye test **anti-plantilla** (falla si dos competencias comparten texto de evaluación) y
+**puerta de idioma**: `i18n-coverage` falla si algún texto no tiene inglés o alemán, e
+`i18n-render` falla si al elegir inglés o alemán se cuela una frase en español.
 
 ### Estructura del repositorio
 
@@ -117,11 +121,15 @@ Synthetic-only learning data (`SYN-*`), progress stays in browser `localStorage`
 ### Local verification
 
 ```bash
-node scripts/enforce-strict-locale.mjs
-npm test
-npm run build
-npm run test:browser:local
+npm run build                 →  rebuilds the standalone from src/
+npm test                      →  56/56 PASS
+npm run test:browser:local    →  exercises the 8 views and 72 skills × 3 modes in
+                                 Chromium, across the three languages
 ```
+
+Includes an **anti-template test** (fails if two skills share assessment text) and a
+**language gate**: `i18n-coverage` fails if any text lacks English or German, and
+`i18n-render` fails if a Spanish sentence surfaces when English or German is selected.
 
 ### Sources
 
