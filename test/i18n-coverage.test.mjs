@@ -17,7 +17,9 @@ const DATA_ONLY = /^[\s\d.,:;%+\-–—()\/€$#*✔✖×xX·]*$/;
 const CODE_LIKE = /^(SYN-|EV-|OINV|JDT1|OITW|ITT1|OIVL|IVL1|PDN1|RDR1|SBO|C\d{5}|V\d{5}|A\d{5}|P-SYN|10\.0|FP )/;
 const isTranslatable = value => Boolean(value)
   && !DATA_ONLY.test(value)
-  && !CODE_LIKE.test(value)
+  // El patrón de código solo descarta identificadores sueltos: una frase que empieza por
+  // el nombre de una tabla («OITW.AvgPrice es el coste medio…») sigue siendo prosa.
+  && !(value.length < 24 && CODE_LIKE.test(value))
   && /[a-zA-ZáéíóúüñÁÉÍÓÚÑäöüß]/.test(value);
 
 // Términos que coinciden legítimamente entre idiomas: nombre del producto,
@@ -28,7 +30,10 @@ const ROOTS = { SKILLS, CASES, INCIDENTS, BOSSES, EVIDENCE, PROCESS_STEPS, LEVEL
 
 function collectGaps(locale) {
   const gaps = [];
-  const isNode = value => value && typeof value === 'object' && !Array.isArray(value) && typeof value.es === 'string';
+  // Un objeto es nodo de texto solo si ninguna otra clave lleva estructura: si la tiene,
+  // hay contenido debajo que también debe auditarse (lo aprendimos con screen de L1-07).
+  const hasNested = value => Object.entries(value).some(([key, item]) => !['es', 'en', 'de'].includes(key) && item && typeof item === 'object');
+  const isNode = value => value && typeof value === 'object' && !Array.isArray(value) && typeof value.es === 'string' && !hasNested(value);
   const isListNode = value => value && typeof value === 'object' && !Array.isArray(value) && Array.isArray(value.es);
   const report = (spanish, where) => {
     if (typeof spanish !== 'string' || !isTranslatable(spanish) || isInvariant(spanish)) return;
