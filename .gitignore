@@ -1,1 +1,6 @@
 node_modules/
+scrollcraft/builds/*/lab/
+scrollcraft/builds/*/scrollcraft.js
+scrollcraft/builds/*/scrollcraft.css
+scrollcraft/builds/*/index.html
+scrollcraft/builds/*/handbuch.*
