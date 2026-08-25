@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import {
   createInitialState,
   reduceState,
@@ -7,6 +8,8 @@ import {
   renderAppMarkup,
   escapeHtml
 } from '../src/app.mjs';
+import { getActivity } from '../src/activities.mjs';
+import { SKILLS } from '../src/content.mjs';
 
 test('initial state starts on home dashboard in Spanish with dual track', () => {
   const state = createInitialState();
@@ -117,4 +120,30 @@ test('German console and evidence views contain localized content', () => {
   const evidence = renderAppMarkup(createInitialState({ locale: 'de', view: 'evidence' }));
   assert.match(evidence, /Logistik-Lernpfad/);
   assert.doesNotMatch(evidence, /logistics learning path/);
+});
+
+test('Pages entrypoint mounts the locale runtime and renders B1 windows in every language', async () => {
+  const [index, runtime] = await Promise.all([
+    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../src/runtime-strict.mjs', import.meta.url), 'utf8')
+  ]);
+  assert.match(index, /mountStrictSapB1Lab/);
+  assert.match(index, /runtime-strict\.mjs/);
+  assert.match(runtime, /document\.documentElement\.lang = locale/);
+  // Las ventanas de SAP B1 se traducen; ya no se ocultan ni se sustituyen por avisos.
+  assert.doesNotMatch(runtime, /figure\.b1|replaceWith|innerHTML/);
+  const german = renderAppMarkup(createInitialState({ locale: 'de', view: 'map' }));
+  assert.match(german, /Hauptmenü von SAP Business One/);
+  assert.match(german, /Verkauf – A\/R/);
+  assert.doesNotMatch(german, /Menú principal de SAP Business One/);
+});
+
+test('practical activities provide localized English and German field content', () => {
+  const skill = SKILLS.find(s => s.id === 'SYN-SK-L0-01');
+  const en = getActivity(skill, 'en');
+  const de = getActivity(skill, 'de');
+  assert.match(en.targets[0].label, /Module|Sales Order/);
+  assert.doesNotMatch(en.targets.map(x => x.label).join(' '), /Módulo|Pedido de cliente/);
+  assert.match(de.targets[0].label, /Modul|Kundenauftrag/);
+  assert.doesNotMatch(de.targets.map(x => x.label).join(' '), /Módulo|Pedido de cliente/);
 });

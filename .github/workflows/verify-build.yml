@@ -1,0 +1,35 @@
+name: verify-and-build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build offline standalone
+        run: npm run build
+      - name: Run tests
+        run: npm test
+      - name: Install browser test runtime
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run browser smoke test
+        run: npm run test:browser:local
+      - name: Verify generated offline artifacts
+        run: |
+          test -s dist/SAP-Business-One-Mastery-Lab-Standalone.html
+          test -s dist/sap-b1-mastery-lab.html
+          grep -q "mountSapB1Lab" index.html

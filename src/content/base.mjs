@@ -47,7 +47,8 @@ export const I18N = {
     b1WindowLabel: 'ventana SAP Business One', techTrackLabel: 'Ruta técnica + IA',
     fbMark: 'Marcar', fbDontMark: 'No marcar', fbMarked: 'Marcado', fbUnmarked: 'Sin marcar',
     fbLinkFlagged: 'Eslabón señalado', fbRealBrokenLink: 'El eslabón roto real', fbStep: 'Paso', fbExpected: 'esperaba',
-    fbDecoys: 'Incluiste señuelos que no pertenecen a la cadena', fbExactSteps: 'pasos exactos', fbSteps: 'pasos', fbSideAmount: 'lado/importe'
+    fbDecoys: 'Incluiste señuelos que no pertenecen a la cadena', fbExactSteps: 'pasos exactos', fbSteps: 'pasos', fbSideAmount: 'lado/importe',
+    kicker: 'SAP BUSINESS ONE · 9 NIVELES · 72 COMPETENCIAS · NIVEL EXPERTO'
   },
   en: {
     appLabel: 'SAP Business One mastery lab', navHome: 'Home', navCareer: 'Career', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'Advanced console', navEvidence: 'Sources',
@@ -96,7 +97,8 @@ export const I18N = {
     b1WindowLabel: 'SAP Business One window', techTrackLabel: 'Technical + AI track',
     fbMark: 'Flag', fbDontMark: 'Do not flag', fbMarked: 'Flagged', fbUnmarked: 'Not flagged',
     fbLinkFlagged: 'Link flagged', fbRealBrokenLink: 'The actual broken link', fbStep: 'Step', fbExpected: 'expected',
-    fbDecoys: 'You included decoys that do not belong to the chain', fbExactSteps: 'exact steps', fbSteps: 'steps', fbSideAmount: 'side/amount'
+    fbDecoys: 'You included decoys that do not belong to the chain', fbExactSteps: 'exact steps', fbSteps: 'steps', fbSideAmount: 'side/amount',
+    kicker: 'SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · EXPERT LEVEL'
   },
   de: {
     appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Home', navCareer: 'Career', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
@@ -145,7 +147,8 @@ export const I18N = {
     b1WindowLabel: 'SAP-Business-One-Fenster', techTrackLabel: 'Technik- und KI-Pfad',
     fbMark: 'Markieren', fbDontMark: 'Nicht markieren', fbMarked: 'Markiert', fbUnmarked: 'Nicht markiert',
     fbLinkFlagged: 'Markiertes Glied', fbRealBrokenLink: 'Das tatsächlich gebrochene Glied', fbStep: 'Schritt', fbExpected: 'erwartet',
-    fbDecoys: 'Du hast Köder aufgenommen, die nicht zur Kette gehören', fbExactSteps: 'exakte Schritte', fbSteps: 'Schritte', fbSideAmount: 'Seite/Betrag'
+    fbDecoys: 'Du hast Köder aufgenommen, die nicht zur Kette gehören', fbExactSteps: 'exakte Schritte', fbSteps: 'Schritte', fbSideAmount: 'Seite/Betrag',
+    kicker: 'SAP BUSINESS ONE · 9 STUFEN · 72 KOMPETENZEN · EXPERTENNIVEAU'
   }
 };
 
@@ -178,6 +181,20 @@ const RISK_BY_LEVEL = [1, 2, 2, 2, 3, 3, 2, 3, 3];
 // ex=ejemplo trabajado {q:pregunta, rows:[[debe,haber,importe]...] opcional, show:[líneas con cifras], a:respuesta}.
 export function sk(level, index, spec) {
   const id = `SYN-SK-L${level}-${String(index + 1).padStart(2, '0')}`;
+  const localizedList = value => Array.isArray(value)
+    ? Object.fromEntries(['es', 'en', 'de'].map(locale => {
+        const wrongReasons = value.map(entry => entry?.[locale]).filter(Boolean);
+        const optionCount = spec.a.opts?.[locale]?.length ?? wrongReasons.length;
+        let wrongIndex = 0;
+        return [locale, Array.from({ length: optionCount }, (_, optionIndex) => optionIndex === (spec.a.correct ?? 0)
+          ? spec.a.why?.[locale]
+          : wrongReasons[wrongIndex++]).filter(Boolean)];
+      }))
+    : value;
+  const localizedText = value => value && Object.fromEntries(['es', 'en', 'de'].map(locale => [
+    locale,
+    Array.isArray(value[locale]) ? value[locale].join(' ') : value[locale]
+  ]));
   return {
     id, classification: 'synthetic', level, track: LEVELS[level].track, title: spec.t,
     objective: spec.o, concept: spec.c, mindset: spec.m, practice: spec.p,
@@ -188,7 +205,7 @@ export function sk(level, index, spec) {
       prompt: spec.a.prompt ?? spec.a.p, optionsText: spec.a.opts, correct: spec.a.correct ?? 0,
       safe: [true, true, false], rationale: spec.a.why,
       why: spec.a.why, principles: spec.a.prin, principleCorrect: spec.a.prinOk ?? 0,
-      seniorSteps: spec.a.senior, distractorWhy: spec.a.dwhy, hints: spec.a.hints
+      seniorSteps: spec.a.senior, distractorWhy: localizedList(spec.a.dwhy), hints: localizedText(spec.a.hints)
     },
     riskWeight: spec.rw ?? RISK_BY_LEVEL[level],
     prerequisites: index === 0 && level > 0

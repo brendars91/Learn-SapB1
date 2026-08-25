@@ -1,14 +1,44 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { chromium } = require('/home/ubuntu/.npm-global/lib/node_modules/promptfoo/node_modules/playwright-core');
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createServer } from 'node:http';
+import { readFile } from 'node:fs/promises';
 
-const browser = await chromium.launch({ headless: true, executablePath: '/home/ubuntu/.cache/ms-playwright/chromium-1234/chrome-linux/chrome', args: ['--no-sandbox'] });
+function loadPlaywright() {
+  const localRequire = createRequire(import.meta.url);
+  try { return localRequire('playwright'); }
+  catch (error) {
+    const runtimeModules = process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES;
+    if (!runtimeModules) throw new Error('Playwright is required. Run: npm install --no-save playwright@1.55.0', { cause: error });
+    return createRequire(path.join(runtimeModules, '__learn_sapb1_resolver.cjs'))('playwright');
+  }
+}
+
+const { chromium } = loadPlaywright();
+
+const browser = await chromium.launch({ headless: true, executablePath: chromium.executablePath(), args: ['--no-sandbox'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 const errors = [];
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 page.on('pageerror', e => errors.push(e.message));
-await page.goto('file:///home/ubuntu/Learn-SapB1-repo/index.html?local-browser-gate');
+// El entrypoint de Pages carga módulos ES: por file:// el navegador los bloquea, así que
+// se sirve el repositorio por HTTP igual que GitHub Pages.
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const TYPES = { '.html': 'text/html', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
+const server = createServer(async (request, response) => {
+  const url = new URL(request.url, 'http://127.0.0.1');
+  const target = path.join(projectRoot, path.normalize(decodeURIComponent(url.pathname)).replace(/^([/\\])+/, ''));
+  if (url.pathname === '/favicon.ico') { response.writeHead(204).end(); return; }
+  if (!target.startsWith(projectRoot)) { response.writeHead(403).end(); return; }
+  try {
+    const body = await readFile(target);
+    response.writeHead(200, { 'content-type': TYPES[path.extname(target)] || 'application/octet-stream' }).end(body);
+  } catch { response.writeHead(404).end(); }
+});
+await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+const entrypoint = `http://127.0.0.1:${server.address().port}/index.html`;
+await page.goto(`${entrypoint}?local-browser-gate`);
 await page.locator('#sap-b1-mastery-lab').waitFor();
 const views = ['home','career','map','cases','incidents','simulator','ai','evidence'];
 for (const view of views) { await page.locator(`[data-view="${view}"]`).click(); assert.ok((await page.locator('main').innerText()).trim().length > 20, view); }
@@ -59,3 +89,4 @@ for (const width of [320,375,414,768,1024,1440]) {
 assert.deepEqual(errors, []);
 console.log(JSON.stringify({ views: views.length, skills: ids.length, languageLeaks, errors }, null, 2));
 await browser.close();
+await new Promise(resolve => server.close(resolve));

@@ -5,7 +5,6 @@ import { MASTERCLASS } from '../src/masterclass.mjs';
 import { CAREER } from '../src/career.mjs';
 import { DEEP } from '../src/content/deep.mjs';
 import { ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS } from '../src/advanced.mjs';
-import { JOURNALS, SIMULATOR_FIELDS } from '../src/activities.mjs';
 import { TERMS, INVARIANT } from '../src/content/i18n-terms.mjs';
 import { isInvariant } from '../src/i18n.mjs';
 
@@ -25,10 +24,7 @@ const isTranslatable = value => Boolean(value)
 // verbos idénticos en español e inglés y anglicismos ya adoptados en los tres.
 const SHARED_UI_TERMS = new Set(['coverTitle', 'stepDecide', 'effectStock', 'navMap', 'status', 'scenario', 'symptom', 'level', 'action', 'mcTitle']);
 
-const ROOTS = { SKILLS, CASES, INCIDENTS, BOSSES, EVIDENCE, PROCESS_STEPS, LEVELS, MASTERCLASS, CAREER, DEEP, ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS, SIMULATOR_FIELDS,
-  // De cada línea de asiento solo el nombre de la cuenta se muestra: el lado y el importe
-  // son la clave con la que se valida la respuesta, y no se traducen.
-  JOURNAL_ACCOUNTS: Object.values(JOURNALS).flat().map(line => line[0]) };
+const ROOTS = { SKILLS, CASES, INCIDENTS, BOSSES, EVIDENCE, PROCESS_STEPS, LEVELS, MASTERCLASS, CAREER, DEEP, ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS };
 
 function collectGaps(locale) {
   const gaps = [];

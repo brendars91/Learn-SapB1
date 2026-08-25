@@ -363,7 +363,7 @@ function renderHome(state) {
   const techPct = trackPct(byTrack('dual').concat(byTrack('technical')));
   return `<div class="sbl-stack">
     <section class="sbl-cover">
-      <span class="sbl-kicker">SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · NIVEL EXPERTO</span>
+      <span class="sbl-kicker">${t(state, 'kicker')}</span>
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>

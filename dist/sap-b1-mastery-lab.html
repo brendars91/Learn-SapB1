@@ -4647,7 +4647,8 @@ const I18N = {
     b1WindowLabel: 'ventana SAP Business One', techTrackLabel: 'Ruta técnica + IA',
     fbMark: 'Marcar', fbDontMark: 'No marcar', fbMarked: 'Marcado', fbUnmarked: 'Sin marcar',
     fbLinkFlagged: 'Eslabón señalado', fbRealBrokenLink: 'El eslabón roto real', fbStep: 'Paso', fbExpected: 'esperaba',
-    fbDecoys: 'Incluiste señuelos que no pertenecen a la cadena', fbExactSteps: 'pasos exactos', fbSteps: 'pasos', fbSideAmount: 'lado/importe'
+    fbDecoys: 'Incluiste señuelos que no pertenecen a la cadena', fbExactSteps: 'pasos exactos', fbSteps: 'pasos', fbSideAmount: 'lado/importe',
+    kicker: 'SAP BUSINESS ONE · 9 NIVELES · 72 COMPETENCIAS · NIVEL EXPERTO'
   },
   en: {
     appLabel: 'SAP Business One mastery lab', navHome: 'Home', navCareer: 'Career', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'Advanced console', navEvidence: 'Sources',
@@ -4696,7 +4697,8 @@ const I18N = {
     b1WindowLabel: 'SAP Business One window', techTrackLabel: 'Technical + AI track',
     fbMark: 'Flag', fbDontMark: 'Do not flag', fbMarked: 'Flagged', fbUnmarked: 'Not flagged',
     fbLinkFlagged: 'Link flagged', fbRealBrokenLink: 'The actual broken link', fbStep: 'Step', fbExpected: 'expected',
-    fbDecoys: 'You included decoys that do not belong to the chain', fbExactSteps: 'exact steps', fbSteps: 'steps', fbSideAmount: 'side/amount'
+    fbDecoys: 'You included decoys that do not belong to the chain', fbExactSteps: 'exact steps', fbSteps: 'steps', fbSideAmount: 'side/amount',
+    kicker: 'SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · EXPERT LEVEL'
   },
   de: {
     appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Home', navCareer: 'Career', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
@@ -4745,7 +4747,8 @@ const I18N = {
     b1WindowLabel: 'SAP-Business-One-Fenster', techTrackLabel: 'Technik- und KI-Pfad',
     fbMark: 'Markieren', fbDontMark: 'Nicht markieren', fbMarked: 'Markiert', fbUnmarked: 'Nicht markiert',
     fbLinkFlagged: 'Markiertes Glied', fbRealBrokenLink: 'Das tatsächlich gebrochene Glied', fbStep: 'Schritt', fbExpected: 'erwartet',
-    fbDecoys: 'Du hast Köder aufgenommen, die nicht zur Kette gehören', fbExactSteps: 'exakte Schritte', fbSteps: 'Schritte', fbSideAmount: 'Seite/Betrag'
+    fbDecoys: 'Du hast Köder aufgenommen, die nicht zur Kette gehören', fbExactSteps: 'exakte Schritte', fbSteps: 'Schritte', fbSideAmount: 'Seite/Betrag',
+    kicker: 'SAP BUSINESS ONE · 9 STUFEN · 72 KOMPETENZEN · EXPERTENNIVEAU'
   }
 };
 
@@ -4778,6 +4781,20 @@ const RISK_BY_LEVEL = [1, 2, 2, 2, 3, 3, 2, 3, 3];
 // ex=ejemplo trabajado {q:pregunta, rows:[[debe,haber,importe]...] opcional, show:[líneas con cifras], a:respuesta}.
 function sk(level, index, spec) {
   const id = `SYN-SK-L${level}-${String(index + 1).padStart(2, '0')}`;
+  const localizedList = value => Array.isArray(value)
+    ? Object.fromEntries(['es', 'en', 'de'].map(locale => {
+        const wrongReasons = value.map(entry => entry?.[locale]).filter(Boolean);
+        const optionCount = spec.a.opts?.[locale]?.length ?? wrongReasons.length;
+        let wrongIndex = 0;
+        return [locale, Array.from({ length: optionCount }, (_, optionIndex) => optionIndex === (spec.a.correct ?? 0)
+          ? spec.a.why?.[locale]
+          : wrongReasons[wrongIndex++]).filter(Boolean)];
+      }))
+    : value;
+  const localizedText = value => value && Object.fromEntries(['es', 'en', 'de'].map(locale => [
+    locale,
+    Array.isArray(value[locale]) ? value[locale].join(' ') : value[locale]
+  ]));
   return {
     id, classification: 'synthetic', level, track: LEVELS[level].track, title: spec.t,
     objective: spec.o, concept: spec.c, mindset: spec.m, practice: spec.p,
@@ -4788,7 +4805,7 @@ function sk(level, index, spec) {
       prompt: spec.a.prompt ?? spec.a.p, optionsText: spec.a.opts, correct: spec.a.correct ?? 0,
       safe: [true, true, false], rationale: spec.a.why,
       why: spec.a.why, principles: spec.a.prin, principleCorrect: spec.a.prinOk ?? 0,
-      seniorSteps: spec.a.senior, distractorWhy: spec.a.dwhy, hints: spec.a.hints
+      seniorSteps: spec.a.senior, distractorWhy: localizedList(spec.a.dwhy), hints: localizedText(spec.a.hints)
     },
     riskWeight: spec.rw ?? RISK_BY_LEVEL[level],
     prerequisites: index === 0 && level > 0
@@ -4901,7 +4918,7 @@ const L0 = [
   }),
 
   sk(0, 1, {
-    t: { es: 'Socios de negocio', en: 'Business partners', de: 'Geschäftspartner' },
+    t: { es: 'Socios en el modelo del sistema', en: 'Partners in the system model', de: 'Geschäftspartner im Systemmodell' },
     an: { g: '🪪', es: 'El maestro de socios es la agenda del sistema: cada contacto con DNI fiscal. Si la agenda tiene duplicados, nadie sabe a quién llama.', en: 'The partner master is the system\'s address book: every contact with a tax ID. If the book has duplicates, nobody knows who is being called.' },
     pa: ['Socios de negocio', 'Maestro de socios', 'Crear/Ver duplicados'],
     ex: {
@@ -4946,7 +4963,7 @@ const L0 = [
   }),
 
   sk(0, 2, {
-    t: { es: 'Artículos', en: 'Items', de: 'Artikel' },
+    t: { es: 'Artículos en el modelo del sistema', en: 'Items in the system model', de: 'Artikel im Systemmodell' },
     an: { g: '🏷️', es: 'El maestro de artículos es un catálogo de librería: cada libro con su ficha única, ISBN, editorial y precio. Sin ISBN (código), cada cajero inventa el suyo.', en: 'The item master is a bookstore catalogue: each book with one card, ISBN, publisher, price. Without the ISBN (code), every cashier invents their own.' },
     pa: ['Artículos', 'Maestro de artículos', 'Definir grupo/método valoración'],
     ex: {
@@ -8806,11 +8823,7 @@ const MASTERCLASS = {
 Object.assign(MASTERCLASS, MC_BATCH1, MC_BATCH2, MC_BATCH3, MC_BATCH4, MC_BATCH5, MC_BATCH6);
 
 
-// activities.mjs — v7: actividades con andamiaje pedagógico real.
-// P0-1 encuadre específico · P0-3 feedback por elemento · P0-4 simulador con campos reales
-// P0-5 sin autodelato forense · P0-6 consecuencias con distractores causales.
-
-
+// activities.mjs — localized practical activities with strict locale boundaries.
 
 const JOURNAL_IDS = new Set(['SYN-SK-L4-01','SYN-SK-L4-02','SYN-SK-L4-03','SYN-SK-L4-05','SYN-SK-L4-06','SYN-SK-L4-07','SYN-SK-L4-08']);
 const FORENSIC_IDS = new Set(['SYN-SK-L0-04','SYN-SK-L0-07','SYN-SK-L2-01','SYN-SK-L2-02','SYN-SK-L2-04','SYN-SK-L2-05','SYN-SK-L2-06','SYN-SK-L3-08','SYN-SK-L7-08']);
@@ -8836,192 +8849,180 @@ const LABELS = {
   config: { es: 'Reto de configuración', en: 'Configuration challenge', de: 'Konfigurationsaufgabe' }
 };
 
-// Exportados para que el test de cobertura vea también estos textos.
-const JOURNALS = {
-  'SYN-SK-L4-01': [['Cliente 430000','Debe','1190,00'],['Ventas 800000','Haber','1000,00'],['IVA repercutido 177600','Haber','190,00']],
-  'SYN-SK-L4-02': [['Gasto/activo determinado','Debe','1000,00'],['Proveedor 160000','Haber','1190,00'],['IVA soportado 157600','Debe','190,00']],
-  'SYN-SK-L4-03': [['Cliente 430000','Debe','1190,00'],['Ventas 800000','Haber','1000,00'],['IVA repercutido 177600','Haber','190,00']],
-  'SYN-SK-L4-05': [['Banco 120000','Debe','1190,00'],['Cliente 430000','Haber','1190,00']],
-  'SYN-SK-L4-06': [['Proveedor 160000','Debe','1190,00'],['Banco 120000','Haber','1190,00']],
-  'SYN-SK-L4-07': [['Amortización 622000','Debe','100,00'],['Amortización acumulada 490000','Haber','100,00']],
-  'SYN-SK-L4-08': [['Gasto centro CC-VENTAS','Debe','600,00'],['Gasto centro CC-OPS','Debe','400,00'],['Contrapartida','Haber','1000,00']]
+const FEEDBACK = {
+  es: { mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe' },
+  en: { mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount' },
+  de: { mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag' }
 };
 
-// Campos reales por skill simulador: [label, valorCorrecto, decoys plausibles] (P0-4)
+const JOURNAL_BLUEPRINTS = {
+  'SYN-SK-L4-01': [['customer','debit','1190,00'],['sales','credit','1000,00'],['outputVat','credit','190,00']],
+  'SYN-SK-L4-02': [['expenseAsset','debit','1000,00'],['vendor','credit','1190,00'],['inputVat','debit','190,00']],
+  'SYN-SK-L4-03': [['customer','debit','1190,00'],['sales','credit','1000,00'],['outputVat','credit','190,00']],
+  'SYN-SK-L4-05': [['bank','debit','1190,00'],['customer','credit','1190,00']],
+  'SYN-SK-L4-06': [['vendor','debit','1190,00'],['bank','credit','1190,00']],
+  'SYN-SK-L4-07': [['depreciation','debit','100,00'],['accDep','credit','100,00']],
+  'SYN-SK-L4-08': [['salesCc','debit','600,00'],['opsCc','debit','400,00'],['offset','credit','1000,00']]
+};
+const JOURNAL_TEXT = {
+  es: { customer:'Cliente 430000', sales:'Ventas 800000', outputVat:'IVA repercutido 177600', expenseAsset:'Gasto/activo determinado', vendor:'Proveedor 160000', inputVat:'IVA soportado 157600', bank:'Banco 120000', depreciation:'Amortización 622000', accDep:'Amortización acumulada 490000', salesCc:'Gasto centro CC-VENTAS', opsCc:'Gasto centro CC-OPS', offset:'Contrapartida', debit:'Debe', credit:'Haber' },
+  en: { customer:'Customer 430000', sales:'Sales 800000', outputVat:'Output VAT 177600', expenseAsset:'Determined expense/asset', vendor:'Vendor 160000', inputVat:'Input VAT 157600', bank:'Bank 120000', depreciation:'Depreciation 622000', accDep:'Accumulated depreciation 490000', salesCc:'Expense cost center CC-SALES', opsCc:'Expense cost center CC-OPS', offset:'Offset account', debit:'Debit', credit:'Credit' },
+  de: { customer:'Kunde 430000', sales:'Umsatzerlöse 800000', outputVat:'Umsatzsteuer 177600', expenseAsset:'Ermittelter Aufwand/Vermögenswert', vendor:'Lieferant 160000', inputVat:'Vorsteuer 157600', bank:'Bank 120000', depreciation:'Abschreibung 622000', accDep:'Kumulierte Abschreibung 490000', salesCc:'Aufwand Kostenstelle CC-VERTRIEB', opsCc:'Aufwand Kostenstelle CC-OPS', offset:'Gegenkonto', debit:'Soll', credit:'Haben' }
+};
+
 const SIMULATOR_FIELDS = {
-  'SYN-SK-L0-01': [
-    ['Módulo donde vive el Pedido de cliente', 'Ventas – CRM', ['Compras – CRM', 'Comprobantes', 'Finanzas']],
-    ['Base de datos de esta sesión', 'SBODEMOGE', ['SBOCOMMON', 'SBODRAFT', 'SBOTEST']],
-    ['Ruta del asiento manual', 'Comprobantes → Asiento', ['Ventas → Factura', 'Banco → Extracto', 'Existencias → Traspaso']]
-  ],
-  'SYN-SK-L0-02': [
-    ['Nº de socio de negocio (cliente)', 'C20000', ['C20001', 'C29999', 'V10000']],
-    ['Condición de pago estándar del cliente', '30 días netos', ['Contado', '2% 10 / 30 días', '60 días netos']],
-    ['Grupo del socio', 'Clientes locales', ['Proveedores locales', 'Clientes UE', 'Potenciales']]
-  ],
-  'SYN-SK-L0-03': [
-    ['Grupo de artículos', 'Hardware', ['Software', 'Servicios', 'Consumibles']],
-    ['Método de gestión de stock', 'Valorado permanentemente', ['No valorado', 'Solo cantidades', 'Planificación por demanda']],
-    ['Método de coste', 'Media móvil', ['FIFO', 'Estándar', 'Lote']]
-  ]
+  'SYN-SK-L0-01': {
+    es: [['Módulo donde vive el Pedido de cliente','Ventas – CRM',['Compras – CRM','Comprobantes','Finanzas']],['Base de datos de esta sesión','SBODEMOGE',['SBOCOMMON','SBODRAFT','SBOTEST']],['Ruta del asiento manual','Comprobantes → Asiento',['Ventas → Factura','Banco → Extracto','Existencias → Traspaso']]],
+    en: [['Module containing the Sales Order','Sales – CRM',['Purchasing – CRM','Journal Entries','Financials']],['Database for this session','SBODEMOGE',['SBOCOMMON','SBODRAFT','SBOTEST']],['Manual journal-entry path','Financials → Journal Entry',['Sales → A/R Invoice','Banking → Bank Statement','Inventory → Inventory Transfer']]],
+    de: [['Modul für den Kundenauftrag','Verkauf – CRM',['Einkauf – CRM','Journalbuchungen','Finanzwesen']],['Datenbank dieser Sitzung','SBODEMOGE',['SBOCOMMON','SBODRAFT','SBOTEST']],['Pfad zur manuellen Journalbuchung','Finanzwesen → Journalbuchung',['Verkauf → Ausgangsrechnung','Bankenabwicklung → Kontoauszug','Lagerverwaltung → Bestandsumlagerung']]]
+  },
+  'SYN-SK-L0-02': {
+    es: [['Nº de socio de negocio (cliente)','C20000',['C20001','C29999','V10000']],['Condición de pago estándar del cliente','30 días netos',['Contado','2% 10 / 30 días','60 días netos']],['Grupo del socio','Clientes locales',['Proveedores locales','Clientes UE','Potenciales']]],
+    en: [['Business partner number (customer)','C20000',['C20001','C29999','V10000']],['Default customer payment terms','Net 30 days',['Cash','2% 10 / net 30','Net 60 days']],['Business partner group','Local customers',['Local vendors','EU customers','Leads']]],
+    de: [['Geschäftspartnernummer (Kunde)','C20000',['C20001','C29999','V10000']],['Standard-Zahlungsbedingung des Kunden','30 Tage netto',['Barzahlung','2 % 10 / 30 Tage','60 Tage netto']],['Geschäftspartnergruppe','Lokale Kunden',['Lokale Lieferanten','EU-Kunden','Interessenten']]]
+  },
+  'SYN-SK-L0-03': {
+    es: [['Grupo de artículos','Hardware',['Software','Servicios','Consumibles']],['Método de gestión de stock','Valorado permanentemente',['No valorado','Solo cantidades','Planificación por demanda']],['Método de coste','Media móvil',['FIFO','Estándar','Lote']]],
+    en: [['Item group','Hardware',['Software','Services','Consumables']],['Inventory management method','Perpetual inventory',['Non-valuated','Quantities only','Demand planning']],['Valuation method','Moving average',['FIFO','Standard','Batch']]],
+    de: [['Artikelgruppe','Hardware',['Software','Dienstleistungen','Verbrauchsmaterial']],['Bestandsführung','Permanente Bestandsführung',['Nicht bewertet','Nur Mengen','Bedarfsplanung']],['Bewertungsmethode','Gleitender Durchschnitt',['FIFO','Standard','Charge']]]
+  }
 };
 
-// Encuadre específico por skill (P0-1): qué es, qué hacer, qué se evalúa.
-function activityBrief(skill, locale) {
-  const loc = locale || 'es';
-  const L = v => Array.isArray(v) ? v.map(L).join(' ') : trNode(v, loc);
-  const type = activityType(skill.id);
-  const verb = {
-    simulator: { es: 'Opera la ventana como el consultor: elige el valor correcto de cada campo.', en: 'Operate the window like the consultant: pick the right value per field.', de: 'Bediene das Fenster wie der Berater: je Feld der richtige Wert.' },
-    bughunt: { es: 'Audita la evidencia del incidente: marca SOLO lo que está mal.', en: 'Audit the incident evidence: mark ONLY what is wrong.', de: 'Prüfe die Evidenz: markiere NUR das Falsche.' },
-    journal: { es: 'Registra el evento en contabilidad: lado correcto por naturaleza de cuenta e importe exacto.', en: 'Post the event: correct side by account nature, exact amount.', de: 'Buche das Ereignis: richtige Seite, exakter Betrag.' },
-    forensic: { es: 'Reconstruye la cadena documental y señala el punto exacto donde se rompió.', en: 'Reconstruct the document chain and point at the exact break.', de: 'Rekonstruiere die Belegkette, zeige die Bruchstelle.' },
-    consequence: { es: 'Ordena la cascada real: qué causó qué. Hay señuelos que no pertenecen a la cadena.', en: 'Order the real cascade: what caused what. Decoys do not belong.', de: 'Ordne die echte Kaskade. Köder gehören nicht dazu.' },
-    config: { es: 'Monta la ruta de menú EXACTA. Sobran opciones: solo las correctas, en orden.', en: 'Build the EXACT menu path. Only correct ones, in order.', de: 'Baue den EXAKTEN Menüpfad. Nur Richtiges, in Ordnung.' }
-  }[type] || {};
-  const evals = {
-    simulator: { es: 'Se evalúa: interpretar el documento, no memorizarlo.', en: 'Graded on: interpreting the document.', de: 'Bewertet: Delegation interpretieren.' },
-    bughunt: { es: 'Se evalúa: distinguir señal de ruido.', en: 'Graded on: signal vs noise.', de: 'Bewertet: Signal vs Rauschen.' },
-    journal: { es: 'Se evalúa: naturaleza de cuenta + cuadre Debe=Haber.', en: 'Graded on: account nature + balance.', de: 'Bewertet: Kontonatur + Saldo.' },
-    forensic: { es: 'Se evalúa: seguir la lógica del proceso, no la forma del texto.', en: 'Graded on: process logic.', de: 'Bewertet: Prozesslogik.' },
-    consequence: { es: 'Se evalúa: causalidad real, no patrón de orden.', en: 'Graded on: real causality.', de: 'Bewertet: echte Kausalität.' },
-    config: { es: 'Se evalúa: memoria procedural de la ruta real.', en: 'Graded on: procedural memory.', de: 'Bewertet: prozedurales Gedächtnis.' }
-  }[type] || {};
-  return { what: L(skill.objective), task: verb[loc] || verb.es || '', graded: evals[loc] || evals.es || '' };
-}
-
-function text(v, locale) {
-  const normalize = value => {
-    if (value == null) return '';
-    if (typeof value === 'string') return trText(value, locale);
-    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-    if (Array.isArray(value)) return value.map(normalize).filter(Boolean).join(' · ');
-    if (typeof value === 'object') {
-      const localized = value[locale] ?? value.en ?? value.es;
-      if (localized !== undefined && localized !== value) return normalize(localized === value.es ? trText(value.es, locale) : localized);
-      return normalize(value.text ?? value.label ?? value.value ?? value.title ?? value.description ?? value.k ?? value.v ?? '');
-    }
-    return '';
-  };
-  return normalize(v);
+function strictText(v, locale) {
+  if (v == null) return '';
+  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
+  if (Array.isArray(v)) return v.map(x => strictText(x, locale)).filter(Boolean).join(' · ');
+  if (typeof v === 'object') {
+    if (Object.hasOwn(v, locale)) return strictText(v[locale], locale);
+    return strictText(v.text ?? v.label ?? v.value ?? '', locale);
+  }
+  return '';
 }
 function asArray(v) { return Array.isArray(v) ? v : v ? [v] : []; }
-function shuffledDeterministic(items) { return items.map((v,i)=>({v,k:(i*7+3)%items.length})).sort((a,b)=>a.k-b.k).map(x=>x.v); }
+function shuffledDeterministic(items) { return items.map((v,i)=>({v,k:(i*7+3)%Math.max(items.length,1)})).sort((a,b)=>a.k-b.k).map(x=>x.v); }
 function skillIndex(id) { const m=/L(\d+)-(\d+)/.exec(id); return m ? Number(m[1])*8+Number(m[2]) : 0; }
 
+function activityBrief(skill, locale = 'es') {
+  const type = activityType(skill.id);
+  const verb = {
+    simulator: { es:'Opera la ventana como el consultor: elige el valor correcto de cada campo.', en:'Operate the task like the consultant: choose the correct value for each field.', de:'Bearbeite die Aufgabe wie ein Berater: wähle für jedes Feld den richtigen Wert.' },
+    bughunt: { es:'Audita la evidencia del incidente: marca SOLO lo que está mal.', en:'Audit the incident evidence: mark ONLY what is wrong.', de:'Prüfe die Evidenz: markiere NUR das Falsche.' },
+    journal: { es:'Registra el evento en contabilidad: lado correcto e importe exacto.', en:'Post the event: correct side and exact amount.', de:'Buche das Ereignis: richtige Seite und exakter Betrag.' },
+    forensic: { es:'Reconstruye la cadena documental y señala el punto exacto donde se rompió.', en:'Reconstruct the document chain and identify the exact break.', de:'Rekonstruiere die Belegkette und bestimme die genaue Bruchstelle.' },
+    consequence: { es:'Ordena la cascada real. Hay señuelos que no pertenecen a la cadena.', en:'Order the real cascade. Decoys do not belong to the chain.', de:'Ordne die echte Kaskade. Köder gehören nicht zur Kette.' },
+    config: { es:'Monta la secuencia correcta de configuración. Sobran opciones.', en:'Build the correct configuration sequence. Some options are decoys.', de:'Baue die richtige Konfigurationsfolge. Einige Optionen sind Köder.' }
+  }[type];
+  const graded = {
+    simulator:{es:'Se evalúa: interpretar el documento, no memorizarlo.',en:'Graded on: interpreting the document, not memorizing it.',de:'Bewertet wird: den Beleg verstehen, nicht auswendig lernen.'},
+    bughunt:{es:'Se evalúa: distinguir señal de ruido.',en:'Graded on: separating signal from noise.',de:'Bewertet wird: Signal und Rauschen unterscheiden.'},
+    journal:{es:'Se evalúa: naturaleza de cuenta + cuadre Debe=Haber.',en:'Graded on: account nature + Debit=Credit balance.',de:'Bewertet wird: Kontonatur + Soll=Haben-Ausgleich.'},
+    forensic:{es:'Se evalúa: seguir la lógica del proceso.',en:'Graded on: following process logic.',de:'Bewertet wird: die Prozesslogik verfolgen.'},
+    consequence:{es:'Se evalúa: causalidad real.',en:'Graded on: real causality.',de:'Bewertet wird: echte Kausalität.'},
+    config:{es:'Se evalúa: memoria procedural de la secuencia.',en:'Graded on: procedural memory of the sequence.',de:'Bewertet wird: prozedurales Wissen über die Reihenfolge.'}
+  }[type];
+  return { what: strictText(skill.objective, locale), task: verb[locale], graded: graded[locale] };
+}
+
+function localizedJournal(id, locale) {
+  const tx = JOURNAL_TEXT[locale];
+  const rows = JOURNAL_BLUEPRINTS[id] || [['offset','debit','1000,00'],['bank','credit','1000,00']];
+  return rows.map(([account, side, amount]) => [tx[account], tx[side], amount]);
+}
+
 function configSpec(skill, mc, locale) {
-  const raw = text(asArray(mc.cfg)[0], locale);
-  const route = raw.split(':')[0].split('>').map(x=>x.trim()).filter(Boolean);
-  const pool = ['Gestión','Informes','Parametrizaciones generales','Herramientas'].map(x => trText(x, locale));
-  const decoys = shuffledDeterministic(pool.filter(x=>!route.includes(x)).slice(0, Math.max(2, 5-route.length)));
+  const raw = strictText(asArray(mc?.cfg)[0], locale);
+  let route = raw.split(':')[0].split('>').map(x=>x.trim()).filter(Boolean);
+  if (!route.length) route = [strictText(skill.practice, locale), strictText(skill.verify, locale)].filter(Boolean);
+  const pools = {
+    es:['Gestión','Informes','Parametrizaciones generales','Herramientas'],
+    en:['Administration','Reports','General Settings','Tools'],
+    de:['Administration','Berichte','Allgemeine Einstellungen','Extras']
+  };
+  const decoys = shuffledDeterministic(pools[locale].filter(x=>!route.includes(x)).slice(0,2));
   return { route, tokens: shuffledDeterministic([...route, ...decoys]) };
 }
+
 function simulatorSpec(skill, mc, locale) {
-  const custom = SIMULATOR_FIELDS[skill.id];
-  if (custom) {
-    return { targets: custom.map(([label, expected, decoys]) => ({
-      label: trText(label, locale), expected: trText(expected, locale),
-      options: shuffledDeterministic([expected, ...decoys].map(x => trText(x, locale))) })) };
-  }
-  const fields = asArray(mc.screen?.fields);
-  const editable = fields.filter(f=>f[2]).slice(0,3);
-  let targets = editable.length ? editable : fields.slice(0,Math.min(3,fields.length));
-  if (!targets.length) targets = asArray(mc.screen?.rows).slice(0,3).map(r => [r[0], r[1] ?? r[0]]);
-  const fallback = ['— Sin valor —','Automático','Bloqueado','Manual'].map(x => trText(x, locale));
-  return { targets: targets.map((f,i)=>({ label:trText(f[0], locale), expected:trText(f[1], locale),
-    options:shuffledDeterministic([trText(f[1], locale), i===0?fallback[0]:fallback[1], i===0?fallback[2]:fallback[3]]) })) };
-}
-function forensicSpec(skill, mc, locale) {
-  const steps = asArray(mc.e2e).map((x,i)=>({ label:text(x,locale), broken:false, index:i }));
-  const broken = { label: text(mc.war?.root, locale), broken: true, index: steps.length };
-  return { evidence: shuffledDeterministic([...steps.slice(0,3), broken]), resolution: text(mc.war?.fix, locale) };
-}
-function bughuntSpec(skill, mc, locale) {
-  return { clues: shuffledDeterministic([
-    { label:text(mc.war?.root,locale), error:true },
-    { label:text(asArray(mc.bp)[0],locale), error:false },
-    { label:text(asArray(mc.e2e)[0],locale), error:false },
-    { label:text(asArray(mc.cfg)[0],locale), error:false }
-  ]), resolution:text(mc.war?.fix,locale) };
-}
-function consequenceSpec(skill, mc, locale) {
-  const trigger = text(mc.war?.sympt, locale);
-  const root = text(mc.war?.root, locale);
-  const mid = text(asArray(mc.e2e)[Math.min(1,asArray(mc.e2e).length-1)], locale);
-  const fix = text(mc.war?.fix, locale);
-  const chain = [root, mid, fix].filter(Boolean);
-  const pool = [
-    { es:'El informe mensual se imprime dos veces y nadie lo lee', en:'The monthly report prints twice and nobody reads it', de:'Der Monatsbericht druckt zweimal, keiner liest ihn' },
-    { es:'Un usuario adelanta la fecha del sistema para facturar antes', en:'A user shifts system date to invoice earlier', de:'Ein Benutzer verschiebt das Systemdatum' },
-    { es:'El proveedor sube el precio sin actualizar la lista de compra', en:'Vendor raises price without updating the purchase price list', de:'Der Lieferant erhöht den Preis ohne aktualisierte Einkaufsliste' }
-  ];
-  const d = pool[skillIndex(skill.id) % pool.length];
-  const decoy = d[locale] || d.es;
-  return { trigger, chain, tokens: shuffledDeterministic([...chain, decoy]) };
+  const custom = SIMULATOR_FIELDS[skill.id]?.[locale];
+  if (custom) return { targets: custom.map(([label, expected, decoys]) => ({ label, expected, options: shuffledDeterministic([expected, ...decoys]) })) };
+  const labels = { es:['Objetivo','Práctica','Verificación'], en:['Objective','Practice','Verification'], de:['Ziel','Praxis','Verifikation'] }[locale];
+  const expected = [strictText(skill.objective,locale), strictText(skill.practice,locale), strictText(skill.verify,locale)];
+  const decoys = { es:['No comprobar','Cambiar producción','Adivinar'], en:['Do not verify','Change production','Guess'], de:['Nicht prüfen','Produktion ändern','Raten'] }[locale];
+  return { targets: expected.map((value,i)=>({ label:labels[i], expected:value, options:shuffledDeterministic([value,decoys[i]]) })) };
 }
 
-function getActivity(skill, locale) {
-  const loc = locale || 'es';
+function forensicSpec(skill, mc, locale) {
+  let steps = asArray(mc?.e2e).map((x,i)=>({ label:strictText(x,locale), broken:false, index:i })).filter(x=>x.label);
+  let brokenLabel = strictText(mc?.war?.root, locale);
+  let resolution = strictText(mc?.war?.fix, locale);
+  if (!brokenLabel) {
+    steps = [strictText(skill.objective,locale), strictText(skill.practice,locale), strictText(skill.verify,locale)].filter(Boolean).map((label,index)=>({label,broken:false,index}));
+    brokenLabel = strictText(skill.risk,locale);
+    resolution = strictText(skill.verify,locale);
+  }
+  const broken = { label:brokenLabel, broken:true, index:steps.length };
+  return { evidence:shuffledDeterministic([...steps.slice(0,3),broken]), resolution };
+}
+
+function bughuntSpec(skill, mc, locale) {
+  const root = strictText(mc?.war?.root,locale) || strictText(skill.risk,locale);
+  const safe1 = strictText(asArray(mc?.bp)[0],locale) || strictText(skill.verify,locale);
+  const safe2 = strictText(asArray(mc?.e2e)[0],locale) || strictText(skill.practice,locale);
+  const safe3 = strictText(asArray(mc?.cfg)[0],locale) || strictText(skill.objective,locale);
+  return { clues:shuffledDeterministic([{label:root,error:true},{label:safe1,error:false},{label:safe2,error:false},{label:safe3,error:false}].filter(x=>x.label)), resolution:strictText(mc?.war?.fix,locale)||strictText(skill.verify,locale) };
+}
+
+function consequenceSpec(skill, mc, locale) {
+  const trigger = strictText(mc?.war?.sympt,locale) || strictText(skill.risk,locale);
+  const root = strictText(mc?.war?.root,locale) || strictText(skill.risk,locale);
+  const mid = strictText(asArray(mc?.e2e)[1],locale) || strictText(skill.practice,locale);
+  const fix = strictText(mc?.war?.fix,locale) || strictText(skill.verify,locale);
+  const chain = [root,mid,fix].filter(Boolean);
+  const pool = [
+    {es:'El informe mensual se imprime dos veces y nadie lo lee',en:'The monthly report prints twice and nobody reads it',de:'Der Monatsbericht wird zweimal gedruckt und niemand liest ihn'},
+    {es:'Un usuario adelanta la fecha del sistema para facturar antes',en:'A user shifts the system date to invoice earlier',de:'Ein Benutzer verschiebt das Systemdatum, um früher zu fakturieren'},
+    {es:'El proveedor sube el precio sin actualizar la lista de compra',en:'The vendor raises the price without updating the purchase price list',de:'Der Lieferant erhöht den Preis, ohne die Einkaufspreisliste zu aktualisieren'}
+  ];
+  const decoy = pool[skillIndex(skill.id)%pool.length][locale];
+  return { trigger, chain, tokens:shuffledDeterministic([...chain,decoy]) };
+}
+
+function getActivity(skill, locale='es') {
   const mc = MASTERCLASS[skill.id];
   const type = activityType(skill.id);
-  const base = { type, label: text(LABELS[type], loc), mc, brief: activityBrief(skill, loc) };
-  if (!mc) return { ...base, unavailable: true };
-  if (type==='journal') return { ...base, lines: JOURNALS[skill.id] || [['Cuenta de origen','Debe','1000,00'],['Contrapartida','Haber','1000,00']] };
-  if (type==='config') return { ...base, ...configSpec(skill, mc, loc) };
-  if (type==='simulator') return { ...base, ...simulatorSpec(skill, mc, loc) };
-  if (type==='forensic') return { ...base, ...forensicSpec(skill, mc, loc) };
-  if (type==='bughunt') return { ...base, ...bughuntSpec(skill, mc, loc) };
-  return { ...base, ...consequenceSpec(skill, mc, loc) };
+  const base = { type, locale, label:LABELS[type][locale], mc, brief:activityBrief(skill,locale) };
+  if (!mc) return { ...base, unavailable:true };
+  if (type==='journal') return { ...base, lines:localizedJournal(skill.id,locale) };
+  if (type==='config') return { ...base, ...configSpec(skill,mc,locale) };
+  if (type==='simulator') return { ...base, ...simulatorSpec(skill,mc,locale) };
+  if (type==='forensic') return { ...base, ...forensicSpec(skill,mc,locale) };
+  if (type==='bughunt') return { ...base, ...bughuntSpec(skill,mc,locale) };
+  return { ...base, ...consequenceSpec(skill,mc,locale) };
 }
 
-// Validación con feedback por elemento (P0-3): devuelve detalles de qué falló.
-function validateActivityDetailed(activity, answers, sequence, locale = 'es') {
+function validateActivityDetailed(activity, answers, sequence) {
   const A = answers || {};
   const seq = sequence || [];
-  const t = key => translate(locale, key);
   const details = [];
+  const f = FEEDBACK[activity.locale || 'es'];
   let correct = true;
   if (activity.type === 'simulator') {
-    activity.targets.forEach((f, i) => {
-      const ok = A['sim-' + i] === f.expected;
-      if (!ok) correct = false;
-      details.push({ item: f.label, ok, expected: f.expected, got: A['sim-' + i] || '—' });
-    });
+    activity.targets.forEach((field,i)=>{ const ok=A['sim-'+i]===field.expected; if(!ok) correct=false; details.push({item:field.label,ok,expected:field.expected,got:A['sim-'+i]||'—'}); });
   } else if (activity.type === 'bughunt') {
-    activity.clues.forEach((c, i) => {
-      const ok = Boolean(A['clue-' + i]) === Boolean(c.error);
-      if (!ok) correct = false;
-      details.push({ item: c.label.slice(0, 70), ok, expected: c.error ? t('fbMark') : t('fbDontMark'), got: A['clue-' + i] ? t('fbMarked') : t('fbUnmarked') });
-    });
+    activity.clues.forEach((clue,i)=>{ const selected=Boolean(A['clue-'+i]); const ok=selected===Boolean(clue.error); if(!ok) correct=false; details.push({item:clue.label.slice(0,70),ok,expected:clue.error?f.mark:f.noMark,got:selected?f.marked:f.unmarked}); });
   } else if (activity.type === 'forensic') {
-    const chosen = Number(A.broken);
-    const ok = activity.evidence[chosen]?.broken === true;
-    if (!ok) correct = false;
-    details.push({ item: t('fbLinkFlagged'), ok, expected: t('fbRealBrokenLink'), got: activity.evidence[chosen]?.label?.slice(0, 70) || '—' });
+    const chosen=Number(A.broken); const ok=activity.evidence[chosen]?.broken===true; if(!ok) correct=false; details.push({item:f.link,ok,expected:f.broken,got:activity.evidence[chosen]?.label?.slice(0,70)||'—'});
   } else if (activity.type === 'config' || activity.type === 'consequence') {
-    const ref = activity.route || activity.chain;
-    ref.forEach((step, i) => {
-      const ok = seq[i] === step;
-      if (!ok) correct = false;
-      details.push({ item: t('fbStep') + ' ' + (i + 1) + ': ' + t('fbExpected') + ' "' + String(step).slice(0, 40) + '"', ok, expected: step, got: seq[i] || '—' });
-    });
-    if (activity.tokens && seq.length > ref.length) {
-      correct = false;
-      details.push({ item: t('fbDecoys'), ok: false, expected: ref.length + ' ' + t('fbExactSteps'), got: seq.length + ' ' + t('fbSteps') });
-    }
+    const ref=activity.route||activity.chain;
+    ref.forEach((step,i)=>{ const ok=seq[i]===step; if(!ok) correct=false; details.push({item:`${f.step} ${i+1}: ${f.expected} "${String(step).slice(0,40)}"`,ok,expected:step,got:seq[i]||'—'}); });
+    if(activity.tokens&&seq.length>ref.length){ correct=false; details.push({item:f.decoys,ok:false,expected:`${ref.length} ${f.exact}`,got:`${seq.length} ${f.steps}`}); }
   } else if (activity.type === 'journal') {
-    activity.lines.forEach((l, i) => {
-      const sideOk = A['side-' + i] === l[1];
-      const amountOk = String(A['amount-' + i] || '').replace(/\s/g, '') === l[2];
-      if (!sideOk || !amountOk) correct = false;
-      details.push({ item: trText(l[0], locale) + ' — ' + t('fbSideAmount'), ok: sideOk && amountOk, expected: l[1] + ' ' + l[2], got: (A['side-' + i] || '—') + ' ' + (A['amount-' + i] || '—') });
-    });
+    activity.lines.forEach((line,i)=>{ const sideOk=A['side-'+i]===line[1]; const amountOk=String(A['amount-'+i]||'').replace(/\s/g,'')===line[2]; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A['side-'+i]||'—'} ${A['amount-'+i]||'—'}`}); });
   }
   return { correct, details };
 }
 
 const ACTIVITY_COUNTS = Object.freeze(Array.from({length:9},(_,l)=>Array.from({length:8},(_,i)=>activityType(`SYN-SK-L${l}-${String(i+1).padStart(2,'0')}`))).flat().reduce((a,t)=>(a[t]=(a[t]||0)+1,a),{}));
-
 
 // advanced.mjs — Nivel experto: SQL avanzado, KPI/Dashboards y vibecoding SAP B1.
 // Todas las consultas usan tablas reales de SAP Business One (OINV/INV1, OPDN/PDN1,
@@ -10112,7 +10113,7 @@ function renderHome(state) {
   const techPct = trackPct(byTrack('dual').concat(byTrack('technical')));
   return `<div class="sbl-stack">
     <section class="sbl-cover">
-      <span class="sbl-kicker">SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · NIVEL EXPERTO</span>
+      <span class="sbl-kicker">${t(state, 'kicker')}</span>
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>
