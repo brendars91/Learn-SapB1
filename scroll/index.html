@@ -213,6 +213,7 @@ ScrollCraft.mount(document.body);
     els[el.getAttribute('data-ledger-target')] = el;
   });
   function fmt(n) { return String(Math.round(n)); }
+  var ticking = false;
   function frame() {
     var t = Math.min(1, Math.max(0, (window.scrollY || 0) / (document.body.scrollHeight - window.innerHeight)));
     var e = 1 - Math.pow(1 - t, 3);
@@ -221,8 +222,11 @@ ScrollCraft.mount(document.body);
       var v = targets[k][0] + (targets[k][1] - targets[k][0]) * e;
       els[k].textContent = fmt(v);
     });
+    ticking = false;
   }
-  window.addEventListener('scroll', function () { window.requestAnimationFrame(frame); }, { passive: true });
+  window.addEventListener('scroll', function () {
+    if (!ticking) { window.requestAnimationFrame(frame); ticking = true; }
+  }, { passive: true });
   frame();
 })();
 </script>
