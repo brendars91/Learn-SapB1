@@ -1,0 +1,367 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Handbuch der Belegkette · tema del manual técnico
+   Dos familias: una grotesca para la voz y la prosa, una monoespaciada que
+   solo aparece donde hay datos (asientos, códigos, cotas). Retícula visible,
+   papel para leer, tinta para el pico. Los capítulos cortan, no funden.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Papel: el ground por defecto de todo el manual */
+  --sc-canvas:     #ece4d4;
+  --sc-surface:    #f6f0e3;
+  --sc-ink:        #17140f;
+  --sc-ink-soft:   #564e42;
+  --sc-accent:     #a82f18;
+  --sc-accent-ink: #f6f0e3;
+
+  --sc-font-display: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --sc-font-text:    "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --hb-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  --hb-rule: color-mix(in srgb, var(--sc-ink) 22%, transparent);
+  --hb-rule-hard: color-mix(in srgb, var(--sc-ink) 42%, transparent);
+  --hb-folio-w: clamp(0px, 17vw, 232px);
+}
+
+/* Tinta: un ground propio, no una interpolación. Se re-tinta el subtree
+   entero porque `color` ya resolvió en body. */
+.hb-chapter--ink {
+  --sc-canvas:     #12100c;
+  --sc-surface:    #1c1812;
+  --sc-ink:        #f0e8d8;
+  --sc-ink-soft:   #a99d8e;
+  --sc-accent:     #e8613f;
+  --sc-accent-ink: #12100c;
+  --hb-rule: color-mix(in srgb, var(--sc-ink) 20%, transparent);
+  --hb-rule-hard: color-mix(in srgb, var(--sc-ink) 38%, transparent);
+  color: var(--sc-ink);
+  background: var(--sc-canvas);
+}
+.hb-chapter--paper { background: var(--sc-canvas); color: var(--sc-ink); }
+
+.hb {
+  background: var(--sc-canvas);
+  color: var(--sc-ink);
+  font-family: var(--sc-font-text);
+  font-size: var(--sc-t-base);
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* La retícula del manual: presente, no decorativa. Es la que da el aire de
+   lámina impresa y solo se ve en el papel. */
+.hb-chapter--paper::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(to right, var(--hb-rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--hb-rule) 1px, transparent 1px);
+  background-size: clamp(48px, 7vw, 92px) clamp(48px, 7vw, 92px);
+  opacity: 0.32;
+  pointer-events: none;
+}
+.hb-chapter { position: relative; }
+
+/* ── Folio y libro mayor: el gesto propio ───────────────────────────────── */
+
+.folio {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: var(--hb-folio-w);
+  padding: var(--sc-5) var(--sc-4);
+  display: flex; flex-direction: column; gap: var(--sc-5);
+  border-right: 1px solid var(--hb-rule-hard);
+  background: color-mix(in srgb, var(--sc-canvas) 92%, transparent);
+  backdrop-filter: blur(3px);
+  font-family: var(--hb-mono);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--sc-ink-soft);
+  z-index: 40;
+  transition: color .5s, background .5s, border-color .5s;
+}
+.folio--ink {
+  --sc-canvas: #12100c; --sc-ink: #f0e8d8; --sc-ink-soft: #a99d8e; --sc-accent: #e8613f;
+  --hb-rule-hard: color-mix(in srgb, #f0e8d8 32%, transparent);
+  color: var(--sc-ink-soft);
+}
+
+.folio__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sc-2); border-bottom: 1px solid var(--hb-rule-hard); padding-bottom: var(--sc-2); }
+.folio__kap { text-transform: uppercase; letter-spacing: 0.09em; color: var(--sc-ink); font-size: 0.64rem; }
+.folio__num { font-size: 1.4rem; line-height: 1; color: var(--sc-accent); font-variant-numeric: tabular-nums; }
+
+.belegkette { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.belegkette__item {
+  display: grid; grid-template-columns: 14px 1fr; align-items: center; gap: var(--sc-2);
+  padding: 3px 0; position: relative;
+  opacity: 0.34;
+  transition: opacity .45s ease;
+}
+.belegkette__item::after {
+  content: ""; position: absolute; left: 6px; top: 100%; width: 1px; height: 8px;
+  background: var(--hb-rule-hard);
+}
+.belegkette__item:last-child::after { display: none; }
+.belegkette__item[data-on] { opacity: 1; }
+.belegkette__dot {
+  width: 13px; height: 13px; border: 1px solid currentColor; border-radius: 1px;
+  display: block; position: relative;
+}
+.belegkette__item[data-on] .belegkette__dot { background: var(--sc-accent); border-color: var(--sc-accent); }
+.belegkette__item[data-on] .belegkette__name { color: var(--sc-ink); }
+
+/* El libro mayor se escribe solo, línea a línea, y al final cuadra */
+.hauptbuch { margin-top: auto; border-top: 1px solid var(--hb-rule-hard); padding-top: var(--sc-3); }
+.hauptbuch__rule { display: grid; grid-template-columns: 1fr auto auto; gap: var(--sc-2); font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; }
+.hauptbuch__rule span:first-child { grid-column: 2; }
+.hauptbuch__lines { list-style: none; margin: var(--sc-2) 0 0; padding: 0; display: grid; gap: 2px; }
+.hauptbuch__lines li {
+  display: grid; grid-template-columns: 1fr auto auto; gap: var(--sc-2);
+  font-variant-numeric: tabular-nums; font-size: 0.64rem;
+  animation: hb-print .5s ease both;
+}
+.hauptbuch__lines b { font-weight: 400; color: var(--sc-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hauptbuch__lines i { font-style: normal; min-width: 3.6em; text-align: right; }
+@keyframes hb-print { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+.hauptbuch__sum {
+  display: grid; grid-template-columns: 1fr auto auto; gap: var(--sc-2);
+  margin-top: var(--sc-2); padding-top: var(--sc-2);
+  border-top: 1px solid var(--hb-rule-hard);
+  font-variant-numeric: tabular-nums; color: var(--sc-ink);
+}
+.hauptbuch__sum[data-balanced] { color: var(--sc-accent); }
+.hauptbuch__sumlabel { letter-spacing: 0.1em; }
+
+@media (max-width: 900px) {
+  .folio {
+    inset: auto 0 0 0; top: auto; width: auto; flex-direction: row; align-items: center;
+    gap: var(--sc-4); padding: var(--sc-2) var(--sc-4);
+    border-right: 0; border-top: 1px solid var(--hb-rule-hard);
+  }
+  .belegkette { grid-auto-flow: column; gap: var(--sc-3); }
+  .belegkette__item { grid-template-columns: 11px; }
+  .belegkette__item::after { display: none; }
+  .belegkette__name { display: none; }
+  .hauptbuch { margin: 0 0 0 auto; border: 0; padding: 0; }
+  .hauptbuch__rule, .hauptbuch__lines { display: none; }
+  .hauptbuch__sum { border: 0; margin: 0; padding: 0; font-size: 0.68rem; }
+}
+
+/* ── Retícula editorial ─────────────────────────────────────────────────── */
+
+.hb-chapter { padding-inline: var(--sc-gutter); padding-left: calc(var(--hb-folio-w) + var(--sc-gutter)); }
+@media (max-width: 900px) { .hb-chapter { padding-left: var(--sc-gutter); padding-bottom: calc(var(--sc-6) + 46px); } }
+
+.hb-grid, .hb-spread, .hb-costgrid, .hb-kolophon__inner { max-width: 1180px; margin-inline: auto; min-width: 0; }
+
+.hb-chapter[data-sc-act="flow"] { padding-block: clamp(3rem, 5.5vw, 6.5rem); }
+
+/* Titulares: la voz. Tracking negativo porque a este tamaño la grotesca
+   se abre sola. */
+.hb-title__h1 {
+  font-family: var(--sc-font-display);
+  font-size: clamp(3rem, 1.4rem + 7.4vw, 8.2rem);
+  line-height: 0.92; letter-spacing: -0.035em; font-weight: 700;
+  margin: var(--sc-6) 0 var(--sc-5); text-wrap: balance;
+}
+.hb-title__sub { font-weight: 300; letter-spacing: -0.02em; }
+.hb-title__es { font-size: var(--sc-t-lg); max-width: 34ch; color: var(--sc-ink-soft); margin: 0 0 var(--sc-7); text-wrap: pretty; }
+.hb-imprint, .hb-title__note { font-family: var(--hb-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sc-ink-soft); margin: 0; }
+.hb-title__note { text-transform: none; letter-spacing: 0.02em; margin-top: var(--sc-6); }
+.hb-title__note code, .hb-costnote code { font-family: var(--hb-mono); color: var(--sc-accent); }
+
+.hb-title { min-height: 100svh; display: grid; align-content: center; }
+.hb-colofon { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(120px, 45%), 1fr)); min-width: 0; gap: var(--sc-4); margin: 0; padding: var(--sc-4) 0; border-block: 1px solid var(--hb-rule-hard); max-width: 720px; }
+.hb-colofon dt { font-family: var(--hb-mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sc-ink-soft); }
+.hb-colofon dd { margin: 2px 0 0; font-size: var(--sc-t-lg); font-variant-numeric: tabular-nums; }
+.hb-masse { position: absolute; right: var(--sc-gutter); bottom: var(--sc-6); width: clamp(140px, 18vw, 240px); height: auto; opacity: 0.5; }
+.hb-masse line { stroke: var(--sc-ink); stroke-width: 1; }
+.hb-masse text { font-family: var(--hb-mono); font-size: 9px; fill: var(--sc-ink-soft); letter-spacing: 0.14em; }
+
+/* Cabecera de capítulo: más aire encima que debajo. */
+.hb-kaphead { margin: 0 0 var(--sc-6); padding-top: var(--sc-3); border-top: 2px solid var(--sc-ink); max-width: 24ch; }
+.hb-kaphead--inset { border-top-color: var(--sc-ink); }
+.hb-kaphead--ink { border-top-color: var(--sc-accent); }
+.hb-kaphead__num { font-family: var(--hb-mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sc-accent); display: block; margin-bottom: var(--sc-2); }
+.hb-kaphead__h2 {
+  font-family: var(--sc-font-display);
+  font-size: clamp(1.9rem, 1.1rem + 2.6vw, 3.4rem);
+  line-height: 1.02; letter-spacing: -0.028em; font-weight: 700; margin: 0; text-wrap: balance;
+}
+
+.hb-lede { font-size: var(--sc-t-lg); line-height: 1.45; color: var(--sc-ink); max-width: 40ch; margin: 0 0 var(--sc-4); text-wrap: pretty; }
+.hb-spread__text p, .hb-kolophon__text { max-width: 58ch; color: var(--sc-ink-soft); margin: 0 0 var(--sc-4); }
+
+/* Media en su propia columna con caption. Nunca sangra bajo el tipo. */
+.hb-spread { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(var(--sc-6), 5vw, var(--sc-9)); align-items: start; }
+@media (max-width: 860px) { .hb-spread { grid-template-columns: 1fr; } .hb-costlist li { grid-template-columns: 1fr; gap: var(--sc-2); } }
+.hb-peak__caption { justify-self: start; width: min(100%, 1180px); margin-top: 0; }
+.hb-spread__media figcaption, .hb-costnote, .hb-peak__caption {
+  font-family: var(--hb-mono); font-size: 0.68rem; line-height: 1.5;
+  color: var(--sc-ink-soft); margin-top: var(--sc-3); max-width: 46ch;
+}
+
+.hb-ticket { border: 1px solid var(--hb-rule-hard); background: var(--sc-surface); padding: var(--sc-4); box-shadow: 6px 6px 0 color-mix(in srgb, var(--sc-ink) 8%, transparent); }
+.hb-ticket__head, .hb-ticket__foot { display: flex; justify-content: space-between; font-family: var(--hb-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-soft); }
+.hb-ticket__head { border-bottom: 1px solid var(--hb-rule); padding-bottom: var(--sc-2); }
+.hb-ticket__foot { border-top: 1px solid var(--hb-rule); padding-top: var(--sc-2); }
+.hb-ticket__body { font-size: var(--sc-t-lg); line-height: 1.35; margin: var(--sc-4) 0; color: var(--sc-ink); }
+
+/* Capítulo 2: las cifras del caso, en prosa, no en tarjetas iguales */
+.hb-costgrid__lede { max-width: 46ch; }
+.hb-costlist { list-style: none; margin: var(--sc-6) 0 var(--sc-4); padding: 0; display: grid; gap: var(--sc-5); max-width: 760px; }
+.hb-costlist li { display: grid; grid-template-columns: minmax(6ch, max-content) 1fr; gap: clamp(var(--sc-4), 3vw, var(--sc-7)); align-items: baseline; border-top: 1px solid var(--hb-rule); padding-top: var(--sc-3); }
+.hb-costlist b { font-family: var(--sc-font-display); font-size: clamp(1.9rem, 1.1rem + 2.6vw, 3.6rem); font-weight: 700; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--sc-accent); }
+.hb-costlist span { color: var(--sc-ink-soft); max-width: 52ch; }
+
+/* Capítulo 3: la lámina que se dibuja sola */
+.hb-wende { display: grid; align-content: center; gap: var(--sc-6); height: 100%; padding-block: var(--sc-7); }
+.hb-zeichnung { width: 100%; max-width: 1040px; height: auto; }
+.hb-zeichnung__grid path { stroke: var(--hb-rule-hard); stroke-width: 1; stroke-dasharray: 4 6; }
+.hb-draw { fill: none; stroke: var(--sc-ink); stroke-width: 2.4; stroke-linecap: square; stroke-dasharray: var(--len, 1200); stroke-dashoffset: calc(var(--len, 1200) * (1 - var(--hb-draw, 0))); }
+.hb-zeichnung__labels text { font-family: var(--hb-mono); font-size: 15px; font-weight: 600; fill: var(--sc-ink); letter-spacing: 0.04em; text-anchor: middle; opacity: var(--hb-draw, 0); }
+.hb-zeichnung__eff { fill: var(--sc-accent) !important; font-size: 12.5px !important; }
+.hb-zeichnung__abb { fill: var(--sc-ink-soft) !important; font-size: 10px !important; letter-spacing: 0.12em !important; }
+.hb-wende__text { display: grid; gap: var(--sc-3); max-width: 52ch; }
+.hb-wende__text p { margin: 0; font-size: var(--sc-t-lg); line-height: 1.4; }
+
+/* El silencio */
+.hb-atem { min-height: 68svh; display: grid; place-content: center; gap: var(--sc-6); text-align: center; padding-inline: var(--sc-gutter); padding-left: calc(var(--hb-folio-w) + var(--sc-gutter)); position: relative; }
+@media (max-width: 900px) { .hb-atem { padding-left: var(--sc-gutter); } }
+.hb-atem__masse { width: 200px; height: 40px; margin-inline: auto; opacity: 0.45; }
+.hb-atem__masse line { stroke: var(--sc-ink); stroke-width: 1; }
+.hb-atem__line { font-family: var(--sc-font-display); font-size: clamp(1.3rem, 0.9rem + 1.6vw, 2.2rem); letter-spacing: -0.02em; margin: 0; color: var(--sc-ink); }
+
+/* ── Capítulo 4 · el pico ───────────────────────────────────────────────── */
+
+.hb-peak__stage {
+  display: grid; grid-template-rows: auto 1fr auto;
+  align-content: stretch; justify-items: center;
+  gap: clamp(var(--sc-2), 1.4vh, var(--sc-4));
+  min-height: 100svh; padding-block: clamp(var(--sc-4), 3.5vh, var(--sc-6));
+  padding-inline: var(--sc-gutter);
+  perspective: 1500px;
+}
+.hb-peak__stage > .hb-kaphead { justify-self: start; width: min(100%, 1180px); margin: 0; max-width: 30ch; }
+.hb-peak__mid { display: grid; align-content: center; justify-items: center; gap: clamp(var(--sc-4), 3vh, var(--sc-6)); width: min(100%, 1180px); }
+
+.kette {
+  position: relative; width: 100%;
+  display: grid; grid-auto-flow: column; justify-content: center;
+  gap: clamp(0px, 1.2vw, 18px);
+  transform-style: preserve-3d;
+  align-items: center;
+}
+.beleg {
+  --hb-on: 0;
+  transform-style: preserve-3d;
+  transform:
+    perspective(1200px)
+    translateZ(calc(-200px + var(--hb-on) * 200px))
+    translateY(calc((1 - var(--hb-on)) * 34px))
+    rotateY(calc((1 - var(--hb-on)) * -52deg))
+    rotateX(calc((1 - var(--hb-on)) * 9deg));
+  /* Ground: el papel está ahí desde el primer fotograma del capítulo. Lo que
+     el scroll cambia es cómo se coloca, no si existe. */
+  opacity: calc(0.5 + var(--hb-on) * 0.5);
+  transition: transform .18s linear, opacity .18s linear;
+  will-change: transform, opacity;
+}
+.beleg__paper {
+  /* Papel de verdad, no el surface del capítulo: sobre tinta, una hoja
+     iluminada. Se re-tinta el subtree porque `color` ya resolvió arriba. */
+  --sc-ink: #17140f;
+  --sc-ink-soft: #5b5346;
+  --hb-rule: color-mix(in srgb, #17140f 20%, transparent);
+  width: clamp(118px, 13vw, 172px);
+  min-height: clamp(146px, 18vh, 200px);
+  background: linear-gradient(174deg, #fbf6ea 0%, #efe7d6 100%);
+  border: 1px solid rgb(23 20 15 / 0.3);
+  border-top: 3px solid var(--sc-accent);
+  padding: var(--sc-3);
+  display: grid; align-content: start; gap: var(--sc-2);
+  box-shadow: 0 22px 44px rgb(0 0 0 / 0.55);
+  color: var(--sc-ink);
+}
+.beleg__kind { font-family: var(--sc-font-display); font-weight: 700; font-size: 0.92rem; letter-spacing: -0.01em; }
+.beleg__nr { font-family: var(--hb-mono); font-size: 0.64rem; color: var(--sc-ink-soft); letter-spacing: 0.04em; }
+.beleg__eff { list-style: none; margin: var(--sc-2) 0 0; padding: var(--sc-2) 0 0; border-top: 1px solid var(--hb-rule); display: grid; gap: 3px; font-family: var(--hb-mono); font-size: 0.58rem; line-height: 1.4; color: var(--sc-ink-soft); }
+.beleg--focus .beleg__paper { border-color: var(--sc-accent); }
+.beleg[data-pulse] .beleg__paper { animation: hb-pulse .6s ease; }
+@keyframes hb-pulse { 0%,100% { box-shadow: 0 18px 34px rgb(0 0 0 / 0.36); } 40% { box-shadow: 0 0 0 2px var(--sc-accent), 0 18px 40px rgb(0 0 0 / 0.5); } }
+
+/* La ventana: markup real, calcula de verdad */
+.fenster {
+  justify-self: center; width: min(680px, 100%);
+  background: var(--sc-surface); color: var(--sc-ink);
+  border: 1px solid color-mix(in srgb, var(--sc-ink) 30%, transparent);
+  box-shadow: 0 26px 50px rgb(0 0 0 / 0.45);
+  opacity: var(--hb-fenster, 0);
+  transform: translateY(calc((1 - var(--hb-fenster, 0)) * 26px));
+  transition: opacity .3s ease, transform .3s ease;
+}
+.fenster[hidden] { display: none; }
+.fenster__bar { display: flex; justify-content: space-between; align-items: center; gap: var(--sc-3); padding: 6px var(--sc-3); background: #1f3f6b; color: #f2f6fb; font-family: var(--hb-mono); font-size: 0.68rem; letter-spacing: 0.03em; }
+.fenster__ctrl { letter-spacing: 0.22em; opacity: 0.75; }
+.fenster__body { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-3); padding: var(--sc-4); }
+.fenster__field { display: grid; gap: 4px; font-family: var(--hb-mono); font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-soft); }
+.fenster__field input, .fenster__field select {
+  font: inherit; font-size: 0.92rem; text-transform: none; letter-spacing: 0;
+  padding: 7px 9px; border: 1px solid color-mix(in srgb, var(--sc-ink) 34%, transparent);
+  background: #fdf8ea; color: #17140f; border-radius: 0; min-height: 40px;
+}
+.fenster__field input:focus-visible, .fenster__field select:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 1px; }
+.fenster__buchung { grid-column: 1 / -1; width: 100%; border-collapse: collapse; font-family: var(--hb-mono); font-size: 0.72rem; }
+.fenster__buchung caption { text-align: left; font-size: 0.62rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sc-ink-soft); padding-bottom: var(--sc-2); }
+.fenster__buchung th, .fenster__buchung td { border-top: 1px solid var(--hb-rule); padding: 5px 0; text-align: right; font-weight: 400; font-variant-numeric: tabular-nums; }
+.fenster__buchung th { text-align: left; color: var(--sc-ink); }
+.fenster__buchung td { min-width: 6.5em; }
+.fenster__hint { grid-column: 1 / -1; margin: 0; font-family: var(--hb-mono); font-size: 0.66rem; color: var(--sc-ink-soft); }
+@media (max-width: 720px) {
+  .fenster__body { grid-template-columns: 1fr 1fr; }
+  .fenster__buchung { font-size: 0.68rem; }
+  .kette { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-2); }
+  .beleg__paper { width: 100%; min-height: clamp(112px, 15vh, 150px); padding: var(--sc-2); }
+  .beleg__kind { font-size: 0.78rem; }
+  .beleg__eff { font-size: 0.52rem; }
+  .beleg:nth-child(4) { grid-column: 1 / 2; }
+  .hb-stufen { padding-right: 12vw; }
+  .hb-peak__stage { padding-bottom: calc(var(--sc-6) + 54px); }
+}
+
+/* ── Capítulo 5 · las nueve láminas ─────────────────────────────────────── */
+
+.hb-labor { display: grid; align-content: center; gap: var(--sc-6); height: 100%; padding-block: var(--sc-6); }
+.hb-stufen { display: flex; gap: clamp(var(--sc-4), 2vw, var(--sc-6)); padding-right: 30vw; }
+.stufe { flex: 0 0 clamp(210px, 24vw, 290px); border-top: 2px solid var(--sc-ink); padding-top: var(--sc-3); }
+.stufe__nr { font-family: var(--hb-mono); font-size: 0.68rem; letter-spacing: 0.14em; color: var(--sc-accent); }
+.stufe h3 { font-family: var(--sc-font-display); font-size: var(--sc-t-lg); letter-spacing: -0.02em; margin: var(--sc-2) 0 var(--sc-2); line-height: 1.1; }
+.stufe p { margin: 0; color: var(--sc-ink-soft); font-size: 0.92rem; line-height: 1.5; }
+
+/* ── Colofón ────────────────────────────────────────────────────────────── */
+
+.hb-kolophon { min-height: 84svh; display: grid; align-content: center; }
+.hb-kolophon__inner { max-width: 62ch; }
+.hb-kolophon__rule { font-family: var(--hb-mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sc-ink-soft); margin: 0 0 var(--sc-3); padding-bottom: var(--sc-2); border-bottom: 2px solid var(--sc-ink); }
+.hb-kolophon__balance { font-family: var(--sc-font-display); font-size: clamp(1.5rem, 1rem + 2vw, 2.6rem); line-height: 1.12; letter-spacing: -0.025em; margin: 0 0 var(--sc-6); text-wrap: balance; }
+.hb-kolophon__balance[data-balanced] { color: var(--sc-accent); }
+.hb-cta { color: var(--sc-accent); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; }
+.hb-cta:hover { background: var(--sc-accent); color: var(--sc-accent-ink); text-decoration-color: transparent; }
+.hb-cta:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+.hb-kolophon__imprint { font-family: var(--hb-mono); font-size: 0.64rem; letter-spacing: 0.06em; color: var(--sc-ink-soft); margin-top: var(--sc-8); padding-top: var(--sc-3); border-top: 1px solid var(--hb-rule); }
+
+
+/* El remate del capítulo del coste: la frase que duele, no una cifra más. */
+.hb-cost__sting {
+  font-family: var(--sc-font-display);
+  font-size: clamp(1.15rem, 0.9rem + 1.1vw, 1.75rem);
+  line-height: 1.28; letter-spacing: -0.02em;
+  max-width: 32ch; margin: var(--sc-6) 0 var(--sc-4);
+  color: var(--sc-ink); text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beleg, .fenster { transition: none; }
+  .hauptbuch__lines li { animation: none; }
+}

@@ -10,6 +10,8 @@
 
 ### ➡️ [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/)
 
+[Handbuch der Belegkette](https://brendars91.github.io/Learn-SapB1/scroll/) · la portada larga: la cadena documental se arma mientras lees y el margen te escribe el libro mayor de tu visita
+
 </div>
 
 ---
