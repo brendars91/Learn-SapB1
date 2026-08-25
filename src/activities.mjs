@@ -2,6 +2,8 @@
 // P0-1 encuadre específico · P0-3 feedback por elemento · P0-4 simulador con campos reales
 // P0-5 sin autodelato forense · P0-6 consecuencias con distractores causales.
 import { MASTERCLASS } from './masterclass.mjs';
+import { trText, trNode } from './i18n.mjs';
+import { translate } from './content/base.mjs';
 
 const JOURNAL_IDS = new Set(['SYN-SK-L4-01','SYN-SK-L4-02','SYN-SK-L4-03','SYN-SK-L4-05','SYN-SK-L4-06','SYN-SK-L4-07','SYN-SK-L4-08']);
 const FORENSIC_IDS = new Set(['SYN-SK-L0-04','SYN-SK-L0-07','SYN-SK-L2-01','SYN-SK-L2-02','SYN-SK-L2-04','SYN-SK-L2-05','SYN-SK-L2-06','SYN-SK-L3-08','SYN-SK-L7-08']);
@@ -27,7 +29,8 @@ const LABELS = {
   config: { es: 'Reto de configuración', en: 'Configuration challenge', de: 'Konfigurationsaufgabe' }
 };
 
-const JOURNALS = {
+// Exportados para que el test de cobertura vea también estos textos.
+export const JOURNALS = {
   'SYN-SK-L4-01': [['Cliente 430000','Debe','1190,00'],['Ventas 800000','Haber','1000,00'],['IVA repercutido 177600','Haber','190,00']],
   'SYN-SK-L4-02': [['Gasto/activo determinado','Debe','1000,00'],['Proveedor 160000','Haber','1190,00'],['IVA soportado 157600','Debe','190,00']],
   'SYN-SK-L4-03': [['Cliente 430000','Debe','1190,00'],['Ventas 800000','Haber','1000,00'],['IVA repercutido 177600','Haber','190,00']],
@@ -38,7 +41,7 @@ const JOURNALS = {
 };
 
 // Campos reales por skill simulador: [label, valorCorrecto, decoys plausibles] (P0-4)
-const SIMULATOR_FIELDS = {
+export const SIMULATOR_FIELDS = {
   'SYN-SK-L0-01': [
     ['Módulo donde vive el Pedido de cliente', 'Ventas – CRM', ['Compras – CRM', 'Comprobantes', 'Finanzas']],
     ['Base de datos de esta sesión', 'SBODEMOGE', ['SBOCOMMON', 'SBODRAFT', 'SBOTEST']],
@@ -59,7 +62,7 @@ const SIMULATOR_FIELDS = {
 // Encuadre específico por skill (P0-1): qué es, qué hacer, qué se evalúa.
 export function activityBrief(skill, locale) {
   const loc = locale || 'es';
-  const L = v => Array.isArray(v) ? v.map(L).join(' ') : (v?.[loc] ?? v?.es ?? '');
+  const L = v => Array.isArray(v) ? v.map(L).join(' ') : trNode(v, loc);
   const type = activityType(skill.id);
   const verb = {
     simulator: { es: 'Opera la ventana como el consultor: elige el valor correcto de cada campo.', en: 'Operate the window like the consultant: pick the right value per field.', de: 'Bediene das Fenster wie der Berater: je Feld der richtige Wert.' },
@@ -83,11 +86,12 @@ export function activityBrief(skill, locale) {
 function text(v, locale) {
   const normalize = value => {
     if (value == null) return '';
-    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (typeof value === 'string') return trText(value, locale);
+    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
     if (Array.isArray(value)) return value.map(normalize).filter(Boolean).join(' · ');
     if (typeof value === 'object') {
       const localized = value[locale] ?? value.en ?? value.es;
-      if (localized !== undefined && localized !== value) return normalize(localized);
+      if (localized !== undefined && localized !== value) return normalize(localized === value.es ? trText(value.es, locale) : localized);
       return normalize(value.text ?? value.label ?? value.value ?? value.title ?? value.description ?? value.k ?? value.v ?? '');
     }
     return '';
@@ -101,20 +105,24 @@ function skillIndex(id) { const m=/L(\d+)-(\d+)/.exec(id); return m ? Number(m[1
 function configSpec(skill, mc, locale) {
   const raw = text(asArray(mc.cfg)[0], locale);
   const route = raw.split(':')[0].split('>').map(x=>x.trim()).filter(Boolean);
-  const pool = ['Gestión','Informes','Parametrizaciones generales','Herramientas'];
+  const pool = ['Gestión','Informes','Parametrizaciones generales','Herramientas'].map(x => trText(x, locale));
   const decoys = shuffledDeterministic(pool.filter(x=>!route.includes(x)).slice(0, Math.max(2, 5-route.length)));
   return { route, tokens: shuffledDeterministic([...route, ...decoys]) };
 }
 function simulatorSpec(skill, mc, locale) {
   const custom = SIMULATOR_FIELDS[skill.id];
   if (custom) {
-    return { targets: custom.map(([label, expected, decoys]) => ({ label, expected, options: shuffledDeterministic([expected, ...decoys]) })) };
+    return { targets: custom.map(([label, expected, decoys]) => ({
+      label: trText(label, locale), expected: trText(expected, locale),
+      options: shuffledDeterministic([expected, ...decoys].map(x => trText(x, locale))) })) };
   }
   const fields = asArray(mc.screen?.fields);
   const editable = fields.filter(f=>f[2]).slice(0,3);
   let targets = editable.length ? editable : fields.slice(0,Math.min(3,fields.length));
   if (!targets.length) targets = asArray(mc.screen?.rows).slice(0,3).map(r => [r[0], r[1] ?? r[0]]);
-  return { targets: targets.map((f,i)=>({ label:f[0], expected:f[1], options:shuffledDeterministic([f[1], i===0?'— Sin valor —':'Automático', i===0?'Bloqueado':'Manual']) })) };
+  const fallback = ['— Sin valor —','Automático','Bloqueado','Manual'].map(x => trText(x, locale));
+  return { targets: targets.map((f,i)=>({ label:trText(f[0], locale), expected:trText(f[1], locale),
+    options:shuffledDeterministic([trText(f[1], locale), i===0?fallback[0]:fallback[1], i===0?fallback[2]:fallback[3]]) })) };
 }
 function forensicSpec(skill, mc, locale) {
   const steps = asArray(mc.e2e).map((x,i)=>({ label:text(x,locale), broken:false, index:i }));
@@ -160,9 +168,10 @@ export function getActivity(skill, locale) {
 }
 
 // Validación con feedback por elemento (P0-3): devuelve detalles de qué falló.
-export function validateActivityDetailed(activity, answers, sequence) {
+export function validateActivityDetailed(activity, answers, sequence, locale = 'es') {
   const A = answers || {};
   const seq = sequence || [];
+  const t = key => translate(locale, key);
   const details = [];
   let correct = true;
   if (activity.type === 'simulator') {
@@ -175,30 +184,30 @@ export function validateActivityDetailed(activity, answers, sequence) {
     activity.clues.forEach((c, i) => {
       const ok = Boolean(A['clue-' + i]) === Boolean(c.error);
       if (!ok) correct = false;
-      details.push({ item: c.label.slice(0, 70), ok, expected: c.error ? 'Marcar' : 'No marcar', got: A['clue-' + i] ? 'Marcado' : 'Sin marcar' });
+      details.push({ item: c.label.slice(0, 70), ok, expected: c.error ? t('fbMark') : t('fbDontMark'), got: A['clue-' + i] ? t('fbMarked') : t('fbUnmarked') });
     });
   } else if (activity.type === 'forensic') {
     const chosen = Number(A.broken);
     const ok = activity.evidence[chosen]?.broken === true;
     if (!ok) correct = false;
-    details.push({ item: 'Eslabón señalado', ok, expected: 'El eslabón roto real', got: activity.evidence[chosen]?.label?.slice(0, 70) || '—' });
+    details.push({ item: t('fbLinkFlagged'), ok, expected: t('fbRealBrokenLink'), got: activity.evidence[chosen]?.label?.slice(0, 70) || '—' });
   } else if (activity.type === 'config' || activity.type === 'consequence') {
     const ref = activity.route || activity.chain;
     ref.forEach((step, i) => {
       const ok = seq[i] === step;
       if (!ok) correct = false;
-      details.push({ item: 'Paso ' + (i + 1) + ': esperaba "' + String(step).slice(0, 40) + '"', ok, expected: step, got: seq[i] || '—' });
+      details.push({ item: t('fbStep') + ' ' + (i + 1) + ': ' + t('fbExpected') + ' "' + String(step).slice(0, 40) + '"', ok, expected: step, got: seq[i] || '—' });
     });
     if (activity.tokens && seq.length > ref.length) {
       correct = false;
-      details.push({ item: 'Incluiste señuelos que no pertenecen a la cadena', ok: false, expected: ref.length + ' pasos exactos', got: seq.length + ' pasos' });
+      details.push({ item: t('fbDecoys'), ok: false, expected: ref.length + ' ' + t('fbExactSteps'), got: seq.length + ' ' + t('fbSteps') });
     }
   } else if (activity.type === 'journal') {
     activity.lines.forEach((l, i) => {
       const sideOk = A['side-' + i] === l[1];
       const amountOk = String(A['amount-' + i] || '').replace(/\s/g, '') === l[2];
       if (!sideOk || !amountOk) correct = false;
-      details.push({ item: l[0] + ' — lado/importe', ok: sideOk && amountOk, expected: l[1] + ' ' + l[2], got: (A['side-' + i] || '—') + ' ' + (A['amount-' + i] || '—') });
+      details.push({ item: trText(l[0], locale) + ' — ' + t('fbSideAmount'), ok: sideOk && amountOk, expected: l[1] + ' ' + l[2], got: (A['side-' + i] || '—') + ' ' + (A['amount-' + i] || '—') });
     });
   }
   return { correct, details };

@@ -6,7 +6,7 @@
 
 🇪🇸 [Español](#español) · 🇬🇧 [English](#english)
 
-[![tests](https://img.shields.io/badge/tests-43%2F43%20PASS-brightgreen)](#verificación) [![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/archivo-%3C1%20MiB-orange)](#cómo-usarla)
+[![tests](https://img.shields.io/badge/tests-52%2F52%20PASS-brightgreen)](#verificación) [![offline](https://img.shields.io/badge/modo-100%25%20offline-blue)](#privacidad-y-modo-offline) [![tamaño](https://img.shields.io/badge/archivo-%3C1%2C5%20MiB-orange)](#cómo-usarla)
 
 ### ➡️ [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/)
 
@@ -22,7 +22,7 @@ Herramienta de estudio **personal, offline y sin cuentas** para aprender SAP Bus
 
 **Opción 1 (recomendada):** pulsa [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/) — funciona directamente en el navegador, sin instalación.
 
-**Opción 2:** descarga [`index.html`](index.html) y ábrelo con doble clic en cualquier navegador moderno. Todo el contenido, estilos y lógica viven dentro del único archivo HTML (<1 MiB). No requiere servidor, cuenta, clave API ni conexión.
+**Opción 2:** descarga [`index.html`](index.html) y ábrelo con doble clic en cualquier navegador moderno. Todo el contenido, estilos y lógica viven dentro del único archivo HTML (<1,5 MiB). No requiere servidor, cuenta, clave API ni conexión.
 
 ### Qué contiene
 
@@ -57,7 +57,7 @@ Herramienta de estudio **personal, offline y sin cuentas** para aprender SAP Bus
 ### Verificación
 
 ```
-node --test test/*.test.mjs   →  43/43 PASS
+node --test test/*.test.mjs   →  52/52 PASS
 node scripts/build.mjs        →  reconstruye el standalone desde src/
 npm run test:browser:local    →  recorre vistas y 72 skills × 3 modos en Chromium
 ```
@@ -91,7 +91,7 @@ A **personal, offline, account-free** study environment to master SAP Business O
 
 **Option 1 (recommended):** click [**OPEN THE APP**](https://brendars91.github.io/Learn-SapB1/) — runs straight in the browser.
 
-**Option 2:** download [`index.html`](index.html) and double-click it. Everything lives in a single <1 MiB HTML file: no server, account, API key, or network needed.
+**Option 2:** download [`index.html`](index.html) and double-click it. Everything lives in a single <1.5 MiB HTML file: no server, account, API key, or network needed.
 
 ### What's inside
 
@@ -118,7 +118,7 @@ Synthetic-only data (`SYN-*`), progress stays in your browser's `localStorage`, 
 ### Verification
 
 ```
-node --test test/*.test.mjs   →  43/43 PASS
+node --test test/*.test.mjs   →  52/52 PASS
 node scripts/build.mjs        →  rebuilds the standalone from src/
 npm run test:browser:local    →  exercises views and 72 skills × 3 modes in Chromium
 ```

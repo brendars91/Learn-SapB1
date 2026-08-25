@@ -6,10 +6,10 @@ import vm from 'node:vm';
 const fragmentPath = '/tmp/b1lab/out/sap-b1-mastery-lab.html';
 const standalonePath = '/tmp/b1lab/out/SAP-Business-One-Mastery-Lab-Standalone.html';
 
-test('fragment is a sub-1MiB HTML fragment with scoped root and inline runtime', async () => {
+test('fragment is a sub-1.5MiB HTML fragment with scoped root and inline runtime', async () => {
   const html = await readFile(fragmentPath, 'utf8');
   const info = await stat(fragmentPath);
-  assert.ok(info.size < 1024 * 1024, `${info.size} bytes`);
+  assert.ok(info.size < 1536 * 1024, `${info.size} bytes`);
   assert.doesNotMatch(html, /<!doctype|<html|<head|<body/i);
   assert.match(html, /id="sap-b1-mastery-lab"/);
   assert.match(html, /<style>[\s\S]+<\/style>/);
