@@ -334,32 +334,19 @@
 /* Elemento decorativo: círculos concéntricos */
 .hb-title-deco {
   position: absolute;
-  right: calc(var(--sc-gutter) + 60px);
+  right: calc(var(--sc-gutter) + 40px);
   top: 50%;
   transform: translateY(-50%);
-  width: 200px;
-  height: 200px;
-  opacity: 0.06;
+  width: 80px;
+  height: 80px;
+  opacity: 0.08;
   pointer-events: none;
 }
 
 .hb-title-deco circle {
   fill: none;
   stroke: var(--sc-ink);
-  stroke-width: 1;
-}
-
-/* Punto decorativo central */
-.hb-title-deco-point {
-  position: absolute;
-  right: calc(var(--sc-gutter) + 140px);
-  top: 50%;
-  transform: translate(50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: var(--sc-accent);
-  border-radius: 50%;
-  opacity: 0.4;
+  stroke-width: 0.5;
 }
 
 /* Cabecera de capítulo: más aire encima que debajo. */

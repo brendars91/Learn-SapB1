@@ -99,8 +99,8 @@
 
     // Los cinco documentos entran escalonados en el primer 62% del capítulo.
     cards.forEach((card, i) => {
-      const from = 0.06 + i * 0.11;
-      const on = reduced ? (p > from ? 1 : 0) : clamp01((p - from) / 0.16);
+      const from = 0.06 + i * 0.18;
+      const on = reduced ? (p > from ? 1 : 0) : clamp01((p - from) / 0.25);
       card.style.setProperty('--hb-on', on.toFixed(3));
       if (on > 0.98 && !card.dataset.landed) {
         card.dataset.landed = '';
