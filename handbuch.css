@@ -14,6 +14,10 @@
   --sc-accent:     #a82f18;
   --sc-accent-ink: #f6f0e3;
 
+  --sc-accent-soft:  #d4c5b8;
+  --sc-accent-extra: #b8a894;
+  --sc-paper-texture: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%), linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.15) 50%);
+
   --sc-font-display: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
   --sc-font-text:    "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
   --hb-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
@@ -171,13 +175,192 @@
 .hb-title__note { text-transform: none; letter-spacing: 0.02em; margin-top: var(--sc-6); }
 .hb-title__note code, .hb-costnote code { font-family: var(--hb-mono); color: var(--sc-accent); }
 
-.hb-title { min-height: 100svh; display: grid; align-content: center; }
-.hb-colofon { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(120px, 45%), 1fr)); min-width: 0; gap: var(--sc-4); margin: 0; padding: var(--sc-4) 0; border-block: 1px solid var(--hb-rule-hard); max-width: 720px; }
-.hb-colofon dt { font-family: var(--hb-mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sc-ink-soft); }
-.hb-colofon dd { margin: 2px 0 0; font-size: var(--sc-t-lg); font-variant-numeric: tabular-nums; }
-.hb-masse { position: absolute; right: var(--sc-gutter); bottom: var(--sc-6); width: clamp(140px, 18vw, 240px); height: auto; opacity: 0.5; }
-.hb-masse line { stroke: var(--sc-ink); stroke-width: 1; }
-.hb-masse text { font-family: var(--hb-mono); font-size: 9px; fill: var(--sc-ink-soft); letter-spacing: 0.14em; }
+/* ── PORTADA PREMIUM ── Marco editorial con sensación de libro encuadernado */
+.hb-title {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  position: relative;
+  padding: clamp(2rem, 5vw, 5rem) clamp(1.5rem, 4vw, 4rem);
+}
+
+/* Marco decorativo exterior */
+.hb-title::before {
+  content: '';
+  position: absolute;
+  inset: clamp(1rem, 3vw, 2.5rem);
+  border: 1px solid var(--sc-ink);
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* Marco interior punteado */
+.hb-title::after {
+  content: '';
+  position: absolute;
+  inset: clamp(1.5rem, 4vw, 3rem);
+  border: 1px dashed var(--sc-ink);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* Textura sutil de papel premium */
+.hb-title .hb-grid {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+
+/* Imprint con línea decorativa */
+.hb-imprint {
+  font-family: var(--hb-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+  margin: 0 0 var(--sc-4) 0;
+  padding-bottom: var(--sc-3);
+  border-bottom: 1px solid var(--hb-rule);
+  display: inline-block;
+}
+
+/* Título principal mejorado */
+.hb-title__h1 {
+  font-family: var(--sc-font-display);
+  font-size: clamp(2.8rem, 1.4rem + 7.4vw, 8.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  margin: var(--sc-4) 0 var(--sc-3) 0;
+  text-wrap: balance;
+  position: relative;
+}
+
+/* Línea decorativa bajo el título */
+.hb-title__h1::after {
+  content: '';
+  position: absolute;
+  bottom: -0.15em;
+  left: 0;
+  width: 80px;
+  height: 3px;
+  background: var(--sc-accent);
+}
+
+.hb-title__sub {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--sc-ink);
+}
+
+.hb-title__es {
+  font-size: var(--sc-t-lg);
+  max-width: 38ch;
+  color: var(--sc-ink-soft);
+  margin: var(--sc-5) 0 var(--sc-7) 0;
+  text-wrap: pretty;
+  line-height: 1.5;
+}
+
+/* Colofón mejorado con bordes */
+.hb-colofon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(120px, 45%), 1fr));
+  min-width: 0;
+  gap: var(--sc-4);
+  margin: var(--sc-6) 0 0 0;
+  padding: var(--sc-5) 0;
+  border-block: 1px solid var(--hb-rule-hard);
+  max-width: 720px;
+  background: rgba(255,255,255,0.15);
+}
+
+.hb-colofon dt {
+  font-family: var(--hb-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sc-ink-soft);
+}
+
+.hb-colofon dd {
+  margin: 2px 0 0;
+  font-size: var(--sc-t-lg);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/* Nota SYN destacada */
+.hb-title__note {
+  font-family: var(--hb-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--sc-accent);
+  margin: var(--sc-5) 0 0 0;
+  padding: var(--sc-3) var(--sc-4);
+  background: rgba(168, 47, 24, 0.06);
+  border-left: 2px solid var(--sc-accent);
+  display: inline-block;
+}
+
+.hb-title__note code {
+  font-family: var(--hb-mono);
+  color: var(--sc-accent);
+  font-weight: 600;
+}
+
+/* Masa decorativa mejorada */
+.hb-masse {
+  position: absolute;
+  right: var(--sc-gutter);
+  bottom: var(--sc-6);
+  width: clamp(140px, 18vw, 240px);
+  height: auto;
+  opacity: 0.6;
+}
+
+.hb-masse line {
+  stroke: var(--sc-ink);
+  stroke-width: 1.5;
+}
+
+.hb-masse text {
+  font-family: var(--hb-mono);
+  font-size: 9px;
+  fill: var(--sc-ink-soft);
+  letter-spacing: 0.14em;
+}
+
+/* Elemento decorativo: círculos concéntricos */
+.hb-title-deco {
+  position: absolute;
+  right: calc(var(--sc-gutter) + 60px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+  height: 200px;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.hb-title-deco circle {
+  fill: none;
+  stroke: var(--sc-ink);
+  stroke-width: 1;
+}
+
+/* Punto decorativo central */
+.hb-title-deco-point {
+  position: absolute;
+  right: calc(var(--sc-gutter) + 140px);
+  top: 50%;
+  transform: translate(50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: var(--sc-accent);
+  border-radius: 50%;
+  opacity: 0.4;
+}
 
 /* Cabecera de capítulo: más aire encima que debajo. */
 .hb-kaphead { margin: 0 0 var(--sc-6); padding-top: var(--sc-3); border-top: 2px solid var(--sc-ink); max-width: 24ch; }
@@ -226,12 +409,107 @@
 .hb-wende__text { display: grid; gap: var(--sc-3); max-width: 52ch; }
 .hb-wende__text p { margin: 0; font-size: var(--sc-t-lg); line-height: 1.4; }
 
-/* El silencio */
-.hb-atem { min-height: 68svh; display: grid; place-content: center; gap: var(--sc-6); text-align: center; padding-inline: var(--sc-gutter); padding-left: calc(var(--hb-folio-w) + var(--sc-gutter)); position: relative; }
+/* El silencio - rediseñado para mayor impacto */
+.hb-atem {
+  min-height: 85svh;
+  display: grid;
+  place-content: center;
+  gap: var(--sc-8);
+  text-align: center;
+  padding-inline: var(--sc-gutter);
+  padding-left: calc(var(--hb-folio-w) + var(--sc-gutter));
+  position: relative;
+  background: var(--sc-canvas);
+}
 @media (max-width: 900px) { .hb-atem { padding-left: var(--sc-gutter); } }
-.hb-atem__masse { width: 200px; height: 40px; margin-inline: auto; opacity: 0.45; }
-.hb-atem__masse line { stroke: var(--sc-ink); stroke-width: 1; }
-.hb-atem__line { font-family: var(--sc-font-display); font-size: clamp(1.3rem, 0.9rem + 1.6vw, 2.2rem); letter-spacing: -0.02em; margin: 0; color: var(--sc-ink); }
+
+/* Marco decorativo alrededor del silencio */
+.hb-atem::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(280px, 50vw, 600px);
+  height: clamp(120px, 18vw, 220px);
+  border: 1px solid var(--sc-ink);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.hb-atem::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(260px, 46vw, 560px);
+  height: clamp(100px, 14vw, 180px);
+  border: 1px dashed var(--sc-ink);
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.hb-atem__masse {
+  width: clamp(180px, 28vw, 280px);
+  height: 40px;
+  margin-inline: auto;
+  opacity: 0.7;
+  position: relative;
+  z-index: 2;
+}
+
+.hb-atem__masse line {
+  stroke: var(--sc-ink);
+  stroke-width: 1.5;
+}
+
+.hb-atem__line {
+  font-family: var(--sc-font-display);
+  font-size: clamp(1.8rem, 1.2rem + 2.4vw, 3.2rem);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--sc-ink);
+  position: relative;
+  z-index: 2;
+  max-width: 24ch;
+  margin-inline: auto;
+  text-wrap: balance;
+}
+
+/* Líneas decorativas a los lados del texto */
+.hb-atem__line::before,
+.hb-atem__line::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: clamp(30px, 6vw, 80px);
+  height: 1px;
+  background: var(--sc-ink);
+  opacity: 0.3;
+}
+
+.hb-atem__line::before {
+  right: calc(100% + clamp(1rem, 2vw, 2rem));
+}
+
+.hb-atem__line::after {
+  left: calc(100% + clamp(1rem, 2vw, 2rem));
+}
+
+/* Subtítulo sutil debajo del texto principal */
+.hb-atem__sub {
+  font-family: var(--hb-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+  margin: 0;
+  position: relative;
+  z-index: 2;
+}
 
 /* ── Capítulo 4 · el pico ───────────────────────────────────────────────── */
 
@@ -301,7 +579,6 @@
   transform: translateY(calc((1 - var(--hb-fenster, 0)) * 26px));
   transition: opacity .3s ease, transform .3s ease;
 }
-.fenster[hidden] { display: none; }
 .fenster__bar { display: flex; justify-content: space-between; align-items: center; gap: var(--sc-3); padding: 6px var(--sc-3); background: #1f3f6b; color: #f2f6fb; font-family: var(--hb-mono); font-size: 0.68rem; letter-spacing: 0.03em; }
 .fenster__ctrl { letter-spacing: 0.22em; opacity: 0.75; }
 .fenster__body { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-3); padding: var(--sc-4); }

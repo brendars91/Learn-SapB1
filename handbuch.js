@@ -129,7 +129,8 @@
   function driveDrawing() {
     if (!wendeAct) return;
     const p = Number(getComputedStyle(wendeAct).getPropertyValue('--sc-p')) || 0;
-    const d = reduced ? 1 : clamp01((p - 0.05) / 0.5);
+    // Ralentizar el dibujo: hacerlo más gradual y secuencial
+    const d = reduced ? 1 : clamp01((p - 0.02) / 0.8);
     wendeAct.style.setProperty('--hb-draw', d.toFixed(3));
   }
 
