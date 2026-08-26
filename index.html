@@ -9,27 +9,172 @@
 <link rel="stylesheet" href="scrollcraft.css">
 <link rel="stylesheet" href="handbuch.css">
 <style>
-/* Mobile overrides for folio sidebar */
-@media (max-width: 900px) {
+/* ==== Premium Design System ==== */
+/* Color palette - premium charcoal & gold */
+:root {
+  --sc-canvas: #0d0d0d;
+  --sc-surface: #1a1a1a;
+  --sc-ink: #f5f0e8;
+  --sc-ink-soft: #8c867d;
+  --sc-accent: #d4a853;
+  --sc-accent-ink: #0d0d0d;
+  --hb-rule: rgba(255,255,255,0.15);
+  --hb-rule-hard: rgba(255,255,255,0.25);
+  --hb-font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --hb-font-text: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+}
+
+/* Page container - full bleed with safe area */
+body {
+  margin: 0;
+  font: 1rem/1.6 var(--hb-font-text);
+  background: var(--sc-canvas);
+  color: var(--sc-ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Main content area */
+.page {
+  max-width: none;
+  padding: 0;
+  position: relative;
+}
+
+/* Folio sidebar - always visible, premium styling */
+.folio {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 200px;
+  background: var(--sc-surface);
+  border-left: 1px solid var(--hb-rule);
+  z-index: 100;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sc-ink-soft) var(--sc-canvas);
+}
+
+/* Mobile: hide folio sidebar on small screens */
+@media (max-width: 800px) {
   .folio { display: none !important; }
 }
-/* Mobile-safe page padding */
-.page { padding: 0; }
-/* Ticket visual */
-.hb-ticket { background: var(--sc-surface, #f6f0e3); border: 1px solid rgba(86,78,66,0.3); border-radius: 4px; padding: 0.75rem; margin: 1rem 0; }
-.hb-ticket__head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-weight: 700; font-size: 0.8rem; }
-.hb-ticket__body { font-style: italic; color: #564e42; margin: 0.5rem 0; font-size: 0.9rem; }
-.hb-ticket__foot { display: flex; justify-content: space-between; font-size: 0.8rem; color: #564e42; margin-top: 0.5rem; }
-.hb-ticket__priority { color: #c0392b; font-weight: 700; }
+
+/* Folio elements */
+.folio__head { padding: 1.5rem 1rem 0; border-bottom: 1px solid var(--hb-rule); }
+.folio__kap { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sc-ink-soft); margin-bottom: 0.5rem; }
+.folio__num { font-size: 2.5rem; font-weight: 300; color: var(--sc-accent); line-height: 1; }
+.folio__kap, .folio__num { padding: 0 1rem; }
+
+/* Document chain overview */
+.belegkette { padding: 0 1rem 1rem; }
+.belegkette__item { padding: 0.5rem 0; font-size: 0.8rem; color: var(--sc-ink-soft); }
+.belegkette__dot { margin-right: 0.25rem; width: 6px; height: 6px; border-radius: 50; background: var(--sc-ink-soft); vertical-align: middle; }
+.belegkette__item:hover .belegkette__dot { background: var(--sc-accent); }
+
+/* Chapter styling */
+.hb-chapter { padding: 2rem 2rem 0; }
+.hb-chapter--paper { background: var(--sc-surface); border: 1px solid var(--hb-rule); }
+.hb-chapter--ink { --sc-canvas: #151515; --sc-surface: #121212; --sc-ink: #e8e4dc; --sc-ink-soft: #6b675d; --sc-accent: #c99b41; }
+
+/* Title page */
+.hb-title { text-align: center; padding: 3rem 1rem; }
+.hb-title__h1 { font: 2.5rem/1.2 var(--hb-font-display); letter-spacing: 0.05em; margin: 1rem 0; }
+.hb-title__h1 span { display: block; font-style: italic; }
+.hb-title__es { font-size: 1.2rem; color: var(--sc-ink-soft); margin-bottom: 2rem; }
+.hb-imprint { font-size: 0.8rem; color: var(--sc-ink-soft); margin-bottom: 2rem; letter-spacing: 0.1em; }
+
+/* Chapter headers */
+.hb-kaphead { padding: 0 1rem 1rem; border-bottom: 1px solid var(--hb-rule); }
+.hb-kaphead__num { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sc-ink-soft); margin-bottom: 0.25rem; }
+.hb-kaphead__h2 { font: 1.2rem/1.3 var(--hb-font-display); color: var(--sc-ink); margin: 0; }
+
+/* Ticket visual (Chapter 1) */
+.hb-ticket { background: var(--sc-surface); border: 1px solid var(--hb-rule); border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0; position: relative; }
+.hb-ticket__head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; font-weight: 600; font-size: 0.85rem; }
+.hb-ticket__head .svg { width: 18px; height: 18px; flex-shrink: 0; }
+.hb-ticket__body { color: var(--sc-ink-soft); font-style: italic; margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.5; }
+.hb-ticket__foot { display: flex; justify-content: space-between; align-items: baseline; padding-top: 0.75rem; border-top: 1px solid var(--hb-rule); font-size: 0.8rem; }
+.hb-ticket__priority { color: #e74c3c; font-weight: 700; }
+.hb-ticket__dot { width: 10px; height: 10px; border-radius: 50; background: #e74c3c; flex-shrink: 0; }
+
+/* Cost section */
+.hb-costgrid { padding: 0 1rem 1rem; }
+.hb-costlist li { margin-bottom: 1rem; font-size: 0.9rem; line-height: 1.5; }
+.hb-cost__sting { font-size: 0.85rem; color: var(--sc-ink-soft); margin-top: 1rem; }
+.hb-costnote { font-size: 0.8rem; color: var(--sc-ink-soft); margin-top: 0.5rem; display: block; }
+
+/* Diagram (Chapter 3) */
+.hb-zeichnung { max-width: 100%; height: auto; margin: 1.5rem auto; }
+.hb-zeichnung__grid path { stroke: var(--sc-ink-soft); stroke-width: 0.5; }
+.hb-zeichnung__draw .hb-draw { stroke: var(--sc-accent); stroke-width: 2; fill: none; }
+.hb-zeichnung__labels text { fill: var(--sc-ink); font-size: 0.85rem; }
+.hb-zeichnung__eff { fill: var(--sc-accent); }
+.hb-zeichnung__abb { fill: var(--sc-ink-soft); font-size: 0.7rem; }
+
+/* Wende (Chapter 3) */
+.hb-wende__text { padding: 0 1rem 1rem; font-size: 0.9rem; line-height: 1.6; color: var(--sc-ink-soft) }
+.hb-wende__text p { margin-bottom: 1rem; }
+
+/* Peak/Chapter 4 */
+.hb-peak__stage { padding: 0 1rem 1rem; }
+.kette { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+.beleg { flex: 1 1 140px; min-width: 140px; }
+.beleg__paper { background: var(--sc-surface); border: 1px solid var(--hb-rule); border-radius: 6px; padding: 1rem; }
+.beleg--focus .beleg__paper { border-color: var(--sc-accent); background: #1e1e1e; }
+.beleg__kind { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sc-ink-soft); margin-bottom: 0.25rem; }
+.beleg__nr { display: block; font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: var(--sc-ink); }
+.beleg__eff { list-style: none; padding: 0; margin: 0; font-size: 0.8rem; }
+.beleg__eff li { margin-bottom: 0.3rem; }
+
+/* Live SAP window */
+.fenster { background: var(--sc-surface); border: 1px solid var(--hb-rule); border-radius: 6px; margin: 1.5rem 0; }
+.fenster__bar { padding: 0.75rem 1rem; background: var(--sc-accent); color: var(--sc-canvas); font-size: 0.8rem; font-weight: 600; }
+.fenster__bar span { font-family: 'Roboto Mono', monospace; }
+.fenster__ctrl { unicode-bidi: bidi-override; direction: rtl; font-size: 0.7rem; }
+.fenster__body { padding: 1rem; }
+.fenster__field { margin-bottom: 0.75rem; }
+.fenster__field label { display: block; font-size: 0.75rem; color: var(--sc-ink-soft); margin-bottom: 0.25rem; }
+.fenster__field input, .fenster__field select { width: 100%; padding: 0.5rem; margin-top: 0.25rem; border: 1px solid var(--hb-rule); border-radius: 4px; background: var(--sc-canvas); color: var(--sc-ink); font-family: inherit; }
+.fenster__field input:focus, .fenster__field select:focus { outline: none; border-color: var(--sc-accent); }
+.fenster__buchung { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.75rem; }
+.fenster__buchung th, .fenster__buchung td { padding: 0.5rem; border-bottom: 1px solid var(--hb-rule); text-align: left; }
+.fenster__buchung caption { padding-bottom: 0.5rem; font-weight: 600; color: var(--sc-accent); }
+.fenster__hint { font-size: 0.8rem; color: var(--sc-ink-soft); margin-top: 0.5rem; }
+
+/* Levels (Chapter 5) */
+.hb-labor { padding: 0 1rem 2rem; }
+.hb-stufen { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+.stufe { background: var(--sc-surface); border: 1px solid var(--hb-rule); border-radius: 6px; padding: 1rem; transition: all 0.2s ease; }
+.stufe:hover { border-color: var(--sc-accent); }
+.stufe__nr { display: inline-block; width: 2.2rem; height: 2.2rem; background: var(--sc-accent); color: var(--sc-accent-ink); font-size: 0.85rem; font-weight: 700; line-height: 2.2rem; text-align: center; margin-bottom: 0.75rem; font-family: 'Roboto Mono', monospace; }
+.stufe h3 { font: 0.9rem/1.2 var(--hb-font-display); margin: 0 0 0.25rem; color: var(--sc-ink); }
+.stufe p { font-size: 0.85rem; color: var(--sc-ink-soft); line-height: 1.5; }
+
+/* Colophon */
+.hb-kolophon { padding: 2rem; border-top: 1px solid var(--hb-rule); }
+.hb-kolophon__rule { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sc-ink-soft); margin-bottom: 1.5rem; }
+.hb-kolophon__balance { font-size: 1.2rem; color: var(--sc-accent); margin-bottom: 1rem; display: block; }
+.hb-kolophon__text { font-size: 0.9rem; color: var(--sc-ink-soft); margin-bottom: 2rem; line-height: 1.6; }
+.hb-kolophon__text a { color: var(--sc-accent); text-decoration: underline; }
+.hb-kolophon__imprint { font-size: 0.75rem; color: var(--sc-ink-soft); margin-top: 1.5rem; }
+
+/* CTA link styling */
+.hb-cta { color: var(--sc-accent); text-decoration: underline; font-weight: 600; }
+.hb-cta:focus { outline: 2px solid var(--sc-accent); outline-offset: 2px; }
+
+/* Focus visible for accessibility */
+*:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 2px; }
 </style>
 </head>
-<body class="hb">
+<body>
 
 <!-- Folio sidebar -->
 <aside class="folio" aria-label="Folio and the day's general ledger">
   <div class="folio__head">
-    <span class="folio__kap" data-folio-kap>Title Page</span>
-    <span class="folio__num" data-folio-num>—</span>
+    <span class="folio__kap">Title Page</span>
+    <span class="folio__num">—</span>
   </div>
   <ol class="belegkette" aria-label="Document chain">
     <li class="belegkette__item" data-beleg="0"><span class="belegkette__dot"></span><span class="belegkette__name">Quotation</span></li>
@@ -73,8 +218,8 @@
   </svg>
 </section>
 
-<!-- CHAPTER 1 -->
-<section class="hb-chapter hb-chapter--paper" data-sc-act="flow" data-hb-kap="The Incident" data-hb-num="1" data-hb-ledger="Quotation|Quotation A-2026-0114|&mdash;|&mdash;">
+<!-- CHAPTER 1: The Incident -->
+<section class="hb-chapter hb-chapter--paper" data-sc-act="flow" data-hb-kap="The Incident" data-hb-num="1" data-hb-ledger="Quotation|Quotation A-2026-0114|—|—">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 1</span>
     <h2 class="hb-kaphead__h2">08:14. An invoice has disappeared.</h2>
@@ -96,8 +241,8 @@
   </div>
 </section>
 
-<!-- CHAPTER 2 -->
-<section class="hb-chapter hb-chapter--paper hb-cost" data-sc-act="flow" data-hb-kap="The Cost" data-hb-num="2" data-hb-ledger="Sales Order|Sales Order 162|&mdash;|&mdash;">
+<!-- CHAPTER 2: The Cost -->
+<section class="hb-chapter hb-chapter--paper hb-cost" data-sc-act="flow" data-hb-kap="The Cost" data-hb-num="2" data-hb-ledger="Sales Order|Sales Order 162|—|—">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 2</span>
     <h2 class="hb-kaphead__h2">What it costs to ask the wrong question.</h2>
@@ -105,7 +250,7 @@
   <div class="hb-costgrid" data-sc-in data-sc-stagger="70">
     <p class="hb-lede hb-costgrid__lede">The invoice shows up. It was cancelled and replaced by another, in another series. The cost isn't the search: it's that nobody knew where to look.</p>
     <ul class="hb-costlist">
-      <li><b>0,00</b> is what the aged receivables show for a draft of 500.00 that's been sitting there for three weeks. A draft doesn't post to the ledger and doesn't move stock: it's a frozen promise.</li>
+      <li><b>0.00</b> is what the aged receivables show for a draft of 500.00 that's been sitting there for three weeks. A draft doesn't post to the ledger and doesn't move stock: it's a frozen promise.</li>
       <li><b>856.80</b> is what the customer owes per the general ledger, spread across three lines created automatically when the invoice was added.</li>
     </ul>
     <p class="hb-cost__sting">The customer waits while the payment doesn't come in and the same question returns on Thursday with a different document.</p>
@@ -113,8 +258,8 @@
   </div>
 </section>
 
-<!-- CHAPTER 3 -->
-<section class="hb-chapter hb-chapter--paper" data-sc-act="pin" data-sc-span="2.2" data-hb-kap="The Turn" data-hb-num="3" data-hb-ledger="Delivery|Delivery 5001|&mdash;|&mdash;">
+<!-- CHAPTER 3: The Turn -->
+<section class="hb-chapter hb-chapter--paper" data-sc-act="pin" data-sc-span="2.2" data-hb-kap="The Turn" data-hb-num="3" data-hb-ledger="Delivery|Delivery 5001|—|—">
   <div data-sc-stage class="hb-wende">
     <header class="hb-kaphead hb-kaphead--inset">
       <span class="hb-kaphead__num">Chapter 3</span>
@@ -130,11 +275,11 @@
         <path d="M720 40 V260" stroke-dasharray="4 4"/>
       </g>
       <g class="hb-zeichnung__draw">
-        <path class="hb-draw" d="M60 150 H840" stroke="#d9a25a" stroke-width="2" fill="none"/>
-        <rect class="hb-draw" x="60" y="120" width="120" height="60" rx="2" fill="none" stroke="#d9a25a" stroke-width="1.5"/>
-        <rect class="hb-draw" x="250" y="120" width="120" height="60" rx="2" fill="none" stroke="#d9a25a" stroke-width="1.5"/>
-        <rect class="hb-draw" x="440" y="120" width="120" height="60" rx="2" fill="none" stroke="#d9a25a" stroke-width="1.5"/>
-        <rect class="hb-draw" x="630" y="120" width="120" height="60" rx="2" fill="none" stroke="#c8b89a" stroke-width="1"/>
+        <path class="hb-draw" d="M60 150 H840" stroke="#d4a853" stroke-width="2" fill="none"/>
+        <rect class="hb-draw" x="60" y="120" width="120" height="60" rx="2" fill="none" stroke="#d4a853" stroke-width="1.5"/>
+        <rect class="hb-draw" x="250" y="120" width="120" height="60" rx="2" fill="none" stroke="#d4a853" stroke-width="1.5"/>
+        <rect class="hb-draw" x="440" y="120" width="120" height="60" rx="2" fill="none" stroke="#d4a853" stroke-width="1.5"/>
+        <rect class="hb-draw" x="630" y="120" width="120" height="60" rx="2" fill="none" stroke="#a87835" stroke-width="1"/>
         <path class="hb-draw" d="M310 180 V235"/>
         <path class="hb-draw" d="M500 180 V235"/>
         <path class="hb-draw" d="M690 180 V235"/>
@@ -167,7 +312,7 @@
   <p class="hb-atem__line" data-sc-in>Take a breath. Look at a real document.</p>
 </section>
 
-<!-- CHAPTER 4 -->
+<!-- CHAPTER 4: The Document Chain -->
 <section class="hb-chapter hb-chapter--ink hb-peak" data-sc-act="pin" data-sc-span="3.6" data-hb-kap="The Document Chain" data-hb-num="4" data-hb-ledger="Invoice|Invoice 1001-2026|856.80|856.80">
   <div data-sc-stage class="hb-peak__stage">
     <header class="hb-kaphead hb-kaphead--ink">
@@ -181,10 +326,7 @@
           <span class="beleg__kind">Quotation</span>
           <span class="beleg__nr">A-2026-0114</span>
           <ul class="beleg__eff">
-            <li>Stock: &mdash;</li>
-            <li>Ledger: &mdash;</li>
-            <li>Balance: &mdash;</li>
-          </ul>
+            <li>Stock: &mdash;</li><li>Ledger: &mdash;</li><li>Balance: &mdash;</li></ul>
         </div>
       </article>
       <article class="beleg" data-beleg-card="1" style="--i:1">
@@ -192,10 +334,7 @@
           <span class="beleg__kind">Sales Order</span>
           <span class="beleg__nr">162</span>
           <ul class="beleg__eff">
-            <li>Stock: reserved</li>
-            <li>Ledger: &mdash;</li>
-            <li>Balance: &mdash;</li>
-          </ul>
+            <li>Stock: reserved</li><li>Ledger: &mdash;</li><li>Balance: &mdash;</li></ul>
         </div>
       </article>
       <article class="beleg" data-beleg-card="2" style="--i:2">
@@ -203,10 +342,7 @@
           <span class="beleg__kind">Delivery</span>
           <span class="beleg__nr">5001</span>
           <ul class="beleg__eff">
-            <li>Stock: &minus;15</li>
-            <li>Ledger: COGS</li>
-            <li>Balance: &mdash;</li>
-          </ul>
+            <li>Stock: &minus;15</li><li>Ledger: COGS</li><li>Balance: &mdash;</li></ul>
         </div>
       </article>
       <article class="beleg beleg--focus" data-beleg-card="3" style="--i:3">
@@ -214,10 +350,7 @@
           <span class="beleg__kind">Invoice</span>
           <span class="beleg__nr">1001-2026</span>
           <ul class="beleg__eff">
-            <li>Stock: &mdash;</li>
-            <li>Ledger: AR / Revenue / VAT</li>
-            <li>Balance: +856.80</li>
-          </ul>
+            <li>Stock: &mdash;</li><li>Ledger: AR / Revenue / VAT</li><li>Balance: +856.80</li></ul>
         </div>
       </article>
       <article class="beleg" data-beleg-card="4" style="--i:4">
@@ -225,10 +358,7 @@
           <span class="beleg__kind">Payment</span>
           <span class="beleg__nr">2301</span>
           <ul class="beleg__eff">
-            <li>Stock: &mdash;</li>
-            <li>Ledger: Bank / Receivables</li>
-            <li>Balance: 0.00</li>
-          </ul>
+            <li>Stock: &mdash;</li><li>Ledger: Bank / Receivables</li><li>Balance: 0.00</li></ul>
         </div>
       </article>
     </div>
@@ -237,30 +367,30 @@
   </div>
 </section>
 
-<!-- CHAPTER 5 -->
+<!-- CHAPTER 5: The Lab -->
 <section class="hb-chapter hb-chapter--paper" data-sc-act="pan" data-sc-span="2.6" data-hb-kap="The Lab" data-hb-num="5" data-hb-ledger="Payment|Payment 2301|856.80|856.80">
-  <div data-sc-stage class="hb-labor">
+  <div data-sc-stage class="hb-labor" id="sap-b1-mastery-lab">
     <header class="hb-kaphead hb-kaphead--inset">
       <span class="hb-kaphead__num">Chapter 5</span>
       <h2 class="hb-kaphead__h2">Nine levels. At your own pace.</h2>
     </header>
-    <div class="hb-stufen" data-sc-pan="0.07">
+    <div class="hb-stufen">
       <article class="stufe"><span class="stufe__nr">L0</span><h3>Mental Model</h3><p>How a document travels through all eight modules.</p></article>
       <article class="stufe"><span class="stufe__nr">L1</span><h3>Master Data</h3><p>Business partners, items, series, dates — what decides everything else.</p></article>
       <article class="stufe"><span class="stufe__nr">L2</span><h3>Core Logistics</h3><p>Order, delivery, invoice, payment. The full chain.</p></article>
       <article class="stufe"><span class="stufe__nr">L3</span><h3>Advanced Flows</h3><p>Batches, serial numbers, bins, production, MRP.</p></article>
       <article class="stufe"><span class="stufe__nr">L4</span><h3>Finance</h3><p>Journal entries, reconciliation, assets, cost accounting.</p></article>
-      <article class="stufe"><span class="stufe__nr">L5</span><h3>Implementation</h3><p>Discovery, blueprint, migration, UAT, go-live.</p></article>
-      <article class="stufe"><span class="stufe__nr">L6</span><h3>Web &amp; Reporting</h3><p>Crystal Reports, queries, alerts, dashboards.</p></article>
+      <article class="stufe"><span class="stufe__nr">L5</span><h3>Implementation</h3><p>Discovery, plan, migrate, test, go-live.</p></article>
+      <article class="stufe"><span class="stufe__nr">L6</span><h3>Web & Reporting</h3><p>Crystal Reports, queries, alerts, dashboards.</p></article>
       <article class="stufe"><span class="stufe__nr">L7</span><h3>Engineering</h3><p>Tables, DI API, Service Layer, integration.</p></article>
-      <article class="stufe"><span class="stufe__nr">L8</span><h3>AI &amp; Vibecoding</h3><p>Context contracts, RAG with evidence, human gate.</p></article>
+      <article class="stufe"><span class="stufe__nr">L8</span><h3>AI & Vibecoding</h3><p>Context contracts, RAG with evidence, human gate.</p></article>
     </div>
   </div>
 </section>
 
 <!-- COLOPHON -->
 <section class="hb-chapter hb-chapter--paper hb-kolophon" data-sc-act="flow" data-hb-kap="Colophon" data-hb-num="—">
-  <div class="hb-kolophon__inner" data-sc-in data-sc-stagger="80">
+  <div class="hb-kolophon__inner">
     <p class="hb-kolophon__rule">Debit and Credit</p>
     <p class="hb-kolophon__balance" data-balance>Your ledger is sitting there, waiting for that last piece.</p>
     <p class="hb-kolophon__text">This is the front cover of our lab: nine levels, seventy-two skills, trilingual (ES/EN/DE). Runs completely standalone &mdash; no account, no server, no internet needed. Whenever you're ready, <a class="hb-cta" href="#sap-b1-mastery-lab">open the lab</a> and start at level zero.</p>
