@@ -124,7 +124,7 @@ test('German console and evidence views contain localized content', () => {
 
 test('Pages entrypoint mounts the locale runtime and renders B1 windows in every language', async () => {
   const [index, runtime] = await Promise.all([
-    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../lab/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../src/runtime-strict.mjs', import.meta.url), 'utf8')
   ]);
   assert.match(index, /mountStrictSapB1Lab/);

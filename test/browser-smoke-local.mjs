@@ -37,7 +37,7 @@ const server = createServer(async (request, response) => {
   } catch { response.writeHead(404).end(); }
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-const entrypoint = `http://127.0.0.1:${server.address().port}/index.html`;
+const entrypoint = `http://127.0.0.1:${server.address().port}/lab/index.html`;
 await page.goto(`${entrypoint}?local-browser-gate`);
 await page.locator('#sap-b1-mastery-lab').waitFor();
 const views = ['home','career','map','cases','incidents','simulator','ai','evidence'];
