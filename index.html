@@ -1,786 +1,133 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Learn-SapB1 · Handbook of the Document Chain</title>
-<meta name="description" content="Learn SAP Business One by following documents, not by memorising screens. Nine levels, 72 skills, trilingual (ES/EN/DE).">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ece4d4'/><rect x='7' y='9' width='18' height='2' fill='%2317140f'/><rect x='7' y='15' width='18' height='2' fill='%2317140f'/><rect x='7' y='21' width='11' height='2' fill='%23b3341f'/></svg>">
+<meta name="description" content="Master SAP Business One through the living document chain: 9 levels, 72 skills, trilingual (ES/EN/DE), live lab app access">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23f7f2e7'/><rect x='7' y='9' width='18' height='2' fill='%231f1a13'/><rect x='7' y='15' width='18' height='2' fill='%231f1a13'/><rect x='7' y='21' width='11' height='2' fill='%237c2d2d'/></svg>">
+<link rel="preload" href="scrollcraft.css" as="style">
 <link rel="stylesheet" href="scrollcraft.css">
+<link rel="preload" href="src/styles.css" as="style">
+<link rel="stylesheet" href="src/styles.css">
+<link rel="preload" href="handbuch.css" as="style">
 <link rel="stylesheet" href="handbuch.css">
 <style>
-/* ============================================================
-   Learn-SapB1 — "The living ledger" visual thesis
-   Cream paper, editorial serif, hairline rules, one oxblood accent.
-   Exact palette from sap-b1-mastery-lab (src/styles.css)
-   ============================================================ */
-:root {
-  --paper: #f7f2e7;
-  --paper-deep: #efe7d5;
-  --paper-edge: #e2d8c2;
-  --ink: #1f1a13;
-  --ink-soft: #4a4235;
-  --ink-faint: #7a6f5d;
-  --rule: #c9bda3;
-  --rule-strong: #8f8265;
-  --accent: #7c2d2d;      /* oxblood — the ONE accent */
-  --accent-ink: #fdf9f0;
-  --good: #2e5e3a;
-  --bad: #8a2f2f;
-  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
-  --mono: 'SF Mono', 'Cascadia Code', ui-monospace, Menlo, Consolas, monospace;
-  --step--1: 0.8125rem;
-  --step-0: 1rem;
-  --step-1: 1.25rem;
-  --step-2: 1.5625rem;
-  --step-3: 1.953rem;
-  --s1: 0.25rem; --s2: 0.5rem; --s3: 0.75rem; --s4: 1rem;
-  --s6: 1.5rem; --s8: 2rem; --s12: 3rem;
-}
-
-/* === Page shell === */
+/* Premium design overrides for lab integration */
 body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--serif);
-  font-size: var(--step-0);
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  font-family: 'Iowan Old Style', Georgia, serif;
+  background: #f7f2e7;
+  color: #1f1a13;
 }
-
-.page { max-width: none; padding: 0; }
-
-/* === Folio sidebar — editorial ledger column === */
-.folio {
-  position: fixed;
-  right: 0; top: 0; bottom: 0;
-  width: 200px;
-  background: var(--paper-deep);
-  border-left: 1px solid var(--rule);
-  z-index: 100;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--rule-strong) var(--paper-deep);
-}
-@media (max-width: 768px) { .folio { display: none !important; } }
-
-.folio__head {
-  padding: var(--s8) var(--s4) var(--s4);
-  border-bottom: 1px solid var(--rule);
-}
-.folio__kap {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--ink-faint);
-  margin-bottom: var(--s2);
-}
-.folio__num {
-  display: block;
-  font-size: 3rem;
-  font-weight: 300;
-  color: var(--accent);
-  line-height: 1;
-}
-
-.belegkette {
-  list-style: none;
-  padding: var(--s4);
-  margin: 0;
-  border-bottom: 1px solid var(--rule);
-}
-.belegkette__item {
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-  padding: var(--s2) 0;
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-  border-bottom: 1px dotted var(--rule);
-  transition: color 140ms;
-}
-.belegkette__item:last-child { border-bottom: none; }
-.belegkette__dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  border: 1px solid var(--rule-strong);
-  background: var(--paper);
-  flex-shrink: 0;
-  transition: background 140ms, border-color 140ms;
-}
-.belegkette__item.is-active .belegkette__dot {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.hauptbuch { padding: var(--s4); }
-.hauptbuch__rule {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ink-faint);
-  padding-bottom: var(--s2);
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: var(--s2);
-}
-.hauptbuch__lines { list-style: none; padding: 0; margin: 0; }
-.hauptbuch__sum {
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-  padding-top: var(--s3);
-  border-top: 2px solid var(--ink);
-  margin-top: var(--s3);
-  font-family: var(--mono);
-  font-size: var(--step--1);
-}
-.hauptbuch__sumlabel { color: var(--accent); font-weight: 700; font-size: 1.1rem; }
-
-/* === Chapter base === */
-.hb-chapter {
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 0;
-  box-shadow: 0 1px 0 var(--paper-edge);
-  margin: var(--s4) 0;
-  padding: var(--s8) var(--s8);
-  position: relative;
-}
-
-/* === Title page === */
-.hb-title {
-  text-align: center;
-  border: 1px solid var(--rule-strong);
-  outline: 1px solid var(--rule);
-  outline-offset: 4px;
-}
-.hb-imprint {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ink-faint);
-  margin-bottom: var(--s8);
-}
-.hb-title__h1 {
-  font-size: var(--step-4);
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 1.12;
-  margin: 0 0 var(--s4);
-  color: var(--ink);
-}
-.hb-title__sub {
-  display: block;
-  font-style: italic;
-  font-size: 0.65em;
-  color: var(--ink-soft);
-  font-weight: 400;
-}
-.hb-title__es {
-  font-size: var(--step-1);
-  font-style: italic;
-  color: var(--ink-soft);
-  margin-bottom: var(--s8);
-  line-height: 1.5;
-}
-.hb-colofon {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s4);
-  justify-content: center;
-  margin-bottom: var(--s6);
-}
-.hb-colofon > div { text-align: center; }
-.hb-colofon dt {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ink-faint);
-  display: block;
-}
-.hb-colofon dd {
-  font-size: var(--step-1);
-  font-weight: 700;
-  color: var(--accent);
-  margin: 0;
-}
-.hb-title__note {
-  font-size: var(--step--1);
-  color: var(--ink-faint);
-  margin-top: var(--s4);
-}
-.hb-title__note code {
-  font-family: var(--mono);
-  background: var(--paper-deep);
-  padding: 0.05em 0.4em;
-  border: 1px solid var(--rule);
-}
-
-/* === Chapter header === */
-.hb-kaphead {
-  padding: 0 0 var(--s4);
-  margin-bottom: var(--s6);
-  border-bottom: 1px solid var(--rule);
-}
-.hb-kaphead__num {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--ink-faint);
-  margin-bottom: var(--s2);
-}
-.hb-kaphead__h2 {
-  font-size: var(--step-3);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin: 0;
-  color: var(--ink);
-}
-
-/* === Ticket (Ch1) === */
+/* Enhanced ticket card with priority */
 .hb-ticket {
-  background: var(--paper);
-  border: 1px solid var(--rule-strong);
-  border-radius: 0;
-  box-shadow: 0 1px 0 var(--paper-edge);
-  margin: var(--s6) 0;
-  overflow: hidden;
+  background: #f7f2e7;
+  border: 1px solid #7c2d2d;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
 }
+.hb-ticket:hover { box-shadow: 0 4px 8px rgba(124,45,45,0.2); }
 .hb-ticket__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--s2) var(--s4);
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  background: #7c2d2d;
+  color: #f7f2e7;
 }
-.hb-ticket__body {
-  font-style: italic;
-  color: var(--ink-soft);
-  margin: 0;
-  padding: var(--s4);
-  font-size: var(--step-1);
-  line-height: 1.5;
-}
-.hb-ticket__foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--s2) var(--s4);
-  border-top: 1px solid var(--rule);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--ink-faint);
-}
-.hb-ticket__priority { color: var(--accent); font-weight: 700; }
-.hb-ticket__dot {
-  display: inline-block;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-right: 0.3em;
-  vertical-align: middle;
-}
-figcaption {
-  display: block;
-  font-size: var(--step--1);
-  color: var(--ink-faint);
-  font-style: italic;
-  padding-top: var(--s2);
-  border-top: 1px dotted var(--rule);
-  margin-top: var(--s3);
-}
-
-/* === Cost section (Ch2) === */
-.hb-costgrid__lede {
-  font-size: var(--step-1);
-  font-weight: 600;
-  font-style: italic;
-  color: var(--ink);
-  margin-bottom: var(--s6);
-  padding-left: var(--s4);
-  border-left: 3px solid var(--accent);
-  background: var(--paper-deep);
-  padding: var(--s3) var(--s4);
-}
-.hb-costlist {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 var(--s6);
-  display: grid;
-  gap: var(--s4);
-}
-.hb-costlist li {
-  padding: var(--s4);
-  border: 1px solid var(--rule);
-  background: var(--paper);
-  font-size: var(--step-0);
-  line-height: 1.6;
-}
-.hb-costlist li b {
-  font-family: var(--mono);
-  font-size: var(--step-2);
-  color: var(--accent);
-  display: block;
-  margin-bottom: var(--s1);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-.hb-cost__sting {
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-  padding: var(--s3) var(--s4);
-  border: 1px solid var(--rule-strong);
-  background: var(--paper-deep);
-  margin-bottom: var(--s4);
-}
-.hb-costnote {
-  font-family: var(--mono);
-  font-size: var(--step--1);
-  color: var(--ink-faint);
-}
-
-/* === Diagram (Ch3) === */
-.hb-zeichnung {
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  padding: var(--s3);
-  margin: var(--s6) 0;
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.hb-zeichnung__grid path { stroke: var(--ink-faint); stroke-width: 0.5; }
-.hb-zeichnung__draw path.hb-draw { stroke: var(--accent); stroke-width: 1.5; fill: none; }
-.hb-zeichnung__draw rect.hb-draw { stroke: var(--accent); stroke-width: 1.5; fill: var(--paper); }
-.hb-zeichnung__draw rect.hb-draw.focus { fill: var(--paper-deep); stroke-width: 2; }
-.hb-zeichnung__labels text { fill: var(--ink); font-family: var(--serif); font-size: 13px; }
-.hb-zeichnung__eff { fill: var(--accent); font-family: var(--mono); font-size: 11px; font-weight: 600; }
-.hb-zeichnung__abb { fill: var(--ink-faint); font-family: var(--mono); font-size: 10px; }
-.hb-wende__text {
-  font-size: var(--step-0);
-  color: var(--ink-soft);
-  line-height: 1.65;
-}
-.hb-wende__text p { margin-bottom: var(--s4); }
-
-/* === Pause / breathing space === */
-.hb-atem {
-  text-align: center;
-  padding: var(--s12) var(--s8);
-}
-.hb-atem__masse { display: block; margin: 0 auto var(--s4); }
-.hb-atem__line {
-  font-size: var(--step-1);
-  font-style: italic;
-  color: var(--ink-faint);
-  margin: 0;
-}
-
-/* ================================================================
-   CHAPTER 4 — THE DOCUMENT CHAIN (THE HERO SECTION)
-   Completely reimagined: horizontal card rail with animated flow
-   ================================================================ */
-.hb-peak {
-  border: 1px solid var(--rule-strong);
-  outline: 1px solid var(--rule);
-  outline-offset: 2px;
-  background: var(--paper-deep);
-  overflow: hidden;
-}
-.hb-peak__stage { padding: var(--s6) var(--s4); }
-
-.hb-peak__headline {
-  text-align: center;
-  font-size: var(--step-3);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  margin: 0 0 var(--s6);
-  line-height: 1.2;
-}
-.hb-peak__headline em {
-  display: block;
-  font-size: 0.55em;
-  font-weight: 400;
-  font-style: italic;
-  color: var(--ink-soft);
-  letter-spacing: 0;
-  margin-top: var(--s2);
-}
-
-/* The chain rail — horizontal scrollable card sequence */
+.hb-ticket__priority { color: #6b2525; }
+/* Chain visualization enhanced */
 .kette-rail {
-  display: flex;
-  gap: 0;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-  scrollbar-color: var(--rule-strong) var(--paper-deep);
-  padding: var(--s4) 0 var(--s2);
-  margin: 0 0 var(--s6);
-  position: relative;
+  background: #f7f2e7;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 40px 0;
 }
-/* Connecting arrows between cards */
-.kette-rail::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0; right: 0;
-  height: 1px;
-  background: var(--rule);
-  z-index: 0;
+/* Premium animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-.beleg {
-  flex: 0 0 160px;
-  min-width: 0;
-  scroll-snap-align: center;
-  position: relative;
-  z-index: 1;
-  padding: 0 var(--s2);
-}
-.beleg__paper {
-  background: var(--paper);
-  border: 1px solid var(--rule-strong);
-  border-radius: 0;
-  padding: var(--s3);
-  box-shadow: 0 1px 0 var(--paper-edge);
-  transition: border-color 200ms, box-shadow 200ms, transform 200ms;
-}
-.beleg:hover .beleg__paper {
-  border-color: var(--accent);
-  box-shadow: 2px 2px 0 var(--rule-strong);
-  transform: translate(-1px, -1px);
-}
-.beleg--focus .beleg__paper {
-  border-color: var(--accent);
-  border-width: 2px;
-  background: var(--paper-deep);
-  box-shadow: 3px 3px 0 var(--accent);
-}
-.beleg__kind {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ink-faint);
-  margin-bottom: var(--s1);
-}
-.beleg__nr {
-  display: block;
-  font-family: var(--mono);
-  font-size: var(--step--1);
-  font-weight: 700;
-  color: var(--ink);
-  margin-bottom: var(--s3);
-  word-break: break-all;
-}
-.beleg__eff {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  border-top: 1px dotted var(--rule);
-  padding-top: var(--s2);
-}
-.beleg__eff li {
-  font-size: 0.72rem;
-  color: var(--ink-soft);
-  margin-bottom: 0.2rem;
-  line-height: 1.4;
-}
-.beleg__eff li::before {
-  content: '→ ';
-  color: var(--accent);
-  font-weight: 700;
-}
-
-/* Connector arrows between cards */
-.beleg-connector {
-  display: flex;
-  align-items: center;
-  flex: 0 0 24px;
-  z-index: 1;
-}
-.beleg-connector svg { color: var(--accent); flex-shrink: 0; }
-
-/* Chain effects: three vertical tracks */
-.kette-effects {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  border: 1px solid var(--rule-strong);
-  margin: var(--s4) 0;
-  background: var(--paper);
-}
-.kette-effect {
-  padding: var(--s3) var(--s4);
-  border-right: 1px solid var(--rule);
-  text-align: center;
-}
-.kette-effect:last-child { border-right: none; }
-.kette-effect__label {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ink-faint);
-  margin-bottom: var(--s1);
-}
-.kette-effect__value {
-  display: block;
-  font-family: var(--mono);
-  font-size: var(--step-1);
-  font-weight: 700;
-  color: var(--accent);
-}
-.kette-effect__sub {
-  display: block;
-  font-size: 0.72rem;
-  color: var(--ink-soft);
-  margin-top: 0.2rem;
-}
-
-.hb-peak__caption {
-  font-size: var(--step--1);
-  color: var(--ink-faint);
-  font-style: italic;
-  text-align: center;
-  border-top: 1px dotted var(--rule);
-  padding-top: var(--s3);
-  margin-top: var(--s4);
-}
-
-/* === Levels (Ch5) === */
-.hb-labor { padding: var(--s4) 0 0; }
-.hb-stufen {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--s4);
-  margin-top: var(--s6);
-}
-.stufe {
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 0;
-  box-shadow: 0 1px 0 var(--paper-edge);
-  padding: var(--s4);
-  transition: border-color 140ms, box-shadow 140ms;
-}
-.stufe:hover {
-  border-color: var(--ink-soft);
-  box-shadow: 2px 2px 0 var(--paper-edge);
-}
-.stufe__nr {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.4rem;
-  height: 2.4rem;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-family: var(--mono);
-  font-size: 0.82rem;
-  font-weight: 700;
-  margin-bottom: var(--s3);
-  flex-shrink: 0;
-}
-.stufe h3 {
-  font-size: var(--step-0);
-  font-weight: 700;
-  margin: 0 0 var(--s2);
-  color: var(--ink);
-}
-.stufe p {
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* === Colophon === */
-.hb-kolophon {
-  border: 1px solid var(--rule-strong);
-  outline: 1px solid var(--rule);
-  outline-offset: 4px;
-  padding: var(--s8);
-}
-.hb-kolophon__rule {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.22em;
-  color: var(--ink-faint);
-  margin-bottom: var(--s4);
-}
-.hb-kolophon__balance {
-  font-size: var(--step-2);
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: var(--s4);
-  font-style: italic;
-}
-.hb-kolophon__text {
-  font-size: var(--step-0);
-  color: var(--ink-soft);
-  line-height: 1.65;
-  margin-bottom: var(--s8);
-  max-width: 60ch;
-}
-.hb-kolophon__text a { color: var(--accent); text-decoration: underline; }
-.hb-kolophon__text a:hover { background: var(--accent); color: var(--accent-ink); text-decoration: none; }
-.hb-kolophon__imprint {
-  font-size: var(--step--1);
-  color: var(--ink-faint);
-  border-top: 1px solid var(--rule);
-  padding-top: var(--s3);
-  margin-top: var(--s4);
-}
-
-/* === CTA Button (premium editorial) === */
+.hb-peak__headline, .beleg { animation: fadeInUp 0.8s ease-out both; }
+/* Button enhancement */
 .btn-primary {
-  display: inline-block;
-  appearance: none;
-  font-family: var(--serif);
-  font-size: var(--step-0);
-  font-weight: 700;
-  background: var(--accent);
-  color: var(--accent-ink);
-  border: 1px solid var(--accent);
-  border-radius: 0;
-  padding: var(--s3) var(--s8);
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 160ms, box-shadow 160ms;
-  letter-spacing: 0.02em;
+  background: #7c2d2d;
+  color: #f7f2e7;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border-radius: 6px;
 }
 .btn-primary:hover {
   background: #6b2525;
-  box-shadow: 2px 2px 0 var(--rule-strong);
+  box-shadow: 0 4px 12px rgba(124,45,45,0.3);
 }
-.btn-primary:active { transform: translate(1px, 1px); }
-.btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* === Spacing helpers === */
-.hb-spread {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--s6);
-}
-@media (min-width: 640px) {
-  .hb-spread { grid-template-columns: 1fr 1fr; align-items: start; }
-}
-@media (max-width: 639px) {
-  .hb-spread__media { order: -1; }
-}
-
-/* === Accessibility === */
-*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; animation: none !important; }
-}
-
-/* === Responsive spacing === */
-@media (max-width: 640px) {
-  .hb-chapter { padding: var(--s6) var(--s4); }
-  .hb-title__h1 { font-size: var(--step-3); }
-  .hb-kaphead__h2 { font-size: var(--step-2); }
-  .hb-peak__headline { font-size: var(--step-2); }
-  .hb-stufen { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+/* Responsive improvements */
+@media (max-width: 768px) {
+  main { grid-template-columns: 1fr; }
+  .folio { display: none; }
+  .kette-rail { flex-direction: column; height: auto; }
 }
 </style>
 </head>
 <body>
 
-<!-- Folio sidebar -->
-<aside class="folio" aria-label="Folio and the day's general ledger">
+<aside class="folio">
   <div class="folio__head">
     <span class="folio__kap">Title Page</span>
     <span class="folio__num">—</span>
   </div>
-  <ol class="belegkette" aria-label="Document chain">
+  <ol class="belegkette">
     <li class="belegkette__item" data-beleg="0"><span class="belegkette__dot"></span><span class="belegkette__name">Quotation</span></li>
     <li class="belegkette__item" data-beleg="1"><span class="belegkette__dot"></span><span class="belegkette__name">Sales Order</span></li>
     <li class="belegkette__item" data-beleg="2"><span class="belegkette__dot"></span><span class="belegkette__name">Delivery</span></li>
     <li class="belegkette__item" data-beleg="3"><span class="belegkette__dot"></span><span class="belegkette__name">Invoice</span></li>
     <li class="belegkette__item" data-beleg="4"><span class="belegkette__dot"></span><span class="belegkette__name">Payment</span></li>
   </ol>
-  <div class="hauptbuch" aria-live="polite">
+  <div class="hauptbuch">
     <div class="hauptbuch__rule"><span>Debit</span><span>Credit</span></div>
-    <ol class="hauptbuch__lines" data-ledger></ol>
-    <div class="hauptbuch__sum" data-ledger-sum hidden>
-      <span class="hauptbuch__sumlabel">&#x03A3;</span>
+    <ol class="hauptbuch__lines"></ol>
+    <div class="hauptbuch__sum">
+      <span class="hauptbuch__sumlabel">Σ</span>
       <span data-ledger-debit>0.00</span>
       <span data-ledger-credit>0.00</span>
     </div>
   </div>
 </aside>
 
-<main id="top">
+<main>
 
-<!-- PORTADA -->
-<section class="hb-chapter hb-chapter--paper hb-title" data-sc-act="flow" data-hb-kap="Title Page" data-hb-num="—">
-  <p class="hb-imprint">SYN-Nordlicht Demo GmbH &middot; Internal Training Document &middot; Edition 10.0</p>
+<section class="hb-title">
+  <p class="hb-imprint">SYN-Nordlicht Demo GmbH · Internal Training Document · Edition 10.0</p>
   <h1 class="hb-title__h1">Handbook<br><span class="hb-title__sub">of the Document Chain</span></h1>
   <p class="hb-title__es">Learn SAP Business One by following documents,<br>not by memorising screens.</p>
   <dl class="hb-colofon">
     <div><dt>Levels</dt><dd>9</dd></div>
     <div><dt>Skills</dt><dd>72</dd></div>
-    <div><dt>Languages</dt><dd>ES &middot; EN &middot; DE</dd></div>
+    <div><dt>Languages</dt><dd>ES · EN · DE</dd></div>
     <div><dt>Sources</dt><dd>7 official</dd></div>
   </dl>
   <p class="hb-title__note">All data in this manual are synthetic and marked <code>SYN</code>.</p>
 </section>
 
-<!-- CHAPTER 1: The Incident -->
-<section class="hb-chapter" data-sc-act="flow" data-hb-kap="The Incident" data-hb-num="1" data-hb-ledger="Quotation|Quotation A-2026-0114|—|—">
+<section class="hb-chapter">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 1</span>
     <h2 class="hb-kaphead__h2">08:14. An invoice has disappeared.</h2>
   </header>
   <div class="hb-spread">
     <div>
-      <p class="hb-lede" style="font-size:var(--step-1);font-weight:600;font-style:italic;color:var(--ink);margin-bottom:var(--s4);">A client calls. They say their invoice is missing. The consultant opens SAP Business One and stares at a screen with thirty fields, four tabs and no answer.</p>
-      <p style="color:var(--ink-soft);margin-bottom:var(--s3);">The system isn't broken. The question is wrong. "Where is the invoice?" is not answered by looking at a screen: it's answered by following a document back to the one that created it, and back to the one that created that.</p>
-      <p style="color:var(--ink-soft);">Those who don't know that open eleven windows. Those who do open one and press a button.</p>
+      <p class="hb-lede">A client calls. They say their invoice is missing. The consultant opens SAP Business One and stares at a screen with thirty fields, four tabs and no answer.</p>
+      <p>The system isn't broken. The question is wrong. "Where is the invoice?" is not answered by looking at a screen: it's answered by following a document back to the one that created it, and back to the one that created that.</p>
+      <p>Those who don't know that open eleven windows. Those who do open one and press a button.</p>
     </div>
     <figure class="hb-spread__media">
       <div class="hb-ticket">
-        <div class="hb-ticket__head">
-          <span><span class="hb-ticket__dot"></span>NW-001</span>
-          <span>Sales</span>
-        </div>
+        <div class="hb-ticket__head"><span>NW-001</span><span>Sales</span></div>
         <p class="hb-ticket__body">"The invoice for C20000 is gone. The customer wants to pay today."</p>
-        <div class="hb-ticket__foot">
-          <span class="hb-ticket__priority">Priority 1</span>
-          <span>08:14</span>
-        </div>
+        <div class="hb-ticket__foot"><span class="hb-ticket__priority">Priority 1</span><span>08:14</span></div>
       </div>
-      <figcaption>Fig. 1.1 &middot; The ticket as it arrives: no document number, no date, with urgency.</figcaption>
+      <figcaption>Fig. 1.1 · The ticket as it arrives: no document number, no date, with urgency.</figcaption>
     </figure>
   </div>
 </section>
 
-<!-- CHAPTER 2: The Cost -->
-<section class="hb-chapter hb-cost" data-sc-act="flow" data-hb-kap="The Cost" data-hb-num="2" data-hb-ledger="Sales Order|Sales Order 162|—|—">
+<section class="hb-chapter">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 2</span>
     <h2 class="hb-kaphead__h2">What it costs to ask the wrong question.</h2>
@@ -794,13 +141,12 @@ figcaption {
   <p class="hb-costnote">Figures from the lab: the draft from <code>SYN-SK-L0-08</code> and invoice <code>1001-2026</code>.</p>
 </section>
 
-<!-- CHAPTER 3: The Turn -->
-<section class="hb-chapter" data-sc-act="pin" data-sc-span="2.2" data-hb-kap="The Turn" data-hb-num="3" data-hb-ledger="Delivery|Delivery 5001|—|—">
+<section class="hb-chapter">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 3</span>
     <h2 class="hb-kaphead__h2">No screen. A path.</h2>
   </header>
-  <svg class="hb-zeichnung" viewBox="0 0 900 300" aria-label="Diagram: each document inherits from the previous one and produces three effects" role="img">
+  <svg class="hb-zeichnung" viewBox="0 0 900 300" role="img">
     <g class="hb-zeichnung__grid" aria-hidden="true">
       <path d="M0 260 H900"/>
       <path d="M0 40 H900"/>
@@ -810,11 +156,11 @@ figcaption {
       <path d="M720 40 V260" stroke-dasharray="4 4"/>
     </g>
     <g class="hb-zeichnung__draw">
-      <path class="hb-draw" d="M60 150 H840" stroke="#7c2d2d" stroke-width="2"/>
-      <rect class="hb-draw" x="60" y="120" width="120" height="60" rx="2" stroke="#7c2d2d" stroke-width="1.5" fill="#f7f2e7"/>
-      <rect class="hb-draw" x="250" y="120" width="120" height="60" rx="2" stroke="#7c2d2d" stroke-width="1.5" fill="#f7f2e7"/>
-      <rect class="hb-draw focus" x="440" y="120" width="120" height="60" rx="2" stroke="#7c2d2d" stroke-width="2" fill="#efe7d5"/>
-      <rect class="hb-draw" x="630" y="120" width="120" height="60" rx="2" stroke="#8f8265" stroke-width="1" fill="#f7f2e7"/>
+      <path class="hb-draw" d="M60 150 H840" stroke="#7c2d2d"/>
+      <rect class="hb-draw" x="60" y="120" width="120" height="60" rx="2" fill="#f7f2e7"/>
+      <rect class="hb-draw" x="250" y="120" width="120" height="60" rx="2" fill="#f7f2e7"/>
+      <rect class="hb-draw focus" x="440" y="120" width="120" height="60" rx="2" fill="#efe7d5"/>
+      <rect class="hb-draw" x="630" y="120" width="120" height="60" rx="2" fill="#f7f2e7"/>
       <path class="hb-draw" d="M310 180 V235"/>
       <path class="hb-draw" d="M500 180 V235"/>
       <path class="hb-draw" d="M690 180 V235"/>
@@ -836,8 +182,7 @@ figcaption {
   </div>
 </section>
 
-<!-- SILENCE -->
-<section class="hb-chapter hb-atem" data-sc-act="flow" data-hb-kap="A Pause" data-hb-num="—">
+<section class="hb-atem">
   <svg class="hb-atem__masse" viewBox="0 0 200 40" aria-hidden="true">
     <line x1="2" y1="20" x2="198" y2="20" stroke="#c9bda3" stroke-width="0.5"/>
     <line x1="2" y1="12" x2="2" y2="28" stroke="#8f8265" stroke-width="1"/>
@@ -846,101 +191,83 @@ figcaption {
   <p class="hb-atem__line">Take a breath. Look at a real document.</p>
 </section>
 
-<!-- CHAPTER 4: The Document Chain (HERO) -->
-<section class="hb-chapter hb-peak" data-sc-act="pin" data-sc-span="3.6" data-hb-kap="The Document Chain" data-hb-num="4" data-hb-ledger="Invoice|Invoice 1001-2026|856.80|856.80">
-  <div class="hb-peak__stage">
-    <h2 class="hb-peak__headline">
-      The chain builds itself as you read.
-      <em>Five documents, three effects, one commercial event.</em>
-    </h2>
+<section class="hb-peak">
+  <h2 class="hb-peak__headline">
+    The chain builds itself as you read.
+    <em>Five documents, three effects, one commercial event.</em>
+  </h2>
 
-    <!-- Horizontal card rail -->
-    <div class="kette-rail" role="list" aria-label="Document chain cards">
-      <article class="beleg" data-beleg-card="0" style="--i:0" role="listitem">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Quotation</span>
-          <span class="beleg__nr">A-2026-0114</span>
-          <ul class="beleg__eff">
-            <li>Stock: —</li>
-            <li>Ledger: —</li>
-            <li>Balance: —</li>
-          </ul>
-        </div>
-      </article>
-      <div class="beleg-connector" aria-hidden="true"><svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg></div>
-      <article class="beleg" data-beleg-card="1" style="--i:1" role="listitem">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Sales Order</span>
-          <span class="beleg__nr">162</span>
-          <ul class="beleg__eff">
-            <li>Stock: reserved</li>
-            <li>Ledger: —</li>
-            <li>Balance: —</li>
-          </ul>
-        </div>
-      </article>
-      <div class="beleg-connector" aria-hidden="true"><svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg></div>
-      <article class="beleg" data-beleg-card="2" style="--i:2" role="listitem">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Delivery</span>
-          <span class="beleg__nr">5001</span>
-          <ul class="beleg__eff">
-            <li>Stock: &minus;15</li>
-            <li>Ledger: COGS</li>
-            <li>Balance: —</li>
-          </ul>
-        </div>
-      </article>
-      <div class="beleg-connector" aria-hidden="true"><svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg></div>
-      <article class="beleg beleg--focus" data-beleg-card="3" style="--i:3" role="listitem">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Invoice</span>
-          <span class="beleg__nr">1001-2026</span>
-          <ul class="beleg__eff">
-            <li>Stock: —</li>
-            <li>Ledger: AR / Revenue / VAT</li>
-            <li>Balance: +856.80</li>
-          </ul>
-        </div>
-      </article>
-      <div class="beleg-connector" aria-hidden="true"><svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg></div>
-      <article class="beleg" data-beleg-card="4" style="--i:4" role="listitem">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Payment</span>
-          <span class="beleg__nr">2301</span>
-          <ul class="beleg__eff">
-            <li>Stock: —</li>
-            <li>Ledger: Bank / Receivables</li>
-            <li>Balance: 0.00</li>
-          </ul>
-        </div>
-      </article>
+  <div class="kette-rail">
+    <article class="beleg" data-beleg-card="0">
+      <div class="beleg__paper">
+        <span class="beleg__kind">Quotation</span>
+        <span class="beleg__nr">A-2026-0114</span>
+        <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: —</li><li>Balance: —</li></ul>
+      </div>
+    </article>
+    <div class="beleg-connector" aria-hidden="true">
+      <svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg>
     </div>
-
-    <!-- Three effects track -->
-    <div class="kette-effects">
-      <div class="kette-effect">
-        <span class="kette-effect__label">Stock</span>
-        <span class="kette-effect__value">&minus;15</span>
-        <span class="kette-effect__sub">items leave warehouse</span>
+    <article class="beleg" data-beleg-card="1">
+      <div class="beleg__paper">
+        <span class="beleg__kind">Sales Order</span>
+        <span class="beleg__nr">162</span>
+        <ul class="beleg__eff"><li>Stock: reserved</li><li>Ledger: —</li><li>Balance: —</li></ul>
       </div>
-      <div class="kette-effect">
-        <span class="kette-effect__label">Ledger</span>
-        <span class="kette-effect__value">3 entries</span>
-        <span class="kette-effect__sub">AR &middot; Revenue &middot; VAT</span>
-      </div>
-      <div class="kette-effect">
-        <span class="kette-effect__label">Balance</span>
-        <span class="kette-effect__value">+856.80</span>
-        <span class="kette-effect__sub">customer owes</span>
-      </div>
+    </article>
+    <div class="beleg-connector" aria-hidden="true">
+      <svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg>
     </div>
-
-    <p class="hb-peak__caption">Fig. 4.1 &middot; One commercial event, five documents, three effects. The window is real: it calculates as you type.</p>
+    <article class="beleg" data-beleg-card="2">
+      <div class="beleg__paper">
+        <span class="beleg__kind">Delivery</span>
+        <span class="beleg__nr">5001</span>
+        <ul class="beleg__eff"><li>Stock: −15</li><li>Ledger: COGS</li><li>Balance: —</li></ul>
+      </div>
+    </article>
+    <div class="beleg-connector" aria-hidden="true">
+      <svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>
+    <article class="beleg beleg--focus" data-beleg-card="3">
+      <div class="beleg__paper">
+        <span class="beleg__kind">Invoice</span>
+        <span class="beleg__nr">1001-2026</span>
+        <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: AR / Revenue / VAT</li><li>Balance: +856.80</li></ul>
+      </div>
+    </article>
+    <div class="beleg-connector" aria-hidden="true">
+      <svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>
+    <article class="beleg" data-beleg-card="4">
+      <div class="beleg__paper">
+        <span class="beleg__kind">Payment</span>
+        <span class="beleg__nr">2301</span>
+        <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: Bank / Receivables</li><li>Balance: 0.00</li></ul>
+      </div>
+    </article>
   </div>
+
+  <div class="kette-effects">
+    <div class="kette-effect">
+      <span class="kette-effect__label">Stock</span>
+      <span class="kette-effect__value">&minus;15</span>
+      <span class="kette-effect__sub">items leave warehouse</span>
+    </div>
+    <div class="kette-effect">
+      <span class="kette-effect__label">Ledger</span>
+      <span class="kette-effect__value">3 entries</span>
+      <span class="kette-effect__sub">AR · Revenue · VAT</span>
+    </div>
+    <div class="kette-effect">
+      <span class="kette-effect__label">Balance</span>
+      <span class="kette-effect__value">+856.80</span>
+      <span class="kette-effect__sub">customer owes</span>
+    </div>
+  </div>
+
+  <p class="hb-peak__caption">Fig. 4.1 · One commercial event, five documents, three effects. The window is real: it calculates as you type.</p>
 </section>
 
-<!-- CHAPTER 5: The Lab -->
 <section class="hb-chapter" data-sc-act="pan" data-sc-span="2.6" data-hb-kap="The Lab" data-hb-num="5" data-hb-ledger="Payment|Payment 2301|856.80|856.80">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 5</span>
@@ -953,7 +280,7 @@ figcaption {
       <article class="stufe"><span class="stufe__nr">L2</span><h3>Core Logistics</h3><p>Order, delivery, invoice, payment. The full chain.</p></article>
       <article class="stufe"><span class="stufe__nr">L3</span><h3>Advanced Flows</h3><p>Batches, serial numbers, bins, production, MRP.</p></article>
       <article class="stufe"><span class="stufe__nr">L4</span><h3>Finance</h3><p>Journal entries, reconciliation, assets, cost accounting.</p></article>
-      <article class="stufe"><span class="stufe__nr">L5</span><h3>Implementation</h3><p>Discovery, plan, migrate, test, go-live.</p></article>
+      <article class="stufe"><span class="stufe__nr">L5</span><h3>Implementation</h3><p>Discovery, blueprint, migration, UAT, go-live.</p></article>
       <article class="stufe"><span class="stufe__nr">L6</span><h3>Web &amp; Reporting</h3><p>Crystal Reports, queries, alerts, dashboards.</p></article>
       <article class="stufe"><span class="stufe__nr">L7</span><h3>Engineering</h3><p>Tables, DI API, Service Layer, integration.</p></article>
       <article class="stufe"><span class="stufe__nr">L8</span><h3>AI &amp; Vibecoding</h3><p>Context contracts, RAG with evidence, human gate.</p></article>
@@ -961,13 +288,12 @@ figcaption {
   </div>
 </section>
 
-<!-- COLOPHON -->
-<section class="hb-chapter hb-kolophon" data-sc-act="flow" data-hb-kap="Colophon" data-hb-num="—">
+<section class="hb-kolophon">
   <p class="hb-kolophon__rule">Debit and Credit</p>
   <p class="hb-kolophon__balance">Your ledger is sitting there, waiting for that last piece.</p>
   <p class="hb-kolophon__text">This is the front cover of our lab: nine levels, seventy-two skills, trilingual (ES/EN/DE). Runs completely standalone &mdash; no account, no server, no internet needed.</p>
   <a class="btn-primary" href="https://brendars91.github.io/sap-b1-mastery-lab/">Open the Lab &rarr;</a>
-  <p class="hb-kolophon__imprint">SYN-Nordlicht Demo GmbH &middot; Synthetic data marked SYN &middot; Learn-SapB1</p>
+  <p class="hb-kolophon__imprint">SYN-Nordlicht Demo GmbH · Synthetic data marked SYN · Learn-SapB1</p>
 </section>
 
 </main>
