@@ -32,4 +32,4 @@ jobs:
         run: |
           test -s dist/SAP-Business-One-Mastery-Lab-Standalone.html
           test -s dist/sap-b1-mastery-lab.html
-          grep -q "mountStrictSapB1Lab" index.html
+          grep -q "mountStrictSapB1Lab" lab/index.html

@@ -1,88 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Learn-SapB1 · Handbook of the Document Chain</title>
-<meta name="description" content="Master SAP Business One through the living document chain: 9 levels, 72 skills, trilingual (ES/EN/DE), live lab app access">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23f7f2e7'/><rect x='7' y='9' width='18' height='2' fill='%231f1a13'/><rect x='7' y='15' width='18' height='2' fill='%231f1a13'/><rect x='7' y='21' width='11' height='2' fill='%237c2d2d'/></svg>">
-<link rel="preload" href="scrollcraft.css" as="style">
+<meta name="description" content="Learn SAP Business One by following documents, not by memorising screens. Nine levels, 72 skills, trilingual (ES/EN/DE).">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ece4d4'/><rect x='7' y='9' width='18' height='2' fill='%2317140f'/><rect x='7' y='15' width='18' height='2' fill='%2317140f'/><rect x='7' y='21' width='11' height='2' fill='%23b3341f'/></svg>">
 <link rel="stylesheet" href="scrollcraft.css">
-<link rel="preload" href="src/styles.css" as="style">
-<link rel="stylesheet" href="src/styles.css">
-<link rel="preload" href="handbuch.css" as="style">
 <link rel="stylesheet" href="handbuch.css">
-<style>
-/* Premium design overrides for lab integration */
-body {
-  font-family: 'Iowan Old Style', Georgia, serif;
-  background: #f7f2e7;
-  color: #1f1a13;
-}
-/* Enhanced ticket card with priority */
-.hb-ticket {
-  background: #f7f2e7;
-  border: 1px solid #7c2d2d;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-}
-.hb-ticket:hover { box-shadow: 0 4px 8px rgba(124,45,45,0.2); }
-.hb-ticket__head {
-  background: #7c2d2d;
-  color: #f7f2e7;
-}
-.hb-ticket__priority { color: #6b2525; }
-/* Chain visualization enhanced */
-.kette-rail {
-  background: #f7f2e7;
-  padding: 20px;
-  border-radius: 8px;
-  margin: 40px 0;
-}
-/* Premium animations */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.hb-peak__headline, .beleg { animation: fadeInUp 0.8s ease-out both; }
-/* Button enhancement */
-.btn-primary {
-  background: #7c2d2d;
-  color: #f7f2e7;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border-radius: 6px;
-}
-.btn-primary:hover {
-  background: #6b2525;
-  box-shadow: 0 4px 12px rgba(124,45,45,0.3);
-}
-/* Responsive improvements */
-@media (max-width: 768px) {
-  main { grid-template-columns: 1fr; }
-  .folio { display: none; }
-  .kette-rail { flex-direction: column; height: auto; }
-}
-</style>
 </head>
-<body>
+<body class="hb">
 
-<aside class="folio">
+<span data-sc-progress></span>
+
+<!-- ══ GESTO PROPIO ══════════════════════════════════════════════════════
+     The manual folio and the visit ledger, in the same margin.
+     No es una barra de progreso: es la cadena documental, y cada capítulo
+     que pasa contabiliza su asiento. Al llegar al colofón, cuadra. -->
+<aside class="folio" aria-label="Folio and the day's general ledger">
   <div class="folio__head">
-    <span class="folio__kap">Title Page</span>
-    <span class="folio__num">—</span>
+    <span class="folio__kap" data-folio-kap>Title Page</span>
+    <span class="folio__num" data-folio-num>—</span>
   </div>
-  <ol class="belegkette">
+
+  <ol class="belegkette" aria-label="Document chain">
     <li class="belegkette__item" data-beleg="0"><span class="belegkette__dot"></span><span class="belegkette__name">Quotation</span></li>
     <li class="belegkette__item" data-beleg="1"><span class="belegkette__dot"></span><span class="belegkette__name">Sales Order</span></li>
     <li class="belegkette__item" data-beleg="2"><span class="belegkette__dot"></span><span class="belegkette__name">Delivery</span></li>
     <li class="belegkette__item" data-beleg="3"><span class="belegkette__dot"></span><span class="belegkette__name">Invoice</span></li>
     <li class="belegkette__item" data-beleg="4"><span class="belegkette__dot"></span><span class="belegkette__name">Payment</span></li>
   </ol>
-  <div class="hauptbuch">
+
+  <div class="hauptbuch" aria-live="polite">
     <div class="hauptbuch__rule"><span>Debit</span><span>Credit</span></div>
-    <ol class="hauptbuch__lines"></ol>
-    <div class="hauptbuch__sum">
+    <ol class="hauptbuch__lines" data-ledger></ol>
+    <div class="hauptbuch__sum" data-ledger-sum hidden>
       <span class="hauptbuch__sumlabel">Σ</span>
       <span data-ledger-debit>0.00</span>
       <span data-ledger-credit>0.00</span>
@@ -90,191 +42,216 @@ body {
   </div>
 </aside>
 
-<main>
+<main id="top">
 
-<section class="hb-title">
-  <p class="hb-imprint">SYN-Nordlicht Demo GmbH · Internal Training Document · Edition 10.0</p>
-  <h1 class="hb-title__h1">Handbook<br><span class="hb-title__sub">of the Document Chain</span></h1>
-  <p class="hb-title__es">Learn SAP Business One by following documents,<br>not by memorising screens.</p>
-  <dl class="hb-colofon">
-    <div><dt>Levels</dt><dd>9</dd></div>
-    <div><dt>Skills</dt><dd>72</dd></div>
-    <div><dt>Languages</dt><dd>ES · EN · DE</dd></div>
-    <div><dt>Sources</dt><dd>7 official</dd></div>
-  </dl>
-  <p class="hb-title__note">All data in this manual are synthetic and marked <code>SYN</code>.</p>
+<!-- ══ PORTADA ══ Título tipográfico sobre papel. Sin imagen sobre el pliegue. -->
+<section class="hb-chapter hb-chapter--paper hb-title" data-sc-act="flow" data-hb-kap="Title Page" data-hb-num="—">
+  <div class="hb-grid" data-sc-in data-sc-stagger="90">
+    <p class="hb-imprint">SYN-Nordlicht Demo GmbH · Internal Training Document · Edition 10.0</p>
+    <h1 class="hb-title__h1">Handbook<br><span class="hb-title__sub">of the Document Chain</span></h1>
+    <p class="hb-title__es">Learn SAP Business One by following documents,<br>not by memorising screens.</p>
+    <dl class="hb-colofon">
+      <div><dt>Levels</dt><dd>9</dd></div>
+      <div><dt>Skills</dt><dd>72</dd></div>
+      <div><dt>Languages</dt><dd>ES · EN · DE</dd></div>
+      <div><dt>Sources</dt><dd>7 official</dd></div>
+    </dl>
+    <p class="hb-title__note">All data in this manual are synthetic and marked <code>SYN</code>.</p>
+  </div>
+  <svg class="hb-masse" viewBox="0 0 240 60" aria-hidden="true" focusable="false">
+    <line x1="4" y1="30" x2="236" y2="30"/>
+    <line x1="4" y1="22" x2="4" y2="38"/><line x1="236" y1="22" x2="236" y2="38"/>
+    <text x="120" y="24" text-anchor="middle">9 LEVELS</text>
+  </svg>
 </section>
 
-<section class="hb-chapter">
+<!-- ══ KAPITEL 1 ══ Reconocimiento. Prosa densa + el ticket real. -->
+<section class="hb-chapter hb-chapter--paper" data-sc-act="flow" data-hb-kap="The Incident" data-hb-num="1" data-hb-ledger="Quotation|Quotation A-2026-0114|—|—">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 1</span>
     <h2 class="hb-kaphead__h2">08:14. An invoice has disappeared.</h2>
   </header>
   <div class="hb-spread">
-    <div>
+    <div class="hb-spread__text" data-sc-in data-sc-stagger="60">
       <p class="hb-lede">A client calls. They say their invoice is missing. The consultant opens SAP Business One and stares at a screen with thirty fields, four tabs and no answer.</p>
-      <p>The system isn't broken. The question is wrong. "Where is the invoice?" is not answered by looking at a screen: it's answered by following a document back to the one that created it, and back to the one that created that.</p>
-      <p>Those who don't know that open eleven windows. Those who do open one and press a button.</p>
+      <p>The system isn&rsquo;t broken. The question is wrong. &ldquo;Where is the invoice?&rdquo; is not answered by looking at a screen: it&rsquo;s answered by following a document back to the one that created it, and back to the one that created that.</p>
+      <p>Those who don&rsquo;t know that open eleven windows. Those who do open one and press a button.</p>
     </div>
-    <figure class="hb-spread__media">
+    <figure class="hb-spread__media" data-sc-reveal="up" data-sc-reveal-at="0.1 0.5">
       <div class="hb-ticket">
         <div class="hb-ticket__head"><span>NW-001</span><span>Sales</span></div>
-        <p class="hb-ticket__body">"The invoice for C20000 is gone. The customer wants to pay today."</p>
-        <div class="hb-ticket__foot"><span class="hb-ticket__priority">Priority 1</span><span>08:14</span></div>
+        <p class="hb-ticket__body">&ldquo;The invoice for C20000 is gone. The customer wants to pay today.&rdquo;</p>
+        <div class="hb-ticket__foot"><span>Priority 1</span><span>08:14</span></div>
       </div>
       <figcaption>Fig. 1.1 · The ticket as it arrives: no document number, no date, with urgency.</figcaption>
     </figure>
   </div>
 </section>
 
-<section class="hb-chapter">
+<!-- ══ KAPITEL 2 ══ Tensión. Cifras reales del ejemplo trabajado. -->
+<section class="hb-chapter hb-chapter--paper hb-cost" data-sc-act="flow" data-hb-kap="The Cost" data-hb-num="2" data-hb-ledger="Sales Order|Sales Order 162|—|—">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 2</span>
     <h2 class="hb-kaphead__h2">What it costs to ask the wrong question.</h2>
   </header>
-  <p class="hb-costgrid__lede">The invoice shows up. It was cancelled and replaced by another, in another series. The cost isn't the search: it's that nobody knew where to look.</p>
-  <ul class="hb-costlist">
-    <li><b>0.00</b> is what the aged receivables show for a draft of 500.00 that's been sitting there for three weeks. A draft doesn't post to the ledger and doesn't move stock: it's a frozen promise.</li>
-    <li><b>856.80</b> is what the customer owes per the general ledger, spread across three lines created automatically when the invoice was added.</li>
-  </ul>
-  <p class="hb-cost__sting">The customer waits while the payment doesn't come in and the same question returns on Thursday with a different document.</p>
-  <p class="hb-costnote">Figures from the lab: the draft from <code>SYN-SK-L0-08</code> and invoice <code>1001-2026</code>.</p>
+  <div class="hb-costgrid" data-sc-in data-sc-stagger="70">
+    <p class="hb-lede hb-costgrid__lede">The invoice appears. It was cancelled and replaced by another, in another series. The cost isn't the search: it's that nobody knew where to look.</p>
+    <ul class="hb-costlist">
+      <li>
+        <b>0.00</b>
+        <span>is what the aged receivables show for a draft of 500.00 that's been sitting there for three weeks. A draft doesn't post to the ledger and doesn't move stock: it's a frozen promise.</span>
+      </li>
+      <li>
+        <b>856.80</b>
+        <span>is what the customer owes per the general ledger, spread across three lines that were created automatically when the invoice was added. None were typed by hand.</span>
+      </li>
+    </ul>
+    <p class="hb-cost__sting">Meanwhile the customer waits, the payment doesn't come in and the same question returns on Thursday. With a different document.</p>
+    <p class="hb-costnote">Figures from the lab itself: the draft from <code>SYN-SK-L0-08</code> and invoice <code>1001-2026</code>.</p>
+  </div>
 </section>
 
-<section class="hb-chapter">
-  <header class="hb-kaphead">
-    <span class="hb-kaphead__num">Chapter 3</span>
-    <h2 class="hb-kaphead__h2">No screen. A path.</h2>
-  </header>
-  <svg class="hb-zeichnung" viewBox="0 0 900 300" role="img">
-    <g class="hb-zeichnung__grid" aria-hidden="true">
-      <path d="M0 260 H900"/>
-      <path d="M0 40 H900"/>
-      <path d="M180 40 V260" stroke-dasharray="4 4"/>
-      <path d="M360 40 V260" stroke-dasharray="4 4"/>
-      <path d="M540 40 V260" stroke-dasharray="4 4"/>
-      <path d="M720 40 V260" stroke-dasharray="4 4"/>
-    </g>
-    <g class="hb-zeichnung__draw">
-      <path class="hb-draw" d="M60 150 H840" stroke="#7c2d2d"/>
-      <rect class="hb-draw" x="60" y="120" width="120" height="60" rx="2" fill="#f7f2e7"/>
-      <rect class="hb-draw" x="250" y="120" width="120" height="60" rx="2" fill="#f7f2e7"/>
-      <rect class="hb-draw focus" x="440" y="120" width="120" height="60" rx="2" fill="#efe7d5"/>
-      <rect class="hb-draw" x="630" y="120" width="120" height="60" rx="2" fill="#f7f2e7"/>
-      <path class="hb-draw" d="M310 180 V235"/>
-      <path class="hb-draw" d="M500 180 V235"/>
-      <path class="hb-draw" d="M690 180 V235"/>
-    </g>
-    <g class="hb-zeichnung__labels">
-      <text x="120" y="155" text-anchor="middle">Quotation</text>
-      <text x="310" y="155" text-anchor="middle">Sales Order</text>
-      <text x="500" y="155" text-anchor="middle">Delivery</text>
-      <text x="690" y="155" text-anchor="middle" font-weight="bold">Invoice</text>
-      <text class="hb-zeichnung__eff" x="310" y="255" text-anchor="middle">Stock</text>
-      <text class="hb-zeichnung__eff" x="500" y="255" text-anchor="middle">Ledger</text>
-      <text class="hb-zeichnung__eff" x="690" y="255" text-anchor="middle">Balance</text>
-      <text class="hb-zeichnung__abb" x="840" y="30" text-anchor="end">Fig. 3.1</text>
-    </g>
+<!-- ══ KAPITEL 3 ══ El giro. La lámina que se dibuja sola. -->
+<section class="hb-chapter hb-chapter--paper" data-sc-act="pin" data-sc-span="2.2" data-hb-kap="The Turn" data-hb-num="3" data-hb-ledger="Delivery|Delivery 5001|—|—">
+  <div data-sc-stage class="hb-wende">
+    <header class="hb-kaphead hb-kaphead--inset">
+      <span class="hb-kaphead__num">Chapter 3</span>
+      <h2 class="hb-kaphead__h2" data-sc-cue="0 0.9 0">No screen. A path.</h2>
+    </header>
+    <svg class="hb-zeichnung" viewBox="0 0 900 300" aria-label="Diagram: each document inherits from the previous one and produces three effects" role="img">
+      <g class="hb-zeichnung__grid" aria-hidden="true">
+        <path d="M0 260 H900"/><path d="M0 40 H900"/>
+      </g>
+      <g class="hb-zeichnung__draw">
+        <path class="hb-draw" d="M60 150 H840"/>
+        <rect class="hb-draw" x="60" y="120" width="120" height="60"/>
+        <rect class="hb-draw" x="250" y="120" width="120" height="60"/>
+        <rect class="hb-draw" x="440" y="120" width="120" height="60"/>
+        <rect class="hb-draw" x="630" y="120" width="120" height="60"/>
+        <path class="hb-draw" d="M310 180 V235 H700"/>
+        <path class="hb-draw" d="M500 180 V235"/>
+        <path class="hb-draw" d="M690 180 V235"/>
+      </g>
+      <g class="hb-zeichnung__labels">
+        <text x="120" y="155">Sales Order</text>
+        <text x="310" y="155">Delivery</text>
+        <text x="500" y="155">Invoice</text>
+        <text x="690" y="155">Payment</text>
+        <text class="hb-zeichnung__eff" x="310" y="255">Stock</text>
+        <text class="hb-zeichnung__eff" x="500" y="255">Ledger</text>
+        <text class="hb-zeichnung__eff" x="690" y="255">Balance</text>
+        <text class="hb-zeichnung__abb" x="840" y="30">Fig. 3.1</text>
+      </g>
+    </svg>
+    <div class="hb-wende__text">
+      <p data-sc-cue="0.28 0.72">Every document is born from another and leaves three footprints: it moves stock, writes a ledger entry, shifts the partner balance.</p>
+      <p data-sc-cue="0.62 1">Whoever knows those three footprints never memorises the screen. They read it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SILENCIO ══ Autorizado en BRIEF.md. La respiración antes del pico. -->
+<section class="hb-atem hb-chapter--paper" data-sc-act="flow" data-hb-kap="A Pause" data-hb-num="—">
+  <svg class="hb-atem__masse" viewBox="0 0 200 40" aria-hidden="true" focusable="false">
+    <line x1="2" y1="20" x2="198" y2="20"/><line x1="2" y1="12" x2="2" y2="28"/><line x1="198" y1="12" x2="198" y2="28"/>
   </svg>
-  <div class="hb-wende__text">
-    <p>Every document comes from somewhere else and leaves three footprints: it changes inventory, it creates a ledger entry, it shifts a partner's balance.</p>
-    <p>Whoever knows those three tracks doesn't need to memorise the screen. They read it.</p>
+  <p class="hb-atem__line" data-sc-in>Now look at a real document.</p>
+</section>
+
+<!-- ══ KAPITEL 4 · PICO ══ Corte duro a tinta. La cadena en 3D y la ventana viva. -->
+<section class="hb-chapter hb-chapter--ink hb-peak" data-sc-act="pin" data-sc-span="3.6" data-hb-kap="The Document Chain" data-hb-num="4" data-hb-ledger="Invoice|Invoice 1001-2026|856.80|856.80">
+  <div data-sc-stage class="hb-peak__stage">
+    <header class="hb-kaphead hb-kaphead--ink">
+      <span class="hb-kaphead__num">Chapter 4</span>
+      <h2 class="hb-kaphead__h2" data-sc-cue="0 1 0 0">The chain builds itself as you read.</h2>
+    </header>
+
+    <div class="hb-peak__mid">
+    <!-- The chain: five real documents in 3D, assembled by the scroll -->
+    <div class="kette" data-kette aria-label="Cadena documental en tres dimensiones">
+      <article class="beleg" data-beleg-card="0" style="--i:0">
+        <div class="beleg__paper">
+          <span class="beleg__kind">Quotation</span>
+          <span class="beleg__nr">A-2026-0114</span>
+          <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: —</li><li>Balance: —</li></ul>
+        </div>
+      </article>
+      <article class="beleg" data-beleg-card="1" style="--i:1">
+        <div class="beleg__paper">
+          <span class="beleg__kind">Sales Order</span>
+          <span class="beleg__nr">162</span>
+          <ul class="beleg__eff"><li>Stock: reserved</li><li>Ledger: —</li><li>Balance: —</li></ul>
+        </div>
+      </article>
+      <article class="beleg" data-beleg-card="2" style="--i:2">
+        <div class="beleg__paper">
+          <span class="beleg__kind">Delivery</span>
+          <span class="beleg__nr">5001</span>
+          <ul class="beleg__eff"><li>Stock: −15</li><li>Ledger: COGS</li><li>Balance: —</li></ul>
+        </div>
+      </article>
+      <article class="beleg beleg--focus" data-beleg-card="3" style="--i:3">
+        <div class="beleg__paper">
+          <span class="beleg__kind">Invoice</span>
+          <span class="beleg__nr">1001-2026</span>
+          <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: AR / Revenue / VAT</li><li>Balance: +856.80</li></ul>
+        </div>
+      </article>
+      <article class="beleg" data-beleg-card="4" style="--i:4">
+        <div class="beleg__paper">
+          <span class="beleg__kind">Payment</span>
+          <span class="beleg__nr">2301</span>
+          <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: Bank / Receivables</li><li>Balance: 0.00</li></ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- La ventana viva: markup real que calcula de verdad -->
+    <div class="fenster" data-fenster hidden>
+      <div class="fenster__bar"><span class="fenster__title">A/R Invoice 1001-2026</span><span class="fenster__ctrl">_ ▢ ✕</span></div>
+      <div class="fenster__body">
+        <label class="fenster__field">
+          <span>Quantity</span>
+          <input type="number" min="1" max="99" step="1" value="10" data-f-qty inputmode="numeric">
+        </label>
+        <label class="fenster__field">
+          <span>Unit price</span>
+          <input type="number" min="1" max="999" step="0.01" value="60.00" data-f-price inputmode="decimal">
+        </label>
+        <label class="fenster__field">
+          <span>VAT</span>
+          <select data-f-vat>
+            <option value="19" selected>19 %</option>
+            <option value="7">7 %</option>
+            <option value="0">0 %</option>
+          </select>
+        </label>
+        <table class="fenster__buchung">
+          <caption>Ledger entry · generated on Add</caption>
+          <tbody>
+            <tr><th scope="row">Receivables 120000</th><td data-f-debit>714.00</td><td></td></tr>
+            <tr><th scope="row">Revenue 400000</th><td></td><td data-f-rev>600.00</td></tr>
+            <tr><th scope="row">VAT 177600</th><td></td><td data-f-vatamt>114.00</td></tr>
+          </tbody>
+        </table>
+        <p class="fenster__hint" data-f-hint>Change the quantity and watch the ledger entry, the stock and the balance move together.</p>
+      </div>
+    </div>
+
+    </div>
+
+    <p class="hb-peak__caption" data-sc-cue="0.48 1 0.1 0.02">Fig. 4.1 · One commercial event, five documents, three effects. The window is real: it calculates as you type.</p>
   </div>
 </section>
 
-<section class="hb-atem">
-  <svg class="hb-atem__masse" viewBox="0 0 200 40" aria-hidden="true">
-    <line x1="2" y1="20" x2="198" y2="20" stroke="#c9bda3" stroke-width="0.5"/>
-    <line x1="2" y1="12" x2="2" y2="28" stroke="#8f8265" stroke-width="1"/>
-    <line x1="198" y1="12" x2="198" y2="28" stroke="#8f8265" stroke-width="1"/>
-  </svg>
-  <p class="hb-atem__line">Take a breath. Look at a real document.</p>
-</section>
-
-<section class="hb-peak">
-  <h2 class="hb-peak__headline">
-    The chain builds itself as you read.
-    <em>Five documents, three effects, one commercial event.</em>
-  </h2>
-
-  <div class="kette-rail">
-    <article class="beleg" data-beleg-card="0">
-      <div class="beleg__paper">
-        <span class="beleg__kind">Quotation</span>
-        <span class="beleg__nr">A-2026-0114</span>
-        <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: —</li><li>Balance: —</li></ul>
-      </div>
-    </article>
-    <div class="beleg-connector" aria-hidden="true">
-      <svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg>
-    </div>
-    <article class="beleg" data-beleg-card="1">
-      <div class="beleg__paper">
-        <span class="beleg__kind">Sales Order</span>
-        <span class="beleg__nr">162</span>
-        <ul class="beleg__eff"><li>Stock: reserved</li><li>Ledger: —</li><li>Balance: —</li></ul>
-      </div>
-    </article>
-    <div class="beleg-connector" aria-hidden="true">
-      <svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg>
-    </div>
-    <article class="beleg" data-beleg-card="2">
-      <div class="beleg__paper">
-        <span class="beleg__kind">Delivery</span>
-        <span class="beleg__nr">5001</span>
-        <ul class="beleg__eff"><li>Stock: −15</li><li>Ledger: COGS</li><li>Balance: —</li></ul>
-      </div>
-    </article>
-    <div class="beleg-connector" aria-hidden="true">
-      <svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg>
-    </div>
-    <article class="beleg beleg--focus" data-beleg-card="3">
-      <div class="beleg__paper">
-        <span class="beleg__kind">Invoice</span>
-        <span class="beleg__nr">1001-2026</span>
-        <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: AR / Revenue / VAT</li><li>Balance: +856.80</li></ul>
-      </div>
-    </article>
-    <div class="beleg-connector" aria-hidden="true">
-      <svg width="24" height="16" viewBox="0 0 24 16" fill="none"><path d="M0 8H20M20 8L14 2M20 8L14 14" stroke="currentColor" stroke-width="1.5"/></svg>
-    </div>
-    <article class="beleg" data-beleg-card="4">
-      <div class="beleg__paper">
-        <span class="beleg__kind">Payment</span>
-        <span class="beleg__nr">2301</span>
-        <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: Bank / Receivables</li><li>Balance: 0.00</li></ul>
-      </div>
-    </article>
-  </div>
-
-  <div class="kette-effects">
-    <div class="kette-effect">
-      <span class="kette-effect__label">Stock</span>
-      <span class="kette-effect__value">&minus;15</span>
-      <span class="kette-effect__sub">items leave warehouse</span>
-    </div>
-    <div class="kette-effect">
-      <span class="kette-effect__label">Ledger</span>
-      <span class="kette-effect__value">3 entries</span>
-      <span class="kette-effect__sub">AR · Revenue · VAT</span>
-    </div>
-    <div class="kette-effect">
-      <span class="kette-effect__label">Balance</span>
-      <span class="kette-effect__value">+856.80</span>
-      <span class="kette-effect__sub">customer owes</span>
-    </div>
-  </div>
-
-  <p class="hb-peak__caption">Fig. 4.1 · One commercial event, five documents, three effects. The window is real: it calculates as you type.</p>
-</section>
-
-<section class="hb-chapter" data-sc-act="pan" data-sc-span="2.6" data-hb-kap="The Lab" data-hb-num="5" data-hb-ledger="Payment|Payment 2301|856.80|856.80">
-  <header class="hb-kaphead">
-    <span class="hb-kaphead__num">Chapter 5</span>
-    <h2 class="hb-kaphead__h2">Nine levels. At your own pace.</h2>
-  </header>
-  <div class="hb-labor" id="sap-b1-mastery-lab">
-    <div class="hb-stufen">
+<!-- ══ KAPITEL 5 ══ El laboratorio. Vuelta al papel: corte duro. -->
+<section class="hb-chapter hb-chapter--paper" data-sc-act="pan" data-sc-span="2.6" data-hb-kap="The Lab" data-hb-num="5" data-hb-ledger="Payment|Payment 2301|856.80|856.80">
+  <div data-sc-stage class="hb-labor">
+    <header class="hb-kaphead hb-kaphead--inset">
+      <span class="hb-kaphead__num">Chapter 5</span>
+      <h2 class="hb-kaphead__h2">Nine levels. At your own pace.</h2>
+    </header>
+    <div class="hb-stufen" data-sc-pan="0.07">
       <article class="stufe"><span class="stufe__nr">L0</span><h3>Mental Model</h3><p>How a document travels through all eight modules.</p></article>
       <article class="stufe"><span class="stufe__nr">L1</span><h3>Master Data</h3><p>Business partners, items, series, dates — what decides everything else.</p></article>
       <article class="stufe"><span class="stufe__nr">L2</span><h3>Core Logistics</h3><p>Order, delivery, invoice, payment. The full chain.</p></article>
@@ -288,12 +265,14 @@ body {
   </div>
 </section>
 
-<section class="hb-kolophon">
-  <p class="hb-kolophon__rule">Debit and Credit</p>
-  <p class="hb-kolophon__balance">Your ledger is sitting there, waiting for that last piece.</p>
-  <p class="hb-kolophon__text">This is the front cover of our lab: nine levels, seventy-two skills, trilingual (ES/EN/DE). Runs completely standalone &mdash; no account, no server, no internet needed.</p>
-  <a class="btn-primary" href="https://brendars91.github.io/sap-b1-mastery-lab/">Open the Lab &rarr;</a>
-  <p class="hb-kolophon__imprint">SYN-Nordlicht Demo GmbH · Synthetic data marked SYN · Learn-SapB1</p>
+<!-- ══ COLOPHON ══ The ledger balances. CTA as a line of running text. -->
+<section class="hb-chapter hb-chapter--paper hb-kolophon" data-sc-act="flow" data-hb-kap="Colophon" data-hb-num="—">
+  <div class="hb-kolophon__inner" data-sc-in data-sc-stagger="80">
+    <p class="hb-kolophon__rule">Debit and Credit</p>
+    <p class="hb-kolophon__balance" data-balance>Your ledger is waiting for its last entry.</p>
+    <p class="hb-kolophon__text">This manual is the front cover of a lab with nine levels and seventy-two skills, in Spanish, English and German, with seven dated official SAP sources. It runs with no account, no server and no connection. Whenever you are ready, <a class="hb-cta" href="/Learn-SapB1/lab/">open the lab</a> and start at level zero.</p>
+    <p class="hb-kolophon__imprint">SYN-Nordlicht Demo GmbH · Synthetic data marked SYN · Learn-SapB1</p>
+  </div>
 </section>
 
 </main>
