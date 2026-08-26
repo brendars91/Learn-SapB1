@@ -22,6 +22,10 @@
   --accent-ink: #fdf9f0;
   --good: #2e5e3a;
   --bad: #8a2f2f;
+  /* Shared aliases consumed by activities.css and console.css. */
+  --paper-2: var(--paper-deep);
+  --line: var(--rule);
+  --muted: var(--ink-soft);
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   --mono: 'SF Mono', 'Cascadia Code', ui-monospace, Menlo, Consolas, monospace;
 
@@ -48,6 +52,19 @@
   padding: clamp(0.75rem, 2vw, 2rem);
   border-radius: 0;
 }
+
+html,
+body { background: var(--paper); color: var(--ink); }
+body,
+button,
+input,
+select,
+textarea { color: var(--ink); }
+#sap-b1-mastery-lab,
+[data-app-shell],
+.sbl-stack,
+.sbl-main { color: var(--ink); }
+#sap-b1-mastery-lab { background: var(--paper); }
 
 /* every surface: flat paper, hairline rule, sharp corners */
 .card,
