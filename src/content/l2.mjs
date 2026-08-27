@@ -30,15 +30,15 @@ export const L2 = [
   S(2, 1, {
     t: { es: 'Solicitud a pago', en: 'Request to pay', de: 'Anforderung bis Zahlung' },
     o: { es: 'Ejecutar P2P controlando autorización, triple efecto y conciliación.', en: 'Run P2P controlling authorization and 3-way match.', de: 'P2P mit Abgleich steuern.' },
-    c: { es: 'Solicitud → Pedido → Entrada → Factura → Pago: la entrada reconoce stock y GR/IR; la factura la deuda; el pago cierra. La conciliación 3-vías es el control central.', en: 'Request → Order → Receipt → Invoice → Payment: receipt books stock+GR/IR; invoice books debt; payment closes. 3-way is central.', de: 'Dreiecksabgleich ist zentral.' },
+    c: { es: 'Solicitud → Pedido → Entrada → Factura → Pago: la entrada reconoce stock y la cuenta puente de compensación (Goods Receipt Clearing Account); la factura la deuda; el pago cierra. La conciliación 3-vías es el control central.', en: 'Request → Order → Receipt → Invoice → Payment: receipt books stock+the Goods Receipt Clearing Account; invoice books debt; payment closes. 3-way is central.', de: 'Dreiecksabgleich ist zentral.' },
     m: { es: 'Nada se paga que no haya entrado y conciliado.', en: 'Nothing is paid that has not arrived and matched.' },
     p: { es: 'Concilia SYN-PO-0003 contra entrada y factura; documenta la diferencia.', en: 'Match SYN-PO-0003; document the difference.', de: 'Gleiche SYN-PO-0003 ab.' },
     v: { es: 'Verifica precio, cantidad y condición antes de aprobar pago.', en: 'Verify price, quantity, terms before payment.', de: 'Prüfe vor Zahlung.' },
     vs: [{ es: 'Pedido vs entrada (cantidad)', en: 'Order vs receipt (quantity)' }, { es: 'Entrada vs factura (precio)', en: 'Receipt vs invoice (price)' }, { es: 'Resuelve antes del pago', en: 'Resolve before payment' }],
     r: { es: 'Pagar sin entrada paga mercancía que quizá nunca llegó.', en: 'Paying without receipt pays goods that may never arrive.', de: 'Zahlen ohne Eingang zahlt Luft.' },
-    tips: { es: ['La cuenta GR/IR es el detector de mentiras del P2P.', 'Autoriza por importe y riesgo.'], en: ['GR/IR is P2P’s lie detector.', 'Authorize by amount and risk.'] },
+    tips: { es: ['La cuenta de compensación de entrada de mercancías (Goods Receipt Clearing) es el detector de mentiras del P2P: en SAP B1 no se llama GR/IR, ese es el término de S/4HANA.', 'Autoriza por importe y riesgo.'], en: ['The Goods Receipt Clearing Account is P2P’s lie detector — in SAP B1 it is not called GR/IR, that term belongs to S/4HANA.', 'Authorize by amount and risk.'] },
     pf: { es: 'Saltarse el 3-vías «esta vez».', en: 'Skipping 3-way «this once».' },
-    d: { k: 'chain', cap: { es: 'P2P: el 3-vías decide', en: 'P2P: 3-way decides' }, n: [{ t: 'Pedido', s: 'compromiso' }, { t: 'Entrada', s: 'stock+GR/IR' }, { t: 'Factura', s: 'deuda' }, { t: 'Pago', s: 'cierra' }] },
+    d: { k: 'chain', cap: { es: 'P2P: el 3-vías decide', en: 'P2P: 3-way decides' }, n: [{ t: 'Pedido', s: 'compromiso' }, { t: 'Entrada', s: 'stock+compensación' }, { t: 'Factura', s: 'deuda' }, { t: 'Pago', s: 'cierra' }] },
     a: {
       p: { es: 'La factura SYN-V-04 cobra más caro que el pedido. ¿Qué haces?', en: 'SYN-V-04 invoices higher than ordered. What do you do?', de: 'Rechnung höher als Bestellung. Was tun?' },
       opts: { es: ['Bloquear pago, documentar diferencia, resolver con proveedor', 'Pagar y reclamar después', 'Ajustar la entrada al precio de la factura'], en: ['Block, document, resolve with supplier', 'Pay and claim later', 'Adjust receipt to invoice price'], de: ['Sperren, dokumentieren, klären', 'Zahlen, später reklamieren', 'Eingang anpassen'] },
