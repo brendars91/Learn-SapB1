@@ -157,14 +157,49 @@ Cinco fases. Cada una es un commit propio y **no se cierra sin la salida real de
 
 **Cierre de fase:** `npm test` en verde salvo los fallos *intencionados* de cobertura, cuya salida queda registrada. Build y smoke en verde.
 
-### Fase 2 — Saneamiento factual (lo que ya está publicado y no debería)
+### Fase 2 — Saneamiento factual — **COMPLETADA 2026-08-27** (commit siguiente a Fase 1)
+
+Resultado: 4 hechos fijados en `test/content-facts.test.mjs`, un error factual real corregido
+(atomicidad de `$batch`) y la advertencia de cuentas renderizada y verificada en los tres idiomas.
+Detalle abajo; el texto original de la fase se conserva como referencia de lo planificado.
 
 1. **D8 `FP 2405`: RESUELTO, no requiere cambio de contenido.** Verificado contra la *Service Layer API Reference* el 2026-08-27; el dato es correcto (cita literal en §3, D8). Única acción: añadir la cita textual y su URL a la ficha de evidencia. **No borrar la afirmación** — la instrucción previa que lo pedía era errónea.
 2. **D9 cuentas:** marcar cada número como ejemplo sintético dependiente de plan contable y localización, en los tres idiomas, y añadir un test que falle si aparece un número de cuenta sin su marca.
-3. **Barrido de absolutas:** revisar las expresiones `siempre`, `nunca`, `automáticamente`, `obligatorio`, `estándar` en `src/content/*.mjs`. Cada aparición: o describe comportamiento no parametrizable, o se reescribe con su condición. El material sobre lotes de Service Layer se revisa contra §3.10 del PDF 1.28: la unidad con atomicidad documentada es el **change set**, no el lote completo.
+3. **Barrido de absolutas — hecho, con un hallazgo factual nuevo.** El barrido de `siempre`, `nunca`,
+   `automáticamente` y `obligatorio` mostró que la gran mayoría son distractores deliberados de
+   evaluación o principios pedagógicos, no afirmaciones sobre el sistema: correctas, no se tocan.
+   Pero apareció **un error factual real** en `SYN-SK-L7-07` (Sesiones y lotes), que afirmaba
+   *«los lotes ($batch) agrupan operaciones atómicas»*.
+
+   Verificado contra el PDF oficial 1.28, §3.9.3 y §3.9.4, con dos citas literales:
+
+   > «The service processes the requests within a batch request sequentially.»
+   > «A change set is an atomic unit of works. It means that any failed sub request in a change set
+   > will cause the whole change set to be rolled back. Change sets must not contain any GET
+   > requests or other change sets.»
+
+   Corregido en concepto, mentalidad, práctica, verificación, riesgo, tips, diagrama y análisis de
+   distractores, en ES/EN/DE. Se añadió además la regla real que faltaba: un change set **no admite
+   GET ni change sets anidados**. Y se rebajó un absoluto propio (*«la única causa»* pasó a *«la
+   causa más frecuente»*).
 4. Añadir `test/content-facts.test.mjs` que fije los hechos ya verificados y falle si se degradan.
 
-**Cierre de fase:** cero afirmaciones sin fuente en el diff; cada corrección con su URL, versión y fecha en el mensaje de commit.
+**Cierre de fase (verificado 2026-08-27):**
+
+```
+npm test                    75 tests · 70 pass · 5 fail (solo detectores D1-D5)
+npm run build               PASS  fragment 1261942 B / standalone 1262538 B
+npm run test:browser:local  views 8 · skills 72 · languageLeaks 0/0 · errors []
+render en navegador         aviso de cuentas correcto en ES/EN/DE · cita literal visible · 0 pageerrors
+```
+
+Durante la fase, la puerta de idioma detectó 4 regresiones que yo mismo había introducido al
+corregir el contenido: campos nuevos sin traducción DE/EN. Las tres cadenas afectadas se
+tradujeron de verdad. La cuarta era distinta: el campo `quote` es una **cita textual** en inglés y
+traducirla la convertiría en paráfrasis, destruyendo su valor probatorio — se declaró estructural
+en `test/i18n-coverage.test.mjs` con el motivo escrito en el código.
+
+Lección para las fases siguientes: cada corrección de contenido debe nacer con sus tres idiomas.
 
 ### Fase 3 — Reparar las actividades rotas (D2, D3, D4, D5)
 
