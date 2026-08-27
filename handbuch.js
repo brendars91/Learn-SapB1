@@ -97,45 +97,37 @@
     if (!peak) return;
     const p = Number(getComputedStyle(peak).getPropertyValue('--sc-p')) || 0;
 
-    // Máquina de estados: cada documento progresa de future → current → past.
-    // step: separación entre documentos; window: duración de entrada/salida.
-    const step = 0.15;
-    const window = 0.15;
+    // Escala continua: cada documento crece/encoge según su proximidad al "centro" del scroll.
+    // step: separación ideal entre documentos en el rango [0,1].
+    const step = 0.2;
+    const window = 0.25;  // ventana de influencia (más amplia que antes para transiciones suaves)
 
     cards.forEach((card, i) => {
-      const from = i * step;
-      const end = from + window;
-      let state = 'future';
-      let hbt = 0;
+      const center = i * step;
+      // Proximidad: qué tan lejos está `p` de `center`. Cuanto más cerca, más grande.
+      const distance = Math.abs(p - center);
+      // Scale: 0.2 (pequeño) a 1.0 (protagonista). Usa una curva suave.
+      const scale = reduced ? (distance < window / 2 ? 1 : 0.2) : Math.max(0.2, 1 - (distance / window));
 
-      if (p >= from && p < end) {
-        state = 'current';
-        hbt = reduced ? 1 : clamp01((p - from) / window);
-      } else if (p >= end) {
-        state = 'past';
-        hbt = 1;
-      }
-
-      // Aplicar clases de estado
       card.classList.remove('beleg--future', 'beleg--current', 'beleg--past');
-      card.classList.add(`beleg--${state}`);
-      card.style.setProperty('--hb-t', hbt.toFixed(3));
+      card.style.setProperty('--hb-t', scale.toFixed(3));
+      card.style.setProperty('--hb-scale', scale.toFixed(3));
 
-      // Pulse al aterrizar (transición de future a current)
-      if (state === 'current' && hbt > 0.5 && !card.dataset.landed) {
+      // Pulse cuando llega a escala máxima
+      const isProtagonist = scale > 0.95;
+      if (isProtagonist && !card.dataset.landed) {
         card.dataset.landed = '';
         card.setAttribute('data-pulse', '');
         setTimeout(() => card.removeAttribute('data-pulse'), 620);
       }
-      if (state === 'future') delete card.dataset.landed;
+      if (!isProtagonist) delete card.dataset.landed;
     });
 
-    // Fenster sincronizada con Invoice (i=3): visible cuando es current o past.
-    const invoiceState = cards[3]?.classList.contains('beleg--current') || cards[3]?.classList.contains('beleg--past');
-    const invoiceProgress = reduced ? (invoiceState ? 1 : 0) : clamp01((p - (3 * step)) / window);
-    const f = invoiceState ? invoiceProgress : 0;
+    // Fenster sincronizada con Invoice (i=3): visible según su escala.
+    const invoiceScale = Number(cards[3]?.style.getPropertyValue('--hb-scale')) || 0;
+    const f = reduced ? (invoiceScale > 0.7 ? 1 : 0) : invoiceScale;
 
-    fenster.hidden = !invoiceState || f < 0.01;
+    fenster.hidden = f < 0.1;
     fenster.style.setProperty('--hb-fenster', f.toFixed(3));
   }
 
