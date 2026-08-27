@@ -438,7 +438,7 @@ function renderLearnMode(state, skill) {
   const pathHtml = (skill.path || []).length ? `<div class="sbl-detail-grid__full"><h4>${t(state, 'pathLabel')}</h4><div class="sbl-path">${skill.path.map((crumb, i) => `${i ? '<span class="sep">›</span>' : ''}<span class="crumb">${escapeHtml(trText(crumb, state.locale))}</span>`).join('')}</div></div>` : '';
   const ex = skill.example;
   const exHtml = ex ? `<div class="sbl-example"><h4>${t(state, 'exampleLabel')}</h4><p><strong>${escapeHtml(trNode(ex.q, state.locale))}</strong></p><pre class="sbl-figure">${(ex.show || []).map(l => escapeHtml(trText(l, state.locale))).join('\n')}</pre>${ex.a ? `<p class="text-small"><em>${escapeHtml(trNode(ex.a, state.locale))}</em></p>` : ''}</div>` : '';
-  const anHtml = an ? `<div class="sbl-anchor"><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
+  const anHtml = an ? `<div class="sbl-anchor"><h4>${t(state, 'anchorLabel')}</h4><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
   return `<div class="sbl-learn">
     ${anHtml}
     ${renderMasterclass(state, skill)}

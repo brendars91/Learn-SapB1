@@ -262,7 +262,22 @@ directamente en un sistema real con localización alemana** (dos pasadas de nave
 lectura, 2026-08-04), más los nombres de módulo confirmados en los objetivos de los cursos. Queda
 declarado en el código que los nombres dependen de versión y localización.
 
-### Fase 4 — Completar las 27 fichas MASTERCLASS (D1)
+### Fase 4 — Completar las 27 fichas MASTERCLASS — **COMPLETADA 2026-08-27**
+
+Resultado: **72/72 fichas completas, ninguna vacía**, con ancla, ruta y ejemplo trabajado.
+Se trabajó por grupos y se ejecutó la suite completa entre cada uno:
+
+```
+L0        5 fichas  27 -> 22 huecos   suite: solo cobertura en rojo
+L1        6 fichas  22 -> 16 huecos   suite: solo cobertura en rojo
+L2-L3     4 fichas  16 -> 12 huecos   suite: solo cobertura en rojo
+L4        3 fichas  12 ->  9 huecos   suite: solo cobertura en rojo
+L5-L6     4 fichas   9 ->  5 huecos   suite: solo cobertura en rojo
+L7-L8     5 fichas   5 ->  0 huecos   suite: 75/75 PASS
+```
+
+Se añadieron traducciones EN/DE al catálogo después de cada grupo y la puerta i18n se ejecutó
+antes de continuar. La cobertura terminó verde sin bajar ningún umbral.
 
 El bloque de mayor volumen y el de mayor riesgo de invención. Por eso va después de que los detectores existan.
 
@@ -272,7 +287,50 @@ El bloque de mayor volumen y el de mayor riesgo de invención. Por eso va despu�
 4. Recuperar el contenido huérfano retirado de `DEEP` en el trabajo anterior y decidir por pieza: reasignar, convertir en caso del laboratorio, o descartar. Convertir exige redactar distractores razonados — es autoría nueva y se verifica como tal.
 5. Ejecutar tras cada grupo: cobertura, i18n, anti-plantilla, build.
 
-**Cierre de fase:** `DEEP` = 72/72 o inventario explícito y justificado de lo que falta. Anti-plantilla en verde: ninguna ficha nueva clonando otra.
+**Fuentes abiertas y usadas en la fase**
+
+- SAP Learning: *Exploring Master Data and Documents* — maestros, marketing documents,
+  Relationship Map y Reference Document.
+- SAP Learning: *Creating Customers* — tipos de socio, condiciones de pago, crédito y listas.
+- SAP Learning: *Working with Units of Measure* — tres UoM, factores y bloqueo con documentos abiertos.
+- SAP Learning: *Managing Warehouses* / *Exploring Bin Locations* — drop ship, hasta 4 subniveles,
+  código `05-A1-S2-L1`.
+- SAP Learning: *Managing Pricelists* — lista base, factor y simulación del asistente.
+- SAP Learning: *Exploring CRM* — actividades, calendario y tareas fuera del calendario.
+- SAP Learning: *Implementing the Service Process* — fichas de equipo, series y garantía.
+- SAP Learning: *Exploring the Chart of Accounts* / *Handling Payments* — determinación por niveles,
+  conciliación, 4 medios de pago y cuentas puente.
+- SAP Learning: *Managing Users and User Groups* / *Creating Queries* — 5 tipos de grupo y
+  prohibición explícita de insert/update/delete con query tools.
+- SAP SDK Help — **2870 tablas**, secciones DI API y UI API.
+- OWASP Top 10 for LLM Applications 2026 — **LLM01 Prompt Injection** y **LLM02 Insecure Output Handling**.
+
+**Hallazgos nuevos de la fase**
+
+1. La app decía *Goods Receipt Clearing Account*, pero la lección oficial de compras llama el
+   campo **Allocation Account** y explica que su saldo total representa las entradas abiertas no
+   copiadas a factura. Corregido en `L2-02`, con condición de inventario permanente.
+2. `content.mjs` no guarda alemán dentro de `DEEP`: la traducción se resuelve mediante el catálogo
+   `TERMS`. Se creó `scripts/add-terms.cjs`, idempotente y con validación EN/DE, y se usó después de
+   cada grupo.
+3. La etiqueta `anchorLabel` existía traducida en ES/EN/DE pero nunca se renderizaba. El contenido
+   estaba presente; la interfaz omitía el título «El ancla». Conectado y verificado en navegador.
+4. El primer test visual falló falsamente por `text-transform: uppercase`: `innerText` devolvía
+   `EL ANCLA`. Se reemplazó por un test estructural de `.sbl-anchor/.sbl-path/.sbl-example`.
+5. Se añadieron dos contratos permanentes: las 72 skills deben renderizar las tres piezas en los
+   tres idiomas, y la UI de `consequence` debe consumir **los tokens de `getActivity()`**, incluidos
+   los señuelos, para que nunca vuelva la grieta datos/render.
+
+**Cierre de fase (verificado 2026-08-27):**
+
+```
+npm test                    77/77 PASS
+npm run build               PASS
+npm run test:browser:local  8 vistas · 72 skills · fugas EN/DE 0/0 · errors []
+Playwright dirigido         10 fichas nuevas × 3 idiomas · 0 problemas · 0 pageerrors
+```
+
+D1 cerrado: 72/72, anti-duplicado verde, ninguna ficha vacía.
 
 ### Fase 5 — Certificación y publicación
 
