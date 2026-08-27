@@ -10,6 +10,7 @@ const files = [
   'test/browser-smoke-local.mjs',
   'test/browser-smoke.mjs',
   'test/build.test.mjs',
+  'test/coverage.test.mjs',
   'test/runtime-smoke.test.mjs',
   'test/unique-content.test.mjs'
 ];

@@ -1,5 +1,19 @@
 # PLAN DE MEJORA v7 — Learn-SapB1
 
+> **SUSTITUIDO — 2026-08-27.** Este documento queda como archivo histórico. El plan vigente es
+> [`docs/PLAN-PRODUCCION-v8.md`](PLAN-PRODUCCION-v8.md).
+>
+> Motivo: **cinco de los seis P0 de este plan ya se implementaron** después de escribirlo
+> (encuadre por skill, práctica guiada, feedback por elemento, simulador con campos reales,
+> autodelato forense y meta-patrón de consecuencias). Verificado por ejecución el 2026-08-27;
+> el detalle está en §2.1 del v8. Ejecutar este documento tal cual sería rehacer trabajo hecho.
+>
+> Dos correcciones al contenido de abajo, para quien lo lea como referencia:
+> - §2 y §4 dicen que `config` usa «los mismos **4** decoys genéricos». Son **2** (`Gestión`, `Informes`).
+> - El plan no auditó la **cobertura** de contenido y por eso no detectó los dos defectos más graves
+>   que siguen vivos: 27 de 72 skills sin ficha MASTERCLASS y 9 actividades `config` con rutas de
+>   1 o 2 pasos, resolubles por eliminación.
+
 **Propietaria:** Brenda · **Fecha análisis:** 2026-08-24 · **Alcance:** plan, no implementación.
 **Basado en:** lectura del código real (`src/app.mjs`, `src/activities.mjs`, `src/activities.css`, `src/masterclass*.mjs`, `src/content/*`, `test/activities.test.mjs`).
 
