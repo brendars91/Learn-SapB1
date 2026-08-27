@@ -97,24 +97,46 @@
     if (!peak) return;
     const p = Number(getComputedStyle(peak).getPropertyValue('--sc-p')) || 0;
 
-    // Los cinco documentos entran escalonados en el primer 62% del capítulo.
+    // Máquina de estados: cada documento progresa de future → current → past.
+    // step: separación entre documentos; window: duración de entrada/salida.
+    const step = 0.15;
+    const window = 0.15;
+
     cards.forEach((card, i) => {
-      const from = 0.06 + i * 0.18;
-      const on = reduced ? (p > from ? 1 : 0) : clamp01((p - from) / 0.25);
-      card.style.setProperty('--hb-on', on.toFixed(3));
-      if (on > 0.98 && !card.dataset.landed) {
+      const from = i * step;
+      const end = from + window;
+      let state = 'future';
+      let hbt = 0;
+
+      if (p >= from && p < end) {
+        state = 'current';
+        hbt = reduced ? 1 : clamp01((p - from) / window);
+      } else if (p >= end) {
+        state = 'past';
+        hbt = 1;
+      }
+
+      // Aplicar clases de estado
+      card.classList.remove('beleg--future', 'beleg--current', 'beleg--past');
+      card.classList.add(`beleg--${state}`);
+      card.style.setProperty('--hb-t', hbt.toFixed(3));
+
+      // Pulse al aterrizar (transición de future a current)
+      if (state === 'current' && hbt > 0.5 && !card.dataset.landed) {
         card.dataset.landed = '';
         card.setAttribute('data-pulse', '');
         setTimeout(() => card.removeAttribute('data-pulse'), 620);
       }
-      if (on < 0.5) delete card.dataset.landed;
+      if (state === 'future') delete card.dataset.landed;
     });
 
-    // La ventana se materializa cuando la cadena ya está en pie.
-    const f = clamp01((p - 0.6) / 0.12);
-    if (f > 0.01) fenster.hidden = false;
+    // Fenster sincronizada con Invoice (i=3): visible cuando es current o past.
+    const invoiceState = cards[3]?.classList.contains('beleg--current') || cards[3]?.classList.contains('beleg--past');
+    const invoiceProgress = reduced ? (invoiceState ? 1 : 0) : clamp01((p - (3 * step)) / window);
+    const f = invoiceState ? invoiceProgress : 0;
+
+    fenster.hidden = !invoiceState || f < 0.01;
     fenster.style.setProperty('--hb-fenster', f.toFixed(3));
-    if (f < 0.01 && p > 0) fenster.hidden = true;
   }
 
   // La lámina técnica del capítulo 3 se dibuja con el progreso del acto.
