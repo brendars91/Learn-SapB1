@@ -1,7 +1,7 @@
 // Anclas, rutas y ejemplos trabajados para L1-L8.
 // Cada entrada: [id, glyph, anchor es, anchor en, path, ejemplo {q, show, a-es, a-en}]
 export const DEEP = {
-  'SYN-SK-L0-04': ['🔖', 'La serie de numeración es el código postal del documento: te dice de qué oficina viene sin abrir el sobre.', 'The numbering series is the document\'s postal code: it tells you which office sent it without opening the envelope.', 'Administración › Definir series › Numeración', {
+  'SYN-SK-L0-04': ['🔖', 'La serie de numeración es el código postal del documento: te dice de qué oficina viene sin abrir el sobre.', 'The numbering series is the document\'s postal code: it tells you which office sent it without opening the envelope.', 'Administración › Inicialización del sistema › Numeración de documentos', {
     q: '500 facturas serie PRIM + 20 rectificativas serie R. ¿Cómo separa el informe fiscal?',
     show: ['Serie PRIM: 500 normales', 'Serie R: 20 rectificativas', 'Mezcla: imposible por diseño'],
     a: 'Por serie: la numeración separa tipos documentales — el informe fiscal lee series, no títulos.'
