@@ -513,10 +513,15 @@
 
 .kette {
   position: relative; width: 100%;
-  display: grid; grid-auto-flow: column; justify-content: center;
+  display: grid; grid-auto-flow: column; justify-content: flex-start;
   gap: clamp(0px, 1.2vw, 18px);
   transform-style: preserve-3d;
   align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
 }
 .beleg {
   --hb-on: 0;
@@ -527,11 +532,11 @@
     translateY(calc((1 - var(--hb-on)) * 34px))
     rotateY(calc((1 - var(--hb-on)) * -52deg))
     rotateX(calc((1 - var(--hb-on)) * 9deg));
-  /* Ground: el papel está ahí desde el primer fotograma del capítulo. Lo que
-     el scroll cambia es cómo se coloca, no si existe. */
   opacity: calc(0.5 + var(--hb-on) * 0.5);
   transition: transform .18s linear, opacity .18s linear;
   will-change: transform, opacity;
+  flex-shrink: 0;
+  scroll-snap-align: center;
 }
 .beleg__paper {
   /* Papel de verdad, no el surface del capítulo: sobre tinta, una hoja
@@ -585,7 +590,8 @@
 @media (max-width: 720px) {
   .fenster__body { grid-template-columns: 1fr 1fr; }
   .fenster__buchung { font-size: 0.68rem; }
-  .kette { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-2); }
+  .kette { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-2); overflow-x: visible; overflow-y: visible; scroll-behavior: auto; }
+  .beleg { flex-shrink: 1; scroll-snap-align: none; }
   .beleg__paper { width: 100%; min-height: clamp(112px, 15vh, 150px); padding: var(--sc-2); }
   .beleg__kind { font-size: 0.78rem; }
   .beleg__eff { font-size: 0.52rem; }
