@@ -513,34 +513,49 @@
 
 .kette {
   position: relative; width: 100%;
-  display: grid; grid-auto-flow: column; justify-content: flex-start;
-  gap: clamp(0px, 1.2vw, 18px);
+  display: grid; grid-template-columns: 1fr 3fr; gap: clamp(var(--sc-3), 3vw, var(--sc-6));
   transform-style: preserve-3d;
-  align-items: center;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 8px;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
+  align-items: start;
+  min-height: clamp(200px, 35vh, 280px);
+}
+.kette::before {
+  content: ''; grid-column: 1; grid-row: 1; min-width: 120px;
+  /* Espacio reservado para estela vertical a la izquierda */
 }
 .beleg {
-  --hb-on: 0;
+  --hb-t: 0;
+  grid-column: 2; grid-row: 1;
   transform-style: preserve-3d;
   transform:
     perspective(1200px)
-    translateZ(calc(-200px + var(--hb-on) * 200px))
-    translateY(calc((1 - var(--hb-on)) * 34px))
-    rotateY(calc((1 - var(--hb-on)) * -52deg))
-    rotateX(calc((1 - var(--hb-on)) * 9deg));
-  opacity: calc(0.5 + var(--hb-on) * 0.5);
+    translateZ(calc(-200px + var(--hb-t) * 200px))
+    translateY(calc((1 - var(--hb-t)) * 34px))
+    rotateY(calc((1 - var(--hb-t)) * -52deg))
+    rotateX(calc((1 - var(--hb-t)) * 9deg))
+    scale(calc(0.4 + var(--hb-t) * 0.6));
+  opacity: var(--hb-t);
   transition: transform .18s linear, opacity .18s linear;
   will-change: transform, opacity;
-  flex-shrink: 0;
-  scroll-snap-align: center;
+  position: absolute;
+}
+.beleg--future {
+  opacity: 0;
+  pointer-events: none;
+}
+.beleg--current {
+  grid-column: 2; grid-row: 1;
+  position: relative;
+  opacity: 1;
+}
+.beleg--past {
+  grid-column: 1; grid-row: 1;
+  position: relative;
+  align-self: start;
+  margin-top: calc(var(--i) * (60px + var(--sc-2)));
+  width: 120px;
+  opacity: 1;
 }
 .beleg__paper {
-  /* Papel de verdad, no el surface del capítulo: sobre tinta, una hoja
-     iluminada. Se re-tinta el subtree porque `color` ya resolvió arriba. */
   --sc-ink: #17140f;
   --sc-ink-soft: #5b5346;
   --hb-rule: color-mix(in srgb, #17140f 20%, transparent);
@@ -553,6 +568,15 @@
   display: grid; align-content: start; gap: var(--sc-2);
   box-shadow: 0 22px 44px rgb(0 0 0 / 0.55);
   color: var(--sc-ink);
+}
+.beleg--past .beleg__paper {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px var(--sc-2);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+}
+.beleg--past .beleg__eff {
+  display: none;
 }
 .beleg__kind { font-family: var(--sc-font-display); font-weight: 700; font-size: 0.92rem; letter-spacing: -0.01em; }
 .beleg__nr { font-family: var(--hb-mono); font-size: 0.64rem; color: var(--sc-ink-soft); letter-spacing: 0.04em; }
@@ -590,12 +614,16 @@
 @media (max-width: 720px) {
   .fenster__body { grid-template-columns: 1fr 1fr; }
   .fenster__buchung { font-size: 0.68rem; }
-  .kette { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-2); overflow-x: visible; overflow-y: visible; scroll-behavior: auto; }
-  .beleg { flex-shrink: 1; scroll-snap-align: none; }
+  .kette { grid-template-columns: 1fr; gap: var(--sc-4); min-height: auto; }
+  .kette::before { display: none; }
+  .beleg { grid-column: 1; grid-row: auto; position: static; margin-top: 0; }
+  .beleg--current { grid-column: 1; position: static; }
+  .beleg--past { grid-column: 1; position: static; width: 100%; margin-top: var(--sc-2); margin-bottom: var(--sc-2); align-self: auto; }
+  .beleg--future { display: none; }
   .beleg__paper { width: 100%; min-height: clamp(112px, 15vh, 150px); padding: var(--sc-2); }
+  .beleg--past .beleg__paper { min-height: 44px; padding: 6px var(--sc-2); }
   .beleg__kind { font-size: 0.78rem; }
   .beleg__eff { font-size: 0.52rem; }
-  .beleg:nth-child(4) { grid-column: 1 / 2; }
   .hb-stufen { padding-right: 12vw; }
   .hb-peak__stage { padding-bottom: calc(var(--sc-6) + 54px); }
 }
