@@ -484,7 +484,13 @@ function renderActivityBody(state, activity) {
   }
   if (activity.type === 'consequence') {
     const sequence = state.activitySequence || [];
-    const tokens = [...activity.chain].reverse();
+    // Se usan los tokens que produce la capa de datos: barajados de forma
+    // determinista y CON los señuelos de la skill. Antes esta línea era
+    // `[...activity.chain].reverse()`, que descartaba ambas cosas y pintaba la
+    // cadena exacta en orden inverso: el ejercicio se resolvía leyendo los
+    // botones de derecha a izquierda, sin razonar la causalidad ni descartar un
+    // señuelo. El defecto P0-6 estaba corregido en los datos y seguía vivo aquí.
+    const tokens = activity.tokens || [...activity.chain].reverse();
     return `<div class="act-trigger"><strong>${t(state, 'actEventSeen')}</strong><p>${escapeHtml(activity.trigger)}</p></div><div class="act-route-built">${sequence.length?sequence.map((x,i)=>`<span><small>${i+1}</small>${escapeHtml(x)}</span>`).join('<b>→</b>'):`<em>${t(state, 'actBuildCascade')}</em>`}</div><div class="act-token-bank">${tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ ${t(state, 'actUndo')}</button>`;
   }
   if (activity.type === 'journal') {

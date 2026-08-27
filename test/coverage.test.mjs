@@ -123,7 +123,7 @@ test('consequence tokens are never the chain in reverse order', () => {
 });
 
 test('simulator options are business values, never generic placeholders', () => {
-  const generic = /Sin valor|Autom\u00e1tico|Bloqueado|No value|Automatic|Blocked|Kein Wert|Automatisch|Gesperrt/i;
+  const generic = /Sin valor|Autom\u00e1tico|Bloqueado|No value|Automatic|Blocked|Kein Wert|Automatisch|Gesperrt|No comprobar|Cambiar producci\u00f3n|Adivinar|Do not verify|Change production|Guess|Nicht pr\u00fcfen|Produktion \u00e4ndern|Raten/i;
   for (const skill of SKILLS) {
     for (const locale of LOCALES) {
       const activity = getActivity(skill, locale);
@@ -132,6 +132,13 @@ test('simulator options are business values, never generic placeholders', () => 
         for (const option of target.options) {
           assert.doesNotMatch(String(option), generic, skill.id + '/' + locale + ': opcion generica "' + option + '"');
         }
+        // El fallback generico produce opciones de longitudes dispares: la respuesta
+        // correcta es una frase larga y el senuelo dos palabras, asi que se acierta
+        // por forma y no por conocimiento.
+        const lengths = target.options.map(option => String(option).length);
+        const ratio = Math.max(...lengths) / Math.max(Math.min(...lengths), 1);
+        assert.ok(ratio < 4, skill.id + '/' + locale + ': opciones de longitud dispar (' + lengths.join('/') + '), se acierta por forma');
+        assert.ok(target.options.length >= 3, skill.id + '/' + locale + ': menos de 3 opciones');
       }
     }
   }

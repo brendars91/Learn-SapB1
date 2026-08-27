@@ -201,14 +201,66 @@ en `test/i18n-coverage.test.mjs` con el motivo escrito en el código.
 
 Lección para las fases siguientes: cada corrección de contenido debe nacer con sus tres idiomas.
 
-### Fase 3 — Reparar las actividades rotas (D2, D3, D4, D5)
+### Fase 3 — Reparar las actividades rotas — **COMPLETADA 2026-08-27**
+
+Resultado: D2, D3, D4 y D5 en verde **por reparación**, ningún umbral tocado. Aparecieron además
+dos defectos que la auditoría no había visto, ambos corregidos (ver «Hallazgos nuevos» al final
+de la fase). Solo queda D1, que es la Fase 4.
 
 1. **D2:** para las 9 skills con ruta corta, definir la ruta de menú completa como dato explícito por skill —no derivada de partir una cadena—, verificada contra el curso oficial correspondiente. Mínimo 3 niveles.
 2. **D3:** decoys de `config` extraídos de rutas reales adyacentes del mismo nivel, distintos entre skills.
 3. **D4:** señuelo propio por skill en `consequence`, plausible en su dominio y falso por una razón explicable. Retirar el pool global de 3.
 4. **D5:** rebalancear formatos de modo que ninguno pase del 25 % del curso, aprovechando que `simulator` ya tiene el andamiaje trilingüe para crecer.
 
-**Cierre de fase:** el test de Fase 1 pasa de fallo a verde **por reparación, nunca por relajar el umbral**. Resolver a mano dos actividades de cada formato en los tres idiomas y registrar el resultado.
+**Hallazgos nuevos de esta fase (no estaban en la auditoría)**
+
+1. **El `cfg` de 5 skills no contenía una ruta de menú, contenía prosa.** El generador partía esa
+   prosa por `>` y `:`, así que la «ruta» era una frase entera: `['Usuarios se crean por grupo con
+   perfil heredado…']`. No era una ruta corta, era que no había ruta. Por eso se sustituyó el
+   derivado por un mapa explícito `CONFIG_ROUTES` de 14 entradas en ES/EN/DE.
+
+2. **El defecto P0-6 seguía vivo en la capa de presentación.** `src/app.mjs:487` hacía
+   `const tokens = [...activity.chain].reverse()`: descartaba los tokens barajados y los señuelos
+   que la capa de datos ya producía correctamente, y pintaba la cadena exacta en orden inverso. El
+   ejercicio se resolvía leyendo los botones de derecha a izquierda. El v7 dio este defecto por
+   corregido porque solo miró los datos; el test de cobertura tampoco lo veía porque comprobaba
+   `getActivity()`, no el render. Corregido y verificado en navegador: 5 tokens barajados con
+   señuelo, no 3 invertidos.
+
+3. **El test de simulador era demasiado débil.** Al mover skills a ese formato, dos cayeron al
+   fallback genérico con opciones tipo «No comprobar» frente a frases largas. Se endureció el
+   contrato: prohíbe esos literales y además exige que las opciones tengan longitudes comparables
+   (ratio < 4), porque una opción larga entre opciones cortas se acierta por forma. El test
+   endurecido destapó un tercer caso preexistente en `L0-03/de` (`FIFO` de 4 caracteres frente a
+   `Gleitender Durchschnitt` de 23), corregido nombrando los métodos completos.
+
+**Cierre de fase (verificado 2026-08-27):**
+
+```
+npm test                    75 tests · 74 pass · 1 fail (solo D1, Fase 4)
+npm run build               PASS  fragment 1271484 B / standalone 1272080 B
+npm run test:browser:local  views 8 · skills 72 · languageLeaks 0/0 · errors []
+```
+
+Resuelto a mano en navegador, con los tokens reales leídos del DOM:
+
+```
+L5-04 config       6 tokens · ruta de 4 pasos + 2 señuelos de otro nivel
+L3-07 config       5 tokens · ruta de 3 pasos + señuelos de BOM (nivel adyacente)
+L1-06 config       6 tokens · ruta de 4 pasos + Períodos contables / Detalles de la empresa
+L8-01 consequence  5 tokens barajados, ya no la cadena invertida
+L0-05 consequence  5 tokens barajados con señuelo de configuración real
+L8-05 simulator    3 campos × 4 opciones de negocio plausibles
+pageerrors         0
+```
+
+**Procedencia de las rutas de menú.** Las rutas de los cursos oficiales de SAP viven dentro de las
+imágenes de los slides («choose the path shown in the slide»), no en texto extraíble; del curso
+*Implementing SAP Business One* solo se obtuvo en texto `Reports > Query Generator`. Las rutas de
+`CONFIG_ROUTES` se anclaron por tanto en el **árbol de menús del cliente Desktop observado
+directamente en un sistema real con localización alemana** (dos pasadas de navegación de solo
+lectura, 2026-08-04), más los nombres de módulo confirmados en los objetivos de los cursos. Queda
+declarado en el código que los nombres dependen de versión y localización.
 
 ### Fase 4 — Completar las 27 fichas MASTERCLASS (D1)
 

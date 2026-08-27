@@ -8756,10 +8756,15 @@ Object.assign(MASTERCLASS, MC_BATCH1, MC_BATCH2, MC_BATCH3, MC_BATCH4, MC_BATCH5
 // activities.mjs — localized practical activities with strict locale boundaries.
 
 const JOURNAL_IDS = new Set(['SYN-SK-L4-01','SYN-SK-L4-02','SYN-SK-L4-03','SYN-SK-L4-05','SYN-SK-L4-06','SYN-SK-L4-07','SYN-SK-L4-08']);
-const FORENSIC_IDS = new Set(['SYN-SK-L0-04','SYN-SK-L0-07','SYN-SK-L2-01','SYN-SK-L2-02','SYN-SK-L2-04','SYN-SK-L2-05','SYN-SK-L2-06','SYN-SK-L3-08','SYN-SK-L7-08']);
+const FORENSIC_IDS = new Set(['SYN-SK-L0-04','SYN-SK-L0-07','SYN-SK-L2-01','SYN-SK-L2-02','SYN-SK-L2-04','SYN-SK-L2-05','SYN-SK-L2-06','SYN-SK-L3-08','SYN-SK-L7-05','SYN-SK-L7-08']);
 const CONFIG_IDS = new Set(['SYN-SK-L1-06','SYN-SK-L1-07','SYN-SK-L1-08','SYN-SK-L3-03','SYN-SK-L3-05','SYN-SK-L3-07','SYN-SK-L4-04','SYN-SK-L5-02','SYN-SK-L5-03','SYN-SK-L5-04','SYN-SK-L5-05','SYN-SK-L5-06','SYN-SK-L6-04','SYN-SK-L6-05']);
-const CONSEQUENCE_IDS = new Set(['SYN-SK-L0-05','SYN-SK-L0-06','SYN-SK-L1-05','SYN-SK-L2-08','SYN-SK-L3-06','SYN-SK-L5-08','SYN-SK-L6-01','SYN-SK-L6-02','SYN-SK-L6-06','SYN-SK-L6-07','SYN-SK-L6-08','SYN-SK-L7-02','SYN-SK-L7-03','SYN-SK-L7-04','SYN-SK-L7-05','SYN-SK-L7-06','SYN-SK-L7-07','SYN-SK-L8-01','SYN-SK-L8-02','SYN-SK-L8-03','SYN-SK-L8-04','SYN-SK-L8-05','SYN-SK-L8-06','SYN-SK-L8-07','SYN-SK-L8-08']);
-const BUGHUNT_IDS = new Set(['SYN-SK-L0-08','SYN-SK-L1-01','SYN-SK-L1-02','SYN-SK-L1-03','SYN-SK-L1-04','SYN-SK-L2-03','SYN-SK-L2-07','SYN-SK-L3-01','SYN-SK-L3-02','SYN-SK-L3-04','SYN-SK-L5-01','SYN-SK-L5-07','SYN-SK-L6-03','SYN-SK-L7-01']);
+// Reparto de formatos (D5). consequence cubría 25 de 72 skills — un tercio del
+// curso — y era además el formato con los señuelos más pobres: su debilidad se
+// convertía en la debilidad de todo el curso. Se movieron 7 skills a bughunt
+// eligiendo aquellas cuyo aprendizaje real es auditar evidencia técnica y
+// localizar la anomalía (SQL, APIs, salidas de IA), no ordenar una cascada causal.
+const CONSEQUENCE_IDS = new Set(['SYN-SK-L0-05','SYN-SK-L0-06','SYN-SK-L1-05','SYN-SK-L2-08','SYN-SK-L3-06','SYN-SK-L5-08','SYN-SK-L6-01','SYN-SK-L6-02','SYN-SK-L6-06','SYN-SK-L6-08','SYN-SK-L7-04','SYN-SK-L7-06','SYN-SK-L7-07','SYN-SK-L8-01','SYN-SK-L8-02','SYN-SK-L8-04','SYN-SK-L8-06','SYN-SK-L8-08']);
+const BUGHUNT_IDS = new Set(['SYN-SK-L0-08','SYN-SK-L1-01','SYN-SK-L1-02','SYN-SK-L1-03','SYN-SK-L1-04','SYN-SK-L2-03','SYN-SK-L2-07','SYN-SK-L3-01','SYN-SK-L3-02','SYN-SK-L3-04','SYN-SK-L5-01','SYN-SK-L5-07','SYN-SK-L6-03','SYN-SK-L6-07','SYN-SK-L7-01','SYN-SK-L7-02','SYN-SK-L8-03','SYN-SK-L8-07']);
 
 function activityType(id) {
   if (JOURNAL_IDS.has(id)) return 'journal';
@@ -8801,6 +8806,16 @@ const JOURNAL_TEXT = {
 };
 
 const SIMULATOR_FIELDS = {
+  'SYN-SK-L7-03': {
+    es: [['Motor donde el aging de 2M de filas responde en memoria','SAP HANA (columnar, in-memory)',['Microsoft SQL Server (fila, disco)','Cualquiera: el motor no influye','Solo con índice adicional']],['Función de fecha correcta en HANA','ADD_DAYS / DAYS_BETWEEN',['DATEADD / DATEDIFF','GETDATE()','TRUNC(SYSDATE)']],['Función de fecha correcta en MS SQL','DATEADD / DATEDIFF',['ADD_DAYS / DAYS_BETWEEN','CURRENT_UTCDATE','TO_DATE()']]],
+    en: [['Engine where a 2M-row aging answers in memory','SAP HANA (columnar, in-memory)',['Microsoft SQL Server (row, disk)','Either one: the engine is irrelevant','Only with an extra index']],['Correct date function in HANA','ADD_DAYS / DAYS_BETWEEN',['DATEADD / DATEDIFF','GETDATE()','TRUNC(SYSDATE)']],['Correct date function in MS SQL','DATEADD / DATEDIFF',['ADD_DAYS / DAYS_BETWEEN','CURRENT_UTCDATE','TO_DATE()']]],
+    de: [['Engine, in der ein Aging mit 2 Mio. Zeilen im Speicher antwortet','SAP HANA (spaltenbasiert, In-Memory)',['Microsoft SQL Server (zeilenbasiert, Platte)','Beide gleich: Engine ist irrelevant','Nur mit zusätzlichem Index']],['Richtige Datumsfunktion in HANA','ADD_DAYS / DAYS_BETWEEN',['DATEADD / DATEDIFF','GETDATE()','TRUNC(SYSDATE)']],['Richtige Datumsfunktion in MS SQL','DATEADD / DATEDIFF',['ADD_DAYS / DAYS_BETWEEN','CURRENT_UTCDATE','TO_DATE()']]]
+  },
+  'SYN-SK-L8-05': {
+    es: [['Contrato de salida para procesar la respuesta con código','JSON Schema con campos requeridos',['Texto libre bien redactado','Markdown con encabezados','Lo que devuelva el modelo']],['Qué hacer si la salida no valida contra el schema','Rechazar y reintentar con el error',['Aceptarla y corregir a mano','Ignorar la validación','Guardarla igual y avisar después']],['Campo que nunca debe rellenar el modelo por su cuenta','El identificador del documento real',['El resumen del incidente','La categoría propuesta','El nivel de confianza']]],
+    en: [['Output contract to process the answer with code','JSON Schema with required fields',['Well-written free text','Markdown with headings','Whatever the model returns']],['What to do when the output fails schema validation','Reject and retry with the error',['Accept it and fix by hand','Skip validation','Store it anyway and warn later']],['Field the model must never fill on its own','The real document identifier',['The incident summary','The proposed category','The confidence level']]],
+    de: [['Ausgabevertrag, um die Antwort per Code zu verarbeiten','JSON Schema mit Pflichtfeldern',['Gut geschriebener Freitext','Markdown mit Überschriften','Was das Modell zurückgibt']],['Was tun, wenn die Ausgabe das Schema nicht erfüllt','Ablehnen und mit dem Fehler erneut anfragen',['Annehmen und manuell korrigieren','Validierung überspringen','Trotzdem speichern und später warnen']],['Feld, das das Modell nie selbst füllen darf','Die echte Belegnummer',['Die Zusammenfassung des Vorfalls','Die vorgeschlagene Kategorie','Das Konfidenzniveau']]]
+  },
   'SYN-SK-L0-01': {
     es: [['Módulo donde vive el Pedido de cliente','Ventas – CRM',['Compras – CRM','Comprobantes','Finanzas']],['Base de datos de esta sesión','SBODEMOGE',['SBOCOMMON','SBODRAFT','SBOTEST']],['Ruta del asiento manual','Comprobantes → Asiento',['Ventas → Factura','Banco → Extracto','Existencias → Traspaso']]],
     en: [['Module containing the Sales Order','Sales – CRM',['Purchasing – CRM','Journal Entries','Financials']],['Database for this session','SBODEMOGE',['SBOCOMMON','SBODRAFT','SBOTEST']],['Manual journal-entry path','Financials → Journal Entry',['Sales → A/R Invoice','Banking → Bank Statement','Inventory → Inventory Transfer']]],
@@ -8812,9 +8827,9 @@ const SIMULATOR_FIELDS = {
     de: [['Geschäftspartnernummer (Kunde)','C20000',['C20001','C29999','V10000']],['Standard-Zahlungsbedingung des Kunden','30 Tage netto',['Barzahlung','2 % 10 / 30 Tage','60 Tage netto']],['Geschäftspartnergruppe','Lokale Kunden',['Lokale Lieferanten','EU-Kunden','Interessenten']]]
   },
   'SYN-SK-L0-03': {
-    es: [['Grupo de artículos','Hardware',['Software','Servicios','Consumibles']],['Método de gestión de stock','Valorado permanentemente',['No valorado','Solo cantidades','Planificación por demanda']],['Método de coste','Media móvil',['FIFO','Estándar','Lote']]],
-    en: [['Item group','Hardware',['Software','Services','Consumables']],['Inventory management method','Perpetual inventory',['Non-valuated','Quantities only','Demand planning']],['Valuation method','Moving average',['FIFO','Standard','Batch']]],
-    de: [['Artikelgruppe','Hardware',['Software','Dienstleistungen','Verbrauchsmaterial']],['Bestandsführung','Permanente Bestandsführung',['Nicht bewertet','Nur Mengen','Bedarfsplanung']],['Bewertungsmethode','Gleitender Durchschnitt',['FIFO','Standard','Charge']]]
+    es: [['Grupo de artículos','Hardware',['Software','Servicios','Consumibles']],['Método de gestión de stock','Valorado permanentemente',['No valorado','Solo cantidades','Planificación por demanda']],['Método de valoración','Precio medio móvil',['Coste FIFO por entrada','Precio estándar fijo','Valoración por lote']]],
+    en: [['Item group','Hardware',['Software','Services','Consumables']],['Inventory management method','Perpetual inventory',['Non-valuated','Quantities only','Demand planning']],['Valuation method','Moving average price',['FIFO cost per receipt','Fixed standard price','Batch valuation']]],
+    de: [['Artikelgruppe','Hardware',['Software','Dienstleistungen','Verbrauchsmaterial']],['Bestandsführung','Permanente Bestandsführung',['Nicht bewertet','Nur Mengen','Bedarfsplanung']],['Bewertungsmethode','Gleitender Durchschnittspreis',['FIFO-Kosten je Zugang','Fester Standardpreis','Chargenbewertung']]]
   }
 };
 
@@ -8859,16 +8874,124 @@ function localizedJournal(id, locale) {
   return rows.map(([account, side, amount]) => [tx[account], tx[side], amount]);
 }
 
+// Rutas de menú explícitas por skill. No se derivan partiendo una cadena de prosa:
+// una ruta de un solo paso se acierta por eliminación, no por saberla (D2 del
+// PLAN-PRODUCCION-v8).
+//
+// Procedencia de los nombres de menú: árbol del cliente Desktop observado en un
+// sistema real con localización alemana (2 pasadas de navegación de solo lectura,
+// 2026-08-04) más los nombres de módulo de los cursos oficiales de SAP. `Reports >
+// Query Generator` aparece literalmente en el curso oficial "Implementing SAP
+// Business One", lección "Creating Queries".
+//
+// Los nombres de menú dependen de versión y localización: son los del cliente
+// Desktop 10.0. La app lo declara en su registro de fuentes.
+const CONFIG_ROUTES = {
+  'SYN-SK-L1-06': {
+    es: ['Administración','Definir','Finanzas','Códigos de impuestos'],
+    en: ['Administration','Setup','Financials','Tax Codes'],
+    de: ['Administration','Definition','Finanzwesen','Steuerkennzeichen']
+  },
+  'SYN-SK-L1-07': {
+    es: ['Administración','Definir','Socios de negocio','Condiciones de pago'],
+    en: ['Administration','Setup','Business Partners','Payment Terms'],
+    de: ['Administration','Definition','Geschäftspartner','Zahlungsbedingungen']
+  },
+  'SYN-SK-L1-08': {
+    es: ['Administración','Autorizaciones','Autorizaciones generales'],
+    en: ['Administration','System Initialization','Authorizations','General Authorizations'],
+    de: ['Administration','Systeminitialisierung','Berechtigungen','Allgemeine Berechtigungen']
+  },
+  'SYN-SK-L3-03': {
+    es: ['Inventario','Gestión de ubicaciones','Definir ubicaciones'],
+    en: ['Inventory','Bin Location Management','Bin Location Master Data'],
+    de: ['Lagerverwaltung','Lagerplätze','Lagerplatz-Stammdaten']
+  },
+  'SYN-SK-L3-05': {
+    es: ['Producción','Lista de materiales','Definir lista de materiales'],
+    en: ['Production','Bill of Materials','Define Bill of Materials'],
+    de: ['Produktion','Stückliste','Stückliste definieren']
+  },
+  'SYN-SK-L3-07': {
+    es: ['Planificación de necesidades','Asistente de planificación','Escenario de planificación'],
+    en: ['MRP','MRP Wizard','Planning Scenario'],
+    de: ['Materialbedarfsplanung','Dispositionsassistent','Planungsszenario']
+  },
+  'SYN-SK-L4-04': {
+    es: ['Administración','Inicialización del sistema','Períodos contables'],
+    en: ['Administration','System Initialization','Posting Periods'],
+    de: ['Administration','Systeminitialisierung','Buchungsperioden']
+  },
+  'SYN-SK-L5-02': {
+    es: ['Administración','Inicialización del sistema','Detalles de la empresa','Inicialización básica'],
+    en: ['Administration','System Initialization','Company Details','Basic Initialization'],
+    de: ['Administration','Systeminitialisierung','Firmendetails','Basisinitialisierung']
+  },
+  'SYN-SK-L5-03': {
+    es: ['Administración','Inicialización del sistema','Detalles de la empresa','Inicializaciones contables'],
+    en: ['Administration','System Initialization','Company Details','Accounting Data'],
+    de: ['Administration','Systeminitialisierung','Firmendetails','Buchhaltungsdaten']
+  },
+  'SYN-SK-L5-04': {
+    es: ['Administración','Inicialización del sistema','Autorizaciones','Grupos de usuarios'],
+    en: ['Administration','Setup','General','User Groups'],
+    de: ['Administration','Definition','Allgemein','Benutzergruppen']
+  },
+  'SYN-SK-L5-05': {
+    es: ['Administración','Inicialización del sistema','Autorizaciones','Propiedad de datos'],
+    en: ['Administration','System Initialization','Authorizations','Data Ownership'],
+    de: ['Administration','Systeminitialisierung','Berechtigungen','Datenbesitz']
+  },
+  'SYN-SK-L5-06': {
+    es: ['Administración','Inicialización del sistema','Numeración de documentos'],
+    en: ['Administration','System Initialization','Document Numbering'],
+    de: ['Administration','Systeminitialisierung','Belegnummerierung']
+  },
+  'SYN-SK-L6-04': {
+    es: ['Herramientas','Herramientas de personalización','Campos definidos por el usuario'],
+    en: ['Tools','Customization Tools','User-Defined Fields'],
+    de: ['Extras','Customizing Tools','Benutzerdefinierte Felder']
+  },
+  'SYN-SK-L6-05': {
+    es: ['Administración','Alertas','Gestión de alertas'],
+    en: ['Administration','Alerts Management','Alerts Management'],
+    de: ['Administration','Alarmfunktionen','Alarmverwaltung']
+  }
+};
+
+// Los señuelos salen de rutas reales de OTRAS skills del mismo nivel: obligan a
+// distinguir por conocimiento, no por reconocer dos literales fijos (D3).
+function configDecoys(skillId, route, locale) {
+  const level = /L(\d)/.exec(skillId)?.[1];
+  const pool = [];
+  for (const [id, routes] of Object.entries(CONFIG_ROUTES)) {
+    if (id === skillId) continue;
+    const sameLevel = /L(\d)/.exec(id)?.[1] === level;
+    for (const step of routes[locale] || []) {
+      if (route.includes(step)) continue;
+      pool.push({ step, sameLevel });
+    }
+  }
+  const near = [...new Set(pool.filter(x => x.sameLevel).map(x => x.step))];
+  const far = [...new Set(pool.filter(x => !x.sameLevel).map(x => x.step))];
+  const ordered = [...near, ...far];
+  const offset = skillIndex(skillId) % Math.max(ordered.length, 1);
+  const picked = [];
+  for (let i = 0; picked.length < 2 && i < ordered.length; i += 1) {
+    const candidate = ordered[(offset + i) % ordered.length];
+    if (!picked.includes(candidate)) picked.push(candidate);
+  }
+  return picked;
+}
+
 function configSpec(skill, mc, locale) {
-  const raw = strictText(asArray(mc?.cfg)[0], locale);
-  let route = raw.split(':')[0].split('>').map(x=>x.trim()).filter(Boolean);
-  if (!route.length) route = [strictText(skill.practice, locale), strictText(skill.verify, locale)].filter(Boolean);
-  const pools = {
-    es:['Gestión','Informes','Parametrizaciones generales','Herramientas'],
-    en:['Administration','Reports','General Settings','Tools'],
-    de:['Administration','Berichte','Allgemeine Einstellungen','Extras']
-  };
-  const decoys = shuffledDeterministic(pools[locale].filter(x=>!route.includes(x)).slice(0,2));
+  const explicit = CONFIG_ROUTES[skill.id]?.[locale];
+  let route = explicit ? [...explicit] : [];
+  if (!route.length) {
+    const raw = strictText(asArray(mc?.cfg)[0], locale);
+    route = raw.split(':')[0].split('>').map(x=>x.trim()).filter(Boolean);
+  }
+  const decoys = configDecoys(skill.id, route, locale);
   return { route, tokens: shuffledDeterministic([...route, ...decoys]) };
 }
 
@@ -8908,13 +9031,26 @@ function consequenceSpec(skill, mc, locale) {
   const mid = strictText(asArray(mc?.e2e)[1],locale) || strictText(skill.practice,locale);
   const fix = strictText(mc?.war?.fix,locale) || strictText(skill.verify,locale);
   const chain = [root,mid,fix].filter(Boolean);
-  const pool = [
-    {es:'El informe mensual se imprime dos veces y nadie lo lee',en:'The monthly report prints twice and nobody reads it',de:'Der Monatsbericht wird zweimal gedruckt und niemand liest ihn'},
-    {es:'Un usuario adelanta la fecha del sistema para facturar antes',en:'A user shifts the system date to invoice earlier',de:'Ein Benutzer verschiebt das Systemdatum, um früher zu fakturieren'},
-    {es:'El proveedor sube el precio sin actualizar la lista de compra',en:'The vendor raises the price without updating the purchase price list',de:'Der Lieferant erhöht den Preis, ohne die Einkaufspreisliste zu aktualisieren'}
-  ];
-  const decoy = pool[skillIndex(skill.id)%pool.length][locale];
-  return { trigger, chain, tokens:shuffledDeterministic([...chain,decoy]) };
+  // Señuelos propios de cada skill (D4). El pool global de tres frases hacía que
+  // tras tres actividades el alumno reconociera el señuelo sin razonar.
+  //
+  // No se inventa contenido: se reutiliza material real de la propia skill que NO
+  // pertenece a la cascada causal — una buena práctica o un paso de configuración
+  // son afirmaciones verdaderas del dominio, pero no son consecuencias del fallo.
+  // Eso es exactamente la discriminación que la actividad debe entrenar.
+  const candidates = [
+    strictText(asArray(mc?.bp)[0],locale),
+    strictText(asArray(mc?.cfg)[0],locale),
+    strictText(asArray(mc?.bp)[1],locale),
+    strictText(skill.objective,locale)
+  ].filter(Boolean).filter(text => !chain.includes(text));
+  const decoys = [];
+  const offset = skillIndex(skill.id) % Math.max(candidates.length, 1);
+  for (let i = 0; decoys.length < 2 && i < candidates.length; i += 1) {
+    const candidate = candidates[(offset + i) % candidates.length];
+    if (!decoys.includes(candidate)) decoys.push(candidate);
+  }
+  return { trigger, chain, tokens:shuffledDeterministic([...chain,...decoys]) };
 }
 
 function getActivity(skill, locale='es') {
@@ -10164,7 +10300,13 @@ function renderActivityBody(state, activity) {
   }
   if (activity.type === 'consequence') {
     const sequence = state.activitySequence || [];
-    const tokens = [...activity.chain].reverse();
+    // Se usan los tokens que produce la capa de datos: barajados de forma
+    // determinista y CON los señuelos de la skill. Antes esta línea era
+    // `[...activity.chain].reverse()`, que descartaba ambas cosas y pintaba la
+    // cadena exacta en orden inverso: el ejercicio se resolvía leyendo los
+    // botones de derecha a izquierda, sin razonar la causalidad ni descartar un
+    // señuelo. El defecto P0-6 estaba corregido en los datos y seguía vivo aquí.
+    const tokens = activity.tokens || [...activity.chain].reverse();
     return `<div class="act-trigger"><strong>${t(state, 'actEventSeen')}</strong><p>${escapeHtml(activity.trigger)}</p></div><div class="act-route-built">${sequence.length?sequence.map((x,i)=>`<span><small>${i+1}</small>${escapeHtml(x)}</span>`).join('<b>→</b>'):`<em>${t(state, 'actBuildCascade')}</em>`}</div><div class="act-token-bank">${tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ ${t(state, 'actUndo')}</button>`;
   }
   if (activity.type === 'journal') {
