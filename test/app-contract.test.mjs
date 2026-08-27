@@ -147,3 +147,50 @@ test('practical activities provide localized English and German field content', 
   assert.match(de.targets[0].label, /Modul|Kundenauftrag/);
   assert.doesNotMatch(de.targets.map(x => x.label).join(' '), /Módulo|Pedido de cliente/);
 });
+
+
+test('consequence render consumes shuffled activity tokens including decoys', () => {
+  const skill = SKILLS.find(s => s.id === 'SYN-SK-L8-01');
+  const activity = getActivity(skill, 'es');
+  assert.equal(activity.type, 'consequence');
+  const decoys = activity.tokens.filter(token => !activity.chain.includes(token));
+  assert.ok(decoys.length >= 1, 'el fixture necesita al menos un senuelo');
+
+  let state = createInitialState({ locale: 'es', view: 'map' });
+  state = reduceState(state, { type: 'SELECT_SKILL', skillId: skill.id });
+  state = reduceState(state, { type: 'SET_SKILL_MODE', mode: 'prove' });
+  const markup = renderAppMarkup(state);
+
+  for (const token of activity.tokens) {
+    assert.match(markup, new RegExp(escapeHtml(token).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+      'el render debe incluir cada token producido por getActivity');
+  }
+  for (const decoy of decoys) {
+    assert.match(markup, new RegExp(escapeHtml(decoy).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+      'el render debe conservar los senuelos; no puede reconstruir la cadena por su cuenta');
+  }
+  const reversed = [...activity.chain].reverse();
+  assert.notDeepEqual(activity.tokens, reversed, 'el fixture no puede ser la cadena invertida');
+});
+
+test('all 72 skills render anchor, screen route and worked example in every locale', () => {
+  for (const locale of ['es', 'en', 'de']) {
+    for (const skill of SKILLS) {
+      let state = createInitialState({ locale, view: 'map' });
+      state = reduceState(state, { type: 'SELECT_SKILL', skillId: skill.id });
+      const markup = renderAppMarkup(state);
+      assert.match(markup, /class="sbl-anchor"/, `${skill.id}/${locale}: ancla no renderizada`);
+      assert.match(markup, /class="sbl-path"/, `${skill.id}/${locale}: ruta no renderizada`);
+      assert.match(markup, /class="sbl-example"/, `${skill.id}/${locale}: ejemplo no renderizado`);
+      // `undefined` puede aparecer legítimamente en prosa inglesa ("account undefined in settings").
+      // Solo son fuga de runtime las formas serializadas como valor/atributo aislado.
+      const unresolved = />\s*undefined\s*</i.exec(markup)
+        || /="undefined"/i.exec(markup)
+        || /\[object Object\]/.exec(markup);
+      if (unresolved) {
+        const at = unresolved.index;
+        assert.fail(`${skill.id}/${locale}: valor sin resolver cerca de "${markup.slice(Math.max(0, at - 80), at + 100)}"`);
+      }
+    }
+  }
+});

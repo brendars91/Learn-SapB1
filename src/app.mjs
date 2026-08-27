@@ -438,7 +438,7 @@ function renderLearnMode(state, skill) {
   const pathHtml = (skill.path || []).length ? `<div class="sbl-detail-grid__full"><h4>${t(state, 'pathLabel')}</h4><div class="sbl-path">${skill.path.map((crumb, i) => `${i ? '<span class="sep">›</span>' : ''}<span class="crumb">${escapeHtml(trText(crumb, state.locale))}</span>`).join('')}</div></div>` : '';
   const ex = skill.example;
   const exHtml = ex ? `<div class="sbl-example"><h4>${t(state, 'exampleLabel')}</h4><p><strong>${escapeHtml(trNode(ex.q, state.locale))}</strong></p><pre class="sbl-figure">${(ex.show || []).map(l => escapeHtml(trText(l, state.locale))).join('\n')}</pre>${ex.a ? `<p class="text-small"><em>${escapeHtml(trNode(ex.a, state.locale))}</em></p>` : ''}</div>` : '';
-  const anHtml = an ? `<div class="sbl-anchor"><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
+  const anHtml = an ? `<div class="sbl-anchor"><h4>${t(state, 'anchorLabel')}</h4><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
   return `<div class="sbl-learn">
     ${anHtml}
     ${renderMasterclass(state, skill)}
@@ -484,7 +484,13 @@ function renderActivityBody(state, activity) {
   }
   if (activity.type === 'consequence') {
     const sequence = state.activitySequence || [];
-    const tokens = [...activity.chain].reverse();
+    // Se usan los tokens que produce la capa de datos: barajados de forma
+    // determinista y CON los señuelos de la skill. Antes esta línea era
+    // `[...activity.chain].reverse()`, que descartaba ambas cosas y pintaba la
+    // cadena exacta en orden inverso: el ejercicio se resolvía leyendo los
+    // botones de derecha a izquierda, sin razonar la causalidad ni descartar un
+    // señuelo. El defecto P0-6 estaba corregido en los datos y seguía vivo aquí.
+    const tokens = activity.tokens || [...activity.chain].reverse();
     return `<div class="act-trigger"><strong>${t(state, 'actEventSeen')}</strong><p>${escapeHtml(activity.trigger)}</p></div><div class="act-route-built">${sequence.length?sequence.map((x,i)=>`<span><small>${i+1}</small>${escapeHtml(x)}</span>`).join('<b>→</b>'):`<em>${t(state, 'actBuildCascade')}</em>`}</div><div class="act-token-bank">${tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ ${t(state, 'actUndo')}</button>`;
   }
   if (activity.type === 'journal') {
@@ -492,7 +498,7 @@ function renderActivityBody(state, activity) {
     const debit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Debe'?amount(A[`amount-${i}`]):0),0);
     const credit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Haber'?amount(A[`amount-${i}`]):0),0);
     const balanced = debit>0 && Math.abs(debit-credit)<.005;
-    return `<div class="act-journal"><div class="act-jhead"><span>${t(state, 'actAccount')}</span><span>${t(state, 'actSide')}</span><span>${t(state, 'actAmount')}</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(trText(line[0], state.locale))}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option value="Debe"${A[`side-${i}`]==='Debe'?' selected':''}>${t(state, 'actDebit')}</option><option value="Haber"${A[`side-${i}`]==='Haber'?' selected':''}>${t(state, 'actCredit')}</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ ${t(state, 'actDebit')} <output>${debit.toFixed(2).replace('.',',')}</output> · Σ ${t(state, 'actCredit')} <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?`✓ ${t(state, 'actBalanced')}`:`⚠ ${t(state, 'actDifference')} `+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div></div>`;
+    return `<div class="act-journal"><div class="act-jhead"><span>${t(state, 'actAccount')}</span><span>${t(state, 'actSide')}</span><span>${t(state, 'actAmount')}</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(trText(line[0], state.locale))}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option value="Debe"${A[`side-${i}`]==='Debe'?' selected':''}>${t(state, 'actDebit')}</option><option value="Haber"${A[`side-${i}`]==='Haber'?' selected':''}>${t(state, 'actCredit')}</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ ${t(state, 'actDebit')} <output>${debit.toFixed(2).replace('.',',')}</output> · Σ ${t(state, 'actCredit')} <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?`✓ ${t(state, 'actBalanced')}`:`⚠ ${t(state, 'actDifference')} `+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div><p class="act-account-notice">${t(state, 'accountNotice')}</p></div>`;
   }
   return '';
 }
@@ -596,7 +602,7 @@ function renderReview(state) {
 }
 
 function renderEvidence(state) {
-  return `<section class="sbl-stack" aria-labelledby="evidence-title"><h2 id="evidence-title">${t(state, 'evidenceTitle')}</h2><div class="table-responsive"><table class="table table-sm"><thead><tr><th>${t(state, 'sourceOfficial')}</th><th>${t(state, 'applicability')}</th><th>${t(state, 'verifiedAt')}</th><th></th></tr></thead><tbody>${EVIDENCE.map(item => `<tr><td>${escapeHtml(item.title)}</td><td>${local(item.applicability, state.locale)}</td><td class="text-nowrap">${escapeHtml(item.verifiedAt)}</td><td><a class="btn" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${t(state, 'openSource')}</a></td></tr>`).join('')}</tbody></table></div></section>`;
+  return `<section class="sbl-stack" aria-labelledby="evidence-title"><h2 id="evidence-title">${t(state, 'evidenceTitle')}</h2><div class="table-responsive"><table class="table table-sm"><thead><tr><th>${t(state, 'sourceOfficial')}</th><th>${t(state, 'applicability')}</th><th>${t(state, 'verifiedAt')}</th><th></th></tr></thead><tbody>${EVIDENCE.map(item => `<tr><td>${escapeHtml(item.title)}</td><td>${local(item.applicability, state.locale)}${item.quote ? `<blockquote class="ev-quote">“${escapeHtml(item.quote)}”</blockquote>` : ''}</td><td class="text-nowrap">${escapeHtml(item.verifiedAt)}</td><td><a class="btn" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${t(state, 'openSource')}</a></td></tr>`).join('')}</tbody></table></div></section>`;
 }
 
 function renderConsole(state) {

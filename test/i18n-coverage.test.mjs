@@ -11,7 +11,10 @@ import { isInvariant } from '../src/i18n.mjs';
 const LOCALES = ['en', 'de'];
 
 // Claves que nunca son prosa: identificadores, SQL, banderas de configuración.
-const STRUCTURAL = /^(id|classification|track|evidenceId|prerequisites|k|g|activeTab|correct|ok|prinOk|principleCorrect|riskWeight|level|confidence|sourceType|url|verifiedAt|unit|at|menu|practice|sql|tables|dialect|numeric|rw|ev|engines|template)$/;
+// `quote` es una cita textual de la fuente oficial: se reproduce en su idioma
+// original (inglés) y NO se traduce. Traducir una cita la convierte en paráfrasis
+// y destruye su valor como evidencia verificable.
+const STRUCTURAL = /^(id|classification|track|evidenceId|prerequisites|k|g|activeTab|correct|ok|prinOk|principleCorrect|riskWeight|level|confidence|sourceType|url|verifiedAt|quote|unit|at|menu|practice|sql|tables|dialect|numeric|rw|ev|engines|template)$/;
 // Celdas que solo llevan cifras, códigos SYN/SAP o símbolos: iguales en los tres idiomas.
 const DATA_ONLY = /^[\s\d.,:;%+\-–—()\/€$#*✔✖×xX·]*$/;
 const CODE_LIKE = /^(SYN-|EV-|OINV|JDT1|OITW|ITT1|OIVL|IVL1|PDN1|RDR1|SBO|C\d{5}|V\d{5}|A\d{5}|P-SYN|10\.0|FP )/;
