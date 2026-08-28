@@ -71,3 +71,44 @@ export function kpiSnapshot(masteredCount, totalSkills = 72) {
     return { id: k.id, label: k.label, unit: k.unit, value };
   });
 }
+
+// ── Expediente Vivo ────────────────────────────────────────────────────────
+// La cadena forense convierte la war story del skill en la narrativa del
+// expediente: HECHO → EVIDENCIA → HIPÓTESIS DESCARTADA → ACCIÓN SEGURA →
+// VERIFICACIÓN → FUENTE. Cada eslabón admite estado (abierto/cerrado).
+const join = (v, L) => (Array.isArray(v) ? v.map(x => trNode(x, L)).join(' ') : trNode(v, L));
+
+export function forensicChain(skill, mc, locale = 'es', levelsMeta) {
+  const war = mc?.war;
+  if (!war) return null;
+  const ticket = getTicket(skill, mc, locale, levelsMeta);
+  const link = (id, labelKey, text, closed) => ({ id, labelKey, text, closed });
+  return {
+    ticketId: ticket.id,
+    from: ticket.from,
+    subject: ticket.subject,
+    links: [
+      link('fact', 'chainFact', join(war.q, locale), true),
+      link('evidence', 'chainEvidence', join(war.sympt, locale), true),
+      link('hypothesis', 'chainHypothesis', join(war.root, locale), true),
+      link('action', 'chainAction', join(war.fix, locale), true),
+      link('verify', 'chainVerify', join(war.fix, locale), false),
+      link('source', 'chainSource', `${ticket.id} · ${join(war.q, locale)}`, false)
+    ]
+  };
+}
+
+// Expediente activo: el ticket recomendado, con cadena y KPIs al día.
+export function activeCaseFile(skills, progress, mcIndex, locale = 'es', levelsMeta, recommendFn) {
+  const next = (recommendFn && recommendFn(skills, progress, new Date())) || skills[0];
+  const mc = mcIndex[next.id];
+  if (!mc?.war) return null;
+  const mastered = skills.filter(s => progress[s.id]?.mastered).length;
+  return {
+    skill: next,
+    role: careerProgress(mastered, locale).role,
+    mastered,
+    kpis: kpiSnapshot(mastered),
+    chain: forensicChain(next, mc, locale, levelsMeta)
+  };
+}

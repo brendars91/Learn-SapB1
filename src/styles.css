@@ -353,6 +353,32 @@ a.btn {
 .sbl-opening__who { font-family: var(--mono); font-size: var(--step--1); letter-spacing: 0.05em; color: var(--ink-soft); margin: 0; }
 .sbl-opening__line { margin: 0; }
 .sbl-opening__actions { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s2); }
+
+/* tira de expediente activo — career como capa transversal de la home */
+.cr-strip { display: grid; gap: var(--s2); margin-block: var(--s4); padding: var(--s4); text-align: left; }
+.cr-strip__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s3); }
+.cr-strip__head strong { font-family: var(--mono); font-size: var(--step--1); letter-spacing: 0.04em; }
+.cr-strip__subject { margin: 0; font-style: italic; }
+.cr-strip__kpis { display: flex; flex-wrap: wrap; gap: var(--s4); }
+.cr-strip__kpi { display: inline-flex; gap: var(--s1); align-items: baseline; font-size: var(--step--1); }
+
+/* cadena forense del expediente — eslabones con estado */
+.sbl-chain { margin-block: var(--s4); padding: var(--s3); border-left: 3px solid var(--accent); background: var(--paper-deep); }
+.sbl-chain__links { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
+.sbl-chain__link { display: grid; grid-template-columns: minmax(9.5em, auto) 1fr auto; gap: var(--s2); align-items: baseline; padding-block: var(--s1); border-bottom: 1px solid color-mix(in srgb, var(--ink-soft) 22%, transparent); }
+.sbl-chain__link:last-child { border-bottom: 0; }
+.sbl-chain__tag { font-family: var(--mono); font-size: var(--step--2); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+.sbl-chain__text { font-size: var(--step--1); }
+.sbl-chain__state { font-size: var(--step-0); }
+.sbl-chain__link.is-closed .sbl-chain__tag { color: var(--accent); }
+.sbl-chain__link.is-open .sbl-chain__state { color: var(--ink-soft); }
+@media (max-width: 560px) {
+  .sbl-chain__link { grid-template-columns: 1fr auto; }
+  .sbl-chain__tag { grid-column: 1 / -1; }
+  .sbl-chain__text { grid-column: 1; }
+  .sbl-chain__state { grid-column: 2; grid-row: 2; }
+}
+
 .sbl-desk-row, .sbl-desk-recommendation {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s4); min-width: 0;
 }
