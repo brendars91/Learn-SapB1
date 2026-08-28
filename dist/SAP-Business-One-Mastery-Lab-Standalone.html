@@ -96,6 +96,9 @@ textarea { color: var(--ink); }
 .sbl-toolbar,
 .sbl-actions,
 .sbl-process { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); }
+.sbl-effects-grid { display: grid; gap: var(--s2); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin-block-start: var(--s2); }
+.sbl-effect { display: flex; flex-direction: column; gap: var(--s1); border: 1px solid var(--rule); background: var(--paper-deep); padding: var(--s2); }
+.sbl-effect .text-small { color: var(--ink-faint); }
 .sbl-topline { justify-content: space-between; }
 .sbl-statusline { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
 .sbl-nav {
@@ -812,7 +815,7 @@ const TERMS = {
   '¿Cada columna tiene tabla?': { en: 'Does every column name its table?', de: 'Hat jede Spalte ihre Tabelle?' },
   '¿Cómo comprobarías una afirmación concreta de esa respuesta?': { en: 'How would you check one concrete claim in that answer?', de: 'Wie würdest du eine konkrete Behauptung dieser Antwort prüfen?' },
   '¿Cómo demostrarías en UAT que se cumplió?': { en: 'How would you prove in UAT that it was met?', de: 'Wie würdest du im UAT nachweisen, dass es erfüllt ist?' },
-  '¿Cómo distinguir «eficiente» de «abandonado» sin datos?': { en: 'How do you tell «efficient» from «abandoned» without data?', de: 'Wie unterscheidest du „effizient“ von „aufgegeben“ ohne Daten?' },
+  '¿Cómo distinguir «eficiente» de «abandonado» sin datos?': { en: 'How do you tell "efficient" from "abandoned" without data?', de: 'Wie unterscheidest du „effizient“ von „aufgegeben“ ohne Daten?' },
   '¿Cómo sabrá alguien el año próximo que ese dato se corrigió?': { en: 'How will anyone know next year that this data was corrected?', de: 'Woher weiß nächstes Jahr jemand, dass diese Daten korrigiert wurden?' },
   '¿Con qué argumento renueva el cliente el año próximo?': { en: 'On what argument does the customer renew next year?', de: 'Mit welchem Argument verlängert der Kunde nächstes Jahr?' },
   '¿Cuándo deja el saldo bancario de ser verdad?': { en: 'When does the bank balance stop being true?', de: 'Wann hört der Bankkontostand auf, wahr zu sein?' },
@@ -824,7 +827,7 @@ const TERMS = {
   '¿Cuánto rinde ese dinero si no lo usas para capturar el descuento?': { en: 'What does that money yield if you don’t use it to capture the discount?', de: 'Was bringt dieses Geld, wenn du es nicht für das Skonto einsetzt?' },
   '¿Cuánto tiempo vale cada metro caminado al día?': { en: 'How much time is each metre walked per day worth?', de: 'Wie viel Zeit ist jeder täglich gelaufene Meter wert?' },
   '¿Cuánto vale la distancia media lista→efectivo en tu muestra?': { en: 'What is the average list→effective distance worth in your sample?', de: 'Wie viel ist der durchschnittliche Abstand Liste→Effektivpreis in deiner Stichprobe wert?' },
-  '¿Cuántos clientes tocarías si solo supieras «el artículo» y no el lote?': { en: 'How many customers would you touch knowing only «the item» and not the batch?', de: 'Wie viele Kunden würdest du anfassen, wenn du nur „den Artikel“ und nicht die Charge kennst?' },
+  '¿Cuántos clientes tocarías si solo supieras «el artículo» y no el lote?': { en: 'How many customers would you touch knowing only "the item" and not the batch?', de: 'Wie viele Kunden würdest du anfassen, wenn du nur „den Artikel“ und nicht die Charge kennst?' },
   '¿De dónde hereda sus cantidades esa factura?': { en: 'Where does that invoice inherit its quantities from?', de: 'Woher erbt diese Rechnung ihre Mengen?' },
   '¿De dónde viene el 12%: material, tiempo o precio?': { en: 'Where do the 12% come from: material, time or price?', de: 'Woher kommen die 12%: Material, Zeit oder Preis?' },
   '¿Declara motor y versión?': { en: 'Does it state engine and version?', de: 'Nennt er Engine und Version?' },
@@ -870,7 +873,7 @@ const TERMS = {
   '¿Qué documento reclama esa serie hoy?': { en: 'Which document claims that serial today?', de: 'Welcher Beleg beansprucht diese Seriennummer heute?' },
   '¿Qué dos errores pueden sumar cero y mentir?': { en: 'Which two errors can sum to zero and still lie?', de: 'Welche zwei Fehler können sich zu null addieren und trotzdem lügen?' },
   '¿Qué evidencia convencería a tu auditor de conceder autonomía?': { en: 'What evidence would convince your auditor to grant autonomy?', de: 'Welcher Nachweis würde deinen Prüfer überzeugen, Autonomie zu gewähren?' },
-  '¿Qué explicaciones alternativas hay para «no la veo»?': { en: 'What alternative explanations are there for «I can’t see it»?', de: 'Welche anderen Erklärungen gibt es für „ich sehe sie nicht“?' },
+  '¿Qué explicaciones alternativas hay para «no la veo»?': { en: 'What alternative explanations are there for "I can’t see it"?', de: 'Welche anderen Erklärungen gibt es für „ich sehe sie nicht“?' },
   '¿Qué factura demostrará el cambio mañana?': { en: 'Which invoice will prove the change tomorrow?', de: 'Welche Rechnung wird die Änderung morgen belegen?' },
   '¿Qué funciones de tu SQL existen pensadas para disco row-store?': { en: 'Which functions in your SQL were designed for row-store on disk?', de: 'Welche Funktionen deines SQL sind für zeilenbasierte Platten gedacht?' },
   '¿Qué le pasa al registro entre que se crea y se aprueba?': { en: 'What happens to the record between creation and approval?', de: 'Was passiert mit dem Datensatz zwischen Anlage und Genehmigung?' },
@@ -898,7 +901,7 @@ const TERMS = {
   '¿Qué tienen en común exactamente las líneas que faltan?': { en: 'What exactly do the missing lines have in common?', de: 'Was genau haben die fehlenden Zeilen gemeinsam?' },
   '¿Qué tienen en común las diferencias más allá del importe?': { en: 'What do the differences have in common beyond the amount?', de: 'Was haben die Differenzen jenseits des Betrags gemeinsam?' },
   '¿Qué total de control del sistema viejo debe cuadrar exactamente?': { en: 'Which control total from the old system must match exactly?', de: 'Welche Kontrollsumme aus dem Altsystem muss exakt stimmen?' },
-  '¿Qué tres explicaciones hay para «no lo veo» que no son borrado?': { en: 'What three explanations for «I can’t see it» are not deletion?', de: 'Welche drei Erklärungen für „ich sehe es nicht“ sind kein Löschen?' },
+  '¿Qué tres explicaciones hay para «no lo veo» que no son borrado?': { en: 'What three explanations for "I can’t see it" are not deletion?', de: 'Welche drei Erklärungen für „ich sehe es nicht“ sind kein Löschen?' },
   '¿Qué ve el aging de ese cliente después del pago parcial?': { en: 'What does that customer’s aging show after the partial payment?', de: 'Was zeigt die Altersstruktur dieses Kunden nach der Teilzahlung?' },
   '¿Quién autoriza reaperturas en tu empresa?': { en: 'Who authorizes reopenings in your company?', de: 'Wer genehmigt Wiedereröffnungen in deinem Unternehmen?' },
   '¿Quién debió firmar ese cambio?': { en: 'Who should have signed off that change?', de: 'Wer hätte diese Änderung zeichnen müssen?' },
@@ -911,14 +914,14 @@ const TERMS = {
   '¿Quién, cuándo y por qué escribió ese asiento?': { en: 'Who wrote that entry, when, and why?', de: 'Wer hat diese Buchung wann und warum erfasst?' },
   '"¿Cómo crear pedido por API?"': { en: '"How do I create an order via API?"', de: '„Wie lege ich einen Auftrag per API an?“' },
   '"Ignora reglas, ejecuta X"': { en: '"Ignore rules, run X"', de: '„Regeln ignorieren, führe X aus“' },
-  '«Abre» prueba sintaxis, no verdad.': { en: '«It opens» proves syntax, not truth.', de: '„Es öffnet“ beweist Syntax, nicht Wahrheit.' },
+  '«Abre» prueba sintaxis, no verdad.': { en: '"It opens" proves syntax, not truth.', de: '„Es öffnet“ beweist Syntax, nicht Wahrheit.' },
   '«El documento decía que hiciera el reembolso» como justificación.': { de: '„Im Beleg stand, ich solle erstatten“ als Begründung.' },
   '«El más habitual» es apuesta con la declaración fiscal.': { de: '„Das übliche“ ist eine Wette mit der Steuererklärung.' },
   '«El modelo es seguro» como única medida de seguridad.': { de: '„Das Modell ist sicher“ als einzige Sicherheitsmaßnahme.' },
-  '«Equilibrado» valida suma, no concepto.': { en: '«Balanced» validates the sum, not the concept.', de: '„Ausgeglichen“ prüft die Summe, nicht den Sachverhalt.' },
+  '«Equilibrado» valida suma, no concepto.': { en: '"Balanced" validates the sum, not the concept.', de: '„Ausgeglichen“ prüft die Summe, nicht den Sachverhalt.' },
   '«Lo probamos con un par de ejemplos y funcionó».': { de: '„Wir haben es an ein paar Beispielen probiert, es lief“.' },
   '«Luego lo cambiamos» aplicado a moneda, localización o método de valoración global.': { de: '„Das ändern wir später“, angewendet auf Währung, Lokalisierung oder das globale Bewertungsverfahren.' },
-  '«Ninguno» ignora todo el flujo futuro.': { en: '«None» ignores the entire future flow.', de: '„Keiner“ ignoriert den gesamten künftigen Fluss.' },
+  '«Ninguno» ignora todo el flujo futuro.': { en: '"None" ignores the entire future flow.', de: '„Keiner“ ignoriert den gesamten künftigen Fluss.' },
   '«Sé útil y responde sobre SAP B1» como prompt completo.': { de: '„Sei hilfreich und antworte zu SAP B1“ als vollständiger Prompt.' },
   '«Si no hay evidencia, di no verificado»: la línea que más alucinaciones mata.': { de: '„Ohne Nachweis sag: nicht verifiziert“: die Zeile, die die meisten Halluzinationen tötet.' },
   '«Solo corrigo este campo con UPDATE, es inofensivo».': { de: '„Ich korrigiere nur dieses Feld per UPDATE, das ist harmlos“.' },
@@ -1644,7 +1647,7 @@ const TERMS = {
   'Casos': { en: 'Cases', de: 'Fälle' },
   'Casos de uso': { en: 'Use cases', de: 'Anwendungsfälle' },
   'Catálogo de UDFs con dueño y motivo: sin catálogo, fuera.': { de: 'UDF-Katalog mit Verantwortlichem und Grund: ohne Katalog kein Feld.' },
-  'Causa raíz: (1) Un día de cierre genera miles de asientos pesados; (2) license monitor + dashboards por usuario.': { de: 'Ursache: (1) ein Abschlusstag erzeugt tausende schwere Buchungen; (2) Lizenzmonitor + Dashboards je Benutzer.' },
+  '(1) Un día de cierre genera miles de asientos pesados; (2) license monitor + dashboards por usuario.': { de: '(1) Ein Abschlusstag erzeugt tausende schwere Buchungen; (2) Lizenzmonitor + Dashboards je Benutzer.' },
   'celda': { en: 'cell', de: 'Zelle' },
   'Central': { en: 'Central', de: 'Zentrale' },
   'centro': { en: 'centre', de: 'Zentrum' },
@@ -2995,6 +2998,7 @@ const TERMS = {
   'Introducir series «más tarde, cuando haya garantías» y descubrir unidades anónimas.': { de: 'Seriennummern „später, wenn es Garantien gibt“ einführen und anonyme Einheiten vorfinden.' },
   'Introducir series anuales desde el ejercicio siguiente + informe Query de continuidad de series para detectar huecos.': { de: 'Jahresnummernkreise ab dem nächsten Geschäftsjahr einführen + eine Kontinuitätsabfrage, um Lücken zu erkennen.' },
   'INV1 (líneas)': { en: 'INV1 (lines)', de: 'INV1 (Zeilen)' },
+  'OINV (facturas)': { en: 'OINV (invoices)', de: 'OINV (Rechnungen)' },
   'Inventar corrompe la cadena.': { en: 'Inventing corrupts the chain.', de: 'Erfinden korrumpiert die Kette.' },
   'Inventar transacciones SQL de escritura': { en: 'Inventing write SQL transactions', de: 'Schreibende SQL-Transaktionen erfinden' },
   'Inventaría alertas y su lectura real': { de: 'Alarme und ihre tatsächliche Beachtung inventarisieren' },
@@ -3916,8 +3920,8 @@ const TERMS = {
   'Reservas': { en: 'Reservations', de: 'Reservierungen' },
   'Residuo < umbral (p. ej. 1 €): cerrar por diferencia de redondeo documentada.': { de: 'Restbetrag unter der Schwelle (z. B. 1 €): als dokumentierte Rundungsdifferenz schließen.' },
   'Resiliencia': { en: 'Resilience', de: 'Resilienz' },
-  'Resolución: leer el hilo del cierre, no el sistema entero: Query de cancelación + revisar licencias activas.': { de: 'Lösung: den Faden des Abschlusses lesen, nicht das ganze System: Stornoabfrage + aktive Lizenzen prüfen.' },
-  'Resolución: obligar el campo por validación (TransactionNotification) + regularización de facturas existentes.': { de: 'Lösung: das Feld per Prüfung (TransactionNotification) erzwingen + bestehende Rechnungen bereinigen.' },
+  'Leer el hilo del cierre, no el sistema entero: Query de cancelación + revisar licencias activas.': { de: 'Den Faden des Abschlusses lesen, nicht das ganze System: Stornoabfrage + aktive Lizenzen prüfen.' },
+  'Obligar el campo por validación (TransactionNotification) + regularización de facturas existentes.': { de: 'Das Feld per Prüfung (TransactionNotification) erzwingen + bestehende Rechnungen bereinigen.' },
   'Resolver fuera del sistema «para ir rápido» y perder el historial.': { de: 'Außerhalb des Systems lösen, „um schnell zu sein“, und die Historie verlieren.' },
   'Respetar lo ya sucedido': { de: 'Das Geschehene respektieren' },
   'Responde 2xx inmediato y procesa async: el emisor no espera tu lógica.': { de: 'Sofort mit 2xx antworten und asynchron verarbeiten: der Sender wartet nicht auf deine Logik.' },
@@ -7391,7 +7395,7 @@ const MC_BATCH1 = {
     sympt: [{ es: 'Facturas con vencimiento inmediato, aging distorsionado, cobros caóticos.', en: 'Invoices with immediate due, distorted aging, chaotic collections.' }],
     root: [{ es: 'Campo de condiciones vacío al alta (permitido por el sistema) + checklist de alta incompleto.', en: 'Empty terms field at create (allowed by the system) + incomplete create checklist.' }],
 
-    fix: [{ es: 'Resolución: obligar el campo por validación (TransactionNotification) + regularización de facturas existentes.', en: 'Fix: make the field mandatory via transaction validation + regularize existing invoices.' }] },
+    fix: [{ es: 'Obligar el campo por validación (TransactionNotification) + regularización de facturas existentes.', en: 'Make the field mandatory via transaction validation + regularize existing invoices.' }] },
   bp: [
     { es: 'Un socio = un NIF. Los duplicados rompen análisis y conciliación.', en: 'One partner = one tax ID. Duplicates break analysis and reconciliation.' },
     { es: 'Condiciones de pago obligatorias al alta: sin ellas, el aging se distorsiona desde el día uno.', en: 'Payment terms mandatory at create: without them, aging distorts from day one.' }
@@ -9069,8 +9073,8 @@ const MASTERCLASS = {
   ],
   war: { q: { es: 'El cliente llama: "el sistema está lento".', en: 'Client calls: "the system is slow".' },
     sympt: [{ es: 'Los usuarios reportan lentitud difusa: todo va lento, nadie sabe qué.', en: 'Users report diffuse slowness: everything is slow, nobody knows what.' }],
-    root: [{ es: 'Causa raíz: (1) Un día de cierre genera miles de asientos pesados; (2) license monitor + dashboards por usuario.', en: 'Root cause: (1) A closing day generates thousands of heavy journal entries; (2) license monitor + per-user dashboards.' }],
-    fix: [{ es: 'Resolución: leer el hilo del cierre, no el sistema entero: Query de cancelación + revisar licencias activas.', en: 'Fix: read the closing thread, not the whole system: cancellation query + review active licenses.' }] },
+    root: [{ es: '(1) Un día de cierre genera miles de asientos pesados; (2) license monitor + dashboards por usuario.', en: '(1) A closing day generates thousands of heavy journal entries; (2) license monitor + per-user dashboards.' }],
+    fix: [{ es: 'Leer el hilo del cierre, no el sistema entero: Query de cancelación + revisar licencias activas.', en: 'Read the closing thread, not the whole system: cancellation query + review active licenses.' }] },
   bp: [
     { es: 'Aprende la ruta de menú de cada documento a frío: Ventas→Pedido, Ventas→Entrega, Ventas→Factura...', en: 'Learn each document\'s menu path cold: Sales→Order, Sales→Delivery, Sales→Invoice...' },
     { practice: true, es: 'Práctica pro: pon un hábito de 2 minutos: antes de operar, dibuja el módulo en papel y sus 3 pantallas clave.', en: 'Pro practice: build a 2-minute habit: before operating, sketch the module and its 3 key screens on paper.' }
@@ -9183,9 +9187,9 @@ const LABELS = {
 };
 
 const FEEDBACK = {
-  es: { mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe' },
-  en: { mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount' },
-  de: { mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag' }
+  es: { mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe', qOpen:'«', qClose:'»' },
+  en: { mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount', qOpen:'“', qClose:'”' },
+  de: { mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag', qOpen:'„', qClose:'“' }
 };
 
 const JOURNAL_BLUEPRINTS = {
@@ -9270,6 +9274,21 @@ function localizedJournal(id, locale) {
   const tx = JOURNAL_TEXT[locale];
   const rows = JOURNAL_BLUEPRINTS[id] || [['offset','debit','1000,00'],['bank','credit','1000,00']];
   return rows.map(([account, side, amount]) => [tx[account], tx[side], amount]);
+}
+
+// Mapa semántico de los lados del asiento: las respuestas del journal se guardan con el
+// texto localizado ('Debe'/'Haber', 'Debit'/'Credit', 'Soll'/'Haben'), pero la corrección
+// debe comparar semántica, no localización. Permite además re-derivar el feedback al
+// cambiar de idioma sin que un check correcto se invalide (fix del feedback congelado).
+const JOURNAL_SIDE_KEYS = { es: { Debe: 'debit', Haber: 'credit' }, en: { Debit: 'debit', Credit: 'credit' }, de: { Soll: 'debit', Haben: 'credit' } };
+function journalSideTexts(locale) {
+  return { debit: JOURNAL_TEXT[locale].debit, credit: JOURNAL_TEXT[locale].credit };
+}
+function journalSideKey(text) {
+  for (const localeMap of Object.values(JOURNAL_SIDE_KEYS)) {
+    if (localeMap[text]) return localeMap[text];
+  }
+  return null;
 }
 
 // Rutas de menú explícitas por skill. No se derivan partiendo una cadena de prosa:
@@ -9464,6 +9483,16 @@ function getActivity(skill, locale='es') {
   return { ...base, ...consequenceSpec(skill,mc,locale) };
 }
 
+// Corrige una respuesta guardada en texto localizado comparando por POSICIÓN entre las
+// opciones del locale original y las del locale activo. Necesario porque las respuestas
+// del simulador y las secuencias config/consequence guardan el texto visible del botón,
+// no un identificador. Devuelve el valor sin tocar si no hay traducción posicional.
+function mapAnswerToLocale(value, oldOptions, newOptions) {
+  const index = oldOptions.indexOf(value);
+  if (index < 0 || index >= newOptions.length) return value;
+  return newOptions[index];
+}
+
 function validateActivityDetailed(activity, answers, sequence) {
   const A = answers || {};
   const seq = sequence || [];
@@ -9478,10 +9507,10 @@ function validateActivityDetailed(activity, answers, sequence) {
     const chosen=Number(A.broken); const ok=activity.evidence[chosen]?.broken===true; if(!ok) correct=false; details.push({item:f.link,ok,expected:f.broken,got:activity.evidence[chosen]?.label?.slice(0,70)||'—'});
   } else if (activity.type === 'config' || activity.type === 'consequence') {
     const ref=activity.route||activity.chain;
-    ref.forEach((step,i)=>{ const ok=seq[i]===step; if(!ok) correct=false; details.push({item:`${f.step} ${i+1}: ${f.expected} "${String(step).slice(0,40)}"`,ok,expected:step,got:seq[i]||'—'}); });
+    ref.forEach((step,i)=>{ const ok=seq[i]===step; if(!ok) correct=false; details.push({item:`${f.step} ${i+1}: ${f.expected} ${f.qOpen}${String(step).slice(0,40)}${f.qClose}`,ok,expected:step,got:seq[i]||'—'}); });
     if(activity.tokens&&seq.length>ref.length){ correct=false; details.push({item:f.decoys,ok:false,expected:`${ref.length} ${f.exact}`,got:`${seq.length} ${f.steps}`}); }
   } else if (activity.type === 'journal') {
-    activity.lines.forEach((line,i)=>{ const sideOk=A['side-'+i]===line[1]; const amountOk=String(A['amount-'+i]||'').replace(/\s/g,'')===line[2]; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A['side-'+i]||'—'} ${A['amount-'+i]||'—'}`}); });
+    activity.lines.forEach((line,i)=>{ const sideOk=journalSideKey(A[`side-${i}`])===journalSideKey(line[1]); const amountOk=String(A[`amount-${i}`]||'').replace(/\s/g,'')===line[2]; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A[`side-${i}`]||'—'} ${A[`amount-${i}`]||'—'}`}); });
   }
   return { correct, details };
 }
@@ -9897,7 +9926,7 @@ const CASES = [
     hints: { es: '¿Qué declaración se presenta con ese código?' }
   }),
   decision('SYN-CASE-03', 2, {
-    q: { es: 'SYN-SO-0001 está parcialmente entregado. ¿Qué comprobar antes de copiar?', en: 'SYN-SO-0001 is partially delivered. What to check before copying?', de: 'SYN-SO-0001 teiligeliefert. Was prüfen?' },
+    q: { es: 'SYN-SO-0001 está parcialmente entregado. ¿Qué comprobar antes de copiar?', en: 'SYN-SO-0001 is partially delivered. What to check before copying?', de: 'SYN-SO-0001 teilgeliefert. Was prüfen?' },
     opts: { es: ['Solo el total original', 'Cantidades abiertas, almacén y relación base-destino', 'Cerrar el pedido'], en: ['Only the original total', 'Open quantities, warehouse, base-target link', 'Close the order'], de: ['Nur Summe', 'Offene Mengen, Lager, Bezug', 'Schließen'] },
     ok: 1,
     why: { es: 'El documento destino debe respetar la cantidad realmente abierta y conservar trazabilidad.', en: 'The target must respect the truly open quantity and keep traceability.', de: 'Zielbeleg respektiert offene Menge.' },
@@ -10267,7 +10296,52 @@ function updateSkill(progress, skillId, change) {
 
 function reduceState(state, action) {
   switch (action.type) {
-    case 'SET_LOCALE': return ['es', 'en', 'de'].includes(action.locale) ? { ...state, locale: action.locale, toast: '' } : state;
+    case 'SET_LOCALE': {
+      if (!['es', 'en', 'de'].includes(action.locale)) return state;
+      // i18n: el feedback de actividad y las respuestas viven en state como texto YA
+      // localizado (FEEDBACK[locale], opciones de selects, tokens de secuencia). Al
+      // cambiar de idioma se re-deriva TODO con el locale activo: respuestas mapeadas
+      // por posición entre opciones equivalentes y feedback re-validado, para que ni
+      // el bloque de corrección quede congelado ni un check correcto se invalide.
+      let activityFeedback = state.activityFeedback;
+      let activityAnswers = state.activityAnswers;
+      let activitySequence = state.activitySequence;
+      if (state.selectedSkillId) {
+        const skill = SKILLS.find(s => s.id === state.selectedSkillId);
+        const oldActivity = skill ? getActivity(skill, state.locale) : null;
+        const activity = skill ? getActivity(skill, action.locale) : null;
+        if (activity && !activity.unavailable) {
+          if (activity.type === 'simulator' && oldActivity?.type === 'simulator') {
+            activityAnswers = Object.fromEntries(Object.entries(activityAnswers).map(([key, value]) => {
+              const index = Number(key.replace('sim-', ''));
+              const oldOptions = oldActivity.targets[index]?.options || [];
+              const newOptions = activity.targets[index]?.options || [];
+              return [key, mapAnswerToLocale(value, oldOptions, newOptions)];
+            }));
+          } else if ((activity.type === 'config' || activity.type === 'consequence')) {
+            activitySequence = activitySequence.map(value => mapAnswerToLocale(value, oldActivity?.tokens || [], activity.tokens || []));
+          } else if (activity.type === 'journal') {
+            activityAnswers = Object.fromEntries(Object.entries(activityAnswers).map(([key, value]) => {
+              if (!key.startsWith('side-')) return [key, value];
+              const semantic = journalSideKey(value);
+              return [key, semantic ? journalSideTexts(action.locale)[semantic] : value];
+            }));
+          }
+          if (activityFeedback) {
+            const revalidated = validateActivityDetailed(activity, activityAnswers, activitySequence);
+            const passed = revalidated.correct;
+            activityFeedback = {
+              correct: passed,
+              message: passed ? (activity.resolution || translate(action.locale, 'actRightPrompt')) : translate(action.locale, 'actWrongPrompt'),
+              details: revalidated.details
+            };
+          }
+        } else if (activityFeedback) {
+          activityFeedback = null;
+        }
+      }
+      return { ...state, locale: action.locale, toast: '', activityAnswers, activitySequence, activityFeedback };
+    }
     case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
     case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
     case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0, toast: '' };
@@ -10405,8 +10479,8 @@ function svgDiagram(diagram, locale) {
   if (kind === 'hub') {
     const cx = 300, cy = 84, r = 44;
     body = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="rgba(74,163,255,0.16)" stroke="${theme.stroke}" stroke-width="1.6"/>
-      <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--sbl-ink, #e8edf7)">${escapeHtml(local(nodes[nodes.length - 1]?.t || nodes[0].t, locale))}</text>
-      <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="10" fill="${theme.dim}">${escapeHtml(local(nodes[nodes.length - 1]?.s || '', locale))}</text>`
+      <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--sbl-ink, #e8edf7)">${local(nodes[nodes.length - 1]?.t || nodes[0].t, locale)}</text>
+      <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="10" fill="${theme.dim}">${local(nodes[nodes.length - 1]?.s || '', locale)}</text>`
       + nodes.slice(0, 4).map((node, i) => {
         const angle = (Math.PI * 2 * i) / Math.min(nodes.length - 1, 4) - Math.PI / 2;
         const x = cx + Math.cos(angle) * 175 - 60, y = cy + Math.sin(angle) * 74 - 20;
@@ -10456,8 +10530,8 @@ function svgDiagram(diagram, locale) {
         const x = 60 + i * 160;
         const last = i === n - 1;
         return `<circle cx="${x}" cy="52" r="${last ? 10 : 7}" fill="${last ? 'var(--sbl-gold, #ffc857)' : 'var(--sbl-accent, #4aa3ff)'}"/>`
-          + `<text x="${x}" y="30" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--sbl-ink, #e8edf7)">${escapeHtml(local(node.t, locale))}</text>`
-          + `<text x="${x}" y="80" text-anchor="middle" font-size="10" fill="${theme.dim}">${escapeHtml(local(node.s, locale))}</text>`;
+          + `<text x="${x}" y="30" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--sbl-ink, #e8edf7)">${local(node.t, locale)}</text>`
+          + `<text x="${x}" y="80" text-anchor="middle" font-size="10" fill="${theme.dim}">${local(node.s, locale)}</text>`;
       }).join('');
     return wrap(100, 600, cap, body);
   }
@@ -10487,7 +10561,7 @@ function renderHeatmap(state) {
     const mastered = levelSkills.filter(s => state.progress[s.id]?.mastered).length;
     const pct = Math.round((mastered / levelSkills.length) * 100);
     const heat = pct === 0 ? ' sbl-heat-0' : pct < 34 ? ' sbl-heat-1' : pct < 67 ? ' sbl-heat-2' : pct < 100 ? ' sbl-heat-3' : ' sbl-heat-4';
-    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${escapeHtml(local(level.title, state.locale))}: ${pct}%" aria-label="${escapeHtml(local(level.title, state.locale))} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${escapeHtml(local(level.title, state.locale).slice(0, 14))}</span></button>`;
+    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${local(level.title, state.locale)}: ${pct}%" aria-label="${local(level.title, state.locale)} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${local(level.title, state.locale).slice(0, 14)}</span></button>`;
   }).join('');
   return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><div class="sbl-heatmap">${cells}</div></section>`;
 }
@@ -10652,7 +10726,7 @@ function renderLearnMode(state, skill) {
   const pathHtml = (skill.path || []).length ? `<div class="sbl-detail-grid__full"><h4>${t(state, 'pathLabel')}</h4><div class="sbl-path">${skill.path.map((crumb, i) => `${i ? '<span class="sep">›</span>' : ''}<span class="crumb">${escapeHtml(trText(crumb, state.locale))}</span>`).join('')}</div></div>` : '';
   const ex = skill.example;
   const exHtml = ex ? `<div class="sbl-example"><h4>${t(state, 'exampleLabel')}</h4><p><strong>${escapeHtml(trNode(ex.q, state.locale))}</strong></p><pre class="sbl-figure">${(ex.show || []).map(l => escapeHtml(trText(l, state.locale))).join('\n')}</pre>${ex.a ? `<p class="text-small"><em>${escapeHtml(trNode(ex.a, state.locale))}</em></p>` : ''}</div>` : '';
-  const anHtml = an ? `<div class="sbl-anchor"><h4>${t(state, 'anchorLabel')}</h4><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
+  const anHtml = an ? `<div class="sbl-anchor"><h4>${t(state, 'anchorLabel')}</h4><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${local(an, state.locale)}</em></p></div>` : '';
   return `<div class="sbl-learn">
     ${anHtml}
     ${renderMasterclass(state, skill)}
@@ -10709,10 +10783,13 @@ function renderActivityBody(state, activity) {
   }
   if (activity.type === 'journal') {
     const amount = v => Number(String(v||'0').replace(/\./g,'').replace(',','.')) || 0;
-    const debit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Debe'?amount(A[`amount-${i}`]):0),0);
-    const credit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Haber'?amount(A[`amount-${i}`]):0),0);
+    // Los lados se guardan y comparan con el texto del locale activo (Debe/Haber,
+    // Debit/Credit, Soll/Haben): SET_LOCALE re-mapea las respuestas al cambiar idioma.
+    const sides = journalSideTexts(state.locale);
+    const debit = activity.lines.reduce((sum,_,i)=>sum+(journalSideKey(A[`side-${i}`])==='debit'?amount(A[`amount-${i}`]):0),0);
+    const credit = activity.lines.reduce((sum,_,i)=>sum+(journalSideKey(A[`side-${i}`])==='credit'?amount(A[`amount-${i}`]):0),0);
     const balanced = debit>0 && Math.abs(debit-credit)<.005;
-    return `<div class="act-journal"><div class="act-jhead"><span>${t(state, 'actAccount')}</span><span>${t(state, 'actSide')}</span><span>${t(state, 'actAmount')}</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(trText(line[0], state.locale))}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option value="Debe"${A[`side-${i}`]==='Debe'?' selected':''}>${t(state, 'actDebit')}</option><option value="Haber"${A[`side-${i}`]==='Haber'?' selected':''}>${t(state, 'actCredit')}</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ ${t(state, 'actDebit')} <output>${debit.toFixed(2).replace('.',',')}</output> · Σ ${t(state, 'actCredit')} <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?`✓ ${t(state, 'actBalanced')}`:`⚠ ${t(state, 'actDifference')} `+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div><p class="act-account-notice">${t(state, 'accountNotice')}</p></div>`;
+    return `<div class="act-journal"><div class="act-jhead"><span>${t(state, 'actAccount')}</span><span>${t(state, 'actSide')}</span><span>${t(state, 'actAmount')}</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(trText(line[0], state.locale))}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option value="${sides.debit}"${journalSideKey(A[`side-${i}`])==='debit'?' selected':''}>${t(state, 'actDebit')}</option><option value="${sides.credit}"${journalSideKey(A[`side-${i}`])==='credit'?' selected':''}>${t(state, 'actCredit')}</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ ${t(state, 'actDebit')} <output>${debit.toFixed(2).replace('.',',')}</output> · Σ ${t(state, 'actCredit')} <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?`✓ ${t(state, 'actBalanced')}`:`⚠ ${t(state, 'actDifference')} `+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div><p class="act-account-notice">${t(state, 'accountNotice')}</p></div>`;
   }
   return '';
 }

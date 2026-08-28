@@ -177,7 +177,7 @@ export const MC_BATCH1 = {
     sympt: [{ es: 'Facturas con vencimiento inmediato, aging distorsionado, cobros caóticos.', en: 'Invoices with immediate due, distorted aging, chaotic collections.' }],
     root: [{ es: 'Campo de condiciones vacío al alta (permitido por el sistema) + checklist de alta incompleto.', en: 'Empty terms field at create (allowed by the system) + incomplete create checklist.' }],
 
-    fix: [{ es: 'Resolución: obligar el campo por validación (TransactionNotification) + regularización de facturas existentes.', en: 'Fix: make the field mandatory via transaction validation + regularize existing invoices.' }] },
+    fix: [{ es: 'Obligar el campo por validación (TransactionNotification) + regularización de facturas existentes.', en: 'Make the field mandatory via transaction validation + regularize existing invoices.' }] },
   bp: [
     { es: 'Un socio = un NIF. Los duplicados rompen análisis y conciliación.', en: 'One partner = one tax ID. Duplicates break analysis and reconciliation.' },
     { es: 'Condiciones de pago obligatorias al alta: sin ellas, el aging se distorsiona desde el día uno.', en: 'Payment terms mandatory at create: without them, aging distorts from day one.' }

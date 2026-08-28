@@ -31,9 +31,9 @@ const LABELS = {
 };
 
 const FEEDBACK = {
-  es: { mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe' },
-  en: { mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount' },
-  de: { mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag' }
+  es: { mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe', qOpen:'«', qClose:'»' },
+  en: { mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount', qOpen:'“', qClose:'”' },
+  de: { mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag', qOpen:'„', qClose:'“' }
 };
 
 const JOURNAL_BLUEPRINTS = {
@@ -118,6 +118,21 @@ function localizedJournal(id, locale) {
   const tx = JOURNAL_TEXT[locale];
   const rows = JOURNAL_BLUEPRINTS[id] || [['offset','debit','1000,00'],['bank','credit','1000,00']];
   return rows.map(([account, side, amount]) => [tx[account], tx[side], amount]);
+}
+
+// Mapa semántico de los lados del asiento: las respuestas del journal se guardan con el
+// texto localizado ('Debe'/'Haber', 'Debit'/'Credit', 'Soll'/'Haben'), pero la corrección
+// debe comparar semántica, no localización. Permite además re-derivar el feedback al
+// cambiar de idioma sin que un check correcto se invalide (fix del feedback congelado).
+const JOURNAL_SIDE_KEYS = { es: { Debe: 'debit', Haber: 'credit' }, en: { Debit: 'debit', Credit: 'credit' }, de: { Soll: 'debit', Haben: 'credit' } };
+export function journalSideTexts(locale) {
+  return { debit: JOURNAL_TEXT[locale].debit, credit: JOURNAL_TEXT[locale].credit };
+}
+export function journalSideKey(text) {
+  for (const localeMap of Object.values(JOURNAL_SIDE_KEYS)) {
+    if (localeMap[text]) return localeMap[text];
+  }
+  return null;
 }
 
 // Rutas de menú explícitas por skill. No se derivan partiendo una cadena de prosa:
@@ -312,6 +327,16 @@ export function getActivity(skill, locale='es') {
   return { ...base, ...consequenceSpec(skill,mc,locale) };
 }
 
+// Corrige una respuesta guardada en texto localizado comparando por POSICIÓN entre las
+// opciones del locale original y las del locale activo. Necesario porque las respuestas
+// del simulador y las secuencias config/consequence guardan el texto visible del botón,
+// no un identificador. Devuelve el valor sin tocar si no hay traducción posicional.
+export function mapAnswerToLocale(value, oldOptions, newOptions) {
+  const index = oldOptions.indexOf(value);
+  if (index < 0 || index >= newOptions.length) return value;
+  return newOptions[index];
+}
+
 export function validateActivityDetailed(activity, answers, sequence) {
   const A = answers || {};
   const seq = sequence || [];
@@ -326,10 +351,10 @@ export function validateActivityDetailed(activity, answers, sequence) {
     const chosen=Number(A.broken); const ok=activity.evidence[chosen]?.broken===true; if(!ok) correct=false; details.push({item:f.link,ok,expected:f.broken,got:activity.evidence[chosen]?.label?.slice(0,70)||'—'});
   } else if (activity.type === 'config' || activity.type === 'consequence') {
     const ref=activity.route||activity.chain;
-    ref.forEach((step,i)=>{ const ok=seq[i]===step; if(!ok) correct=false; details.push({item:`${f.step} ${i+1}: ${f.expected} "${String(step).slice(0,40)}"`,ok,expected:step,got:seq[i]||'—'}); });
+    ref.forEach((step,i)=>{ const ok=seq[i]===step; if(!ok) correct=false; details.push({item:`${f.step} ${i+1}: ${f.expected} ${f.qOpen}${String(step).slice(0,40)}${f.qClose}`,ok,expected:step,got:seq[i]||'—'}); });
     if(activity.tokens&&seq.length>ref.length){ correct=false; details.push({item:f.decoys,ok:false,expected:`${ref.length} ${f.exact}`,got:`${seq.length} ${f.steps}`}); }
   } else if (activity.type === 'journal') {
-    activity.lines.forEach((line,i)=>{ const sideOk=A['side-'+i]===line[1]; const amountOk=String(A['amount-'+i]||'').replace(/\s/g,'')===line[2]; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A['side-'+i]||'—'} ${A['amount-'+i]||'—'}`}); });
+    activity.lines.forEach((line,i)=>{ const sideOk=journalSideKey(A[`side-${i}`])===journalSideKey(line[1]); const amountOk=String(A[`amount-${i}`]||'').replace(/\s/g,'')===line[2]; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A[`side-${i}`]||'—'} ${A[`amount-${i}`]||'—'}`}); });
   }
   return { correct, details };
 }
