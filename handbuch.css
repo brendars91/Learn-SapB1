@@ -137,6 +137,25 @@
 .hauptbuch__sum[data-balanced] { color: var(--sc-accent); }
 .hauptbuch__sumlabel { letter-spacing: 0.1em; }
 
+/* Puerta discreta al laboratorio: anotación mono del folio, no un botón. */
+.folio__lab {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  min-height: 44px;
+  padding-inline: 0.4rem;
+  margin-inline: -0.4rem;
+  color: var(--sc-accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.64rem;
+}
+.folio__lab:hover { color: var(--sc-ink); border-bottom-color: var(--sc-ink); }
+.folio__lab:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+
 @media (max-width: 900px) {
   .folio {
     inset: auto 0 0 0; top: auto; width: auto; flex-direction: row; align-items: center;
@@ -150,6 +169,7 @@
   .hauptbuch { margin: 0 0 0 auto; border: 0; padding: 0; }
   .hauptbuch__rule, .hauptbuch__lines { display: none; }
   .hauptbuch__sum { border: 0; margin: 0; padding: 0; font-size: 0.68rem; }
+  .folio__lab { margin-top: 0; padding-inline: 0.5rem; margin-inline: -0.5rem; }
 }
 
 /* ── Materialidades de capítulo ────────────────────────────────────────────

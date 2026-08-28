@@ -17,6 +17,19 @@
   const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ── 0 · Puerta al lab con continuidad de idioma ───────────────────────────
+  // La landing es trilingüe por URL (?lang=es|en|de, por defecto en). Ambos
+  // enlaces al lab heredan ese idioma para que no haya salto de género.
+  {
+    const docLang = (document.documentElement.lang || 'en').slice(0, 2).toLowerCase();
+    const urlLang = new URLSearchParams(location.search).get('lang');
+    const lang = ['es', 'en', 'de'].includes(urlLang) ? urlLang
+      : ['es', 'en', 'de'].includes(docLang) ? docLang : 'en';
+    if (lang !== 'en') document.querySelectorAll('a[href="/Learn-SapB1/lab/"]').forEach(a => {
+      a.href = `/Learn-SapB1/lab/?lang=${lang}`;
+    });
+  }
+
   // ── 1 · Folio y libro mayor ──────────────────────────────────────────────
 
   const folio = document.querySelector('.folio');

@@ -457,12 +457,29 @@ function renderHome(state) {
   const trackPct = list => Math.round(list.filter(s => state.progress[s.id]?.mastered).length / Math.max(1, list.length) * 100);
   const funcPct = trackPct(byTrack('functional'));
   const techPct = trackPct(byTrack('dual').concat(byTrack('technical')));
+  const virgin = stats.explored === 0;
+  const openingCopy = {
+    es: { stamp: 'ASIENTO DE APERTURA', who: 'SYN-Nordlicht Demo GmbH · Demostración', line1: 'Cargo: recién llegado. Competencias dominadas: 0 de 72.', line2: 'Expediente activo: NW-001 — la factura del cliente C20000 no aparece. El cliente quiere pagar hoy.', cta: 'Atender NW-001', map: 'Ver el mapa completo' },
+    en: { stamp: 'OPENING ENTRY', who: 'SYN-Nordlicht Demo GmbH · Demonstration', line1: 'Position: newcomer. Skills mastered: 0 of 72.', line2: 'Active case: NW-001 — customer C20000\u2019s invoice is nowhere to be found. The customer wants to pay today.', cta: 'Attend NW-001', map: 'See the full map' },
+    de: { stamp: 'ERÖFFNUNGSBUCHUNG', who: 'SYN-Nordlicht Demo GmbH · Demonstration', line1: 'Position: Neuling. Beherrschte Kompetenzen: 0 von 72.', line2: 'Aktiver Vorgang: NW-001 — die Rechnung des Kunden C20000 ist nirgends auffindbar. Der Kunde will heute zahlen.', cta: 'NW-001 bearbeiten', map: 'Gesamte Karte ansehen' }
+  }[state.locale];
   return `<div class="sbl-stack">
     <section class="sbl-cover">
       <span class="sbl-kicker">${t(state, 'kicker')}</span>
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>
+      ${virgin ? `
+      <section class="sbl-opening card" aria-label="${openingCopy.stamp}">
+        <span class="sbl-kicker">${openingCopy.stamp}</span>
+        <p class="sbl-opening__who">${openingCopy.who}</p>
+        <p class="sbl-opening__line">${openingCopy.line1}</p>
+        <p class="sbl-opening__line"><strong>${openingCopy.line2}</strong></p>
+        <div class="sbl-opening__actions">
+          <button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${openingCopy.cta}</button>
+          <button type="button" class="btn" data-action="nav" data-view="map">${openingCopy.map}</button>
+        </div>
+      </section>` : `
       <section class="sbl-desk" aria-labelledby="desk-title">
         <div class="sbl-desk-row"><div><span class="sbl-kicker">${deskCopy.title}</span><h2 id="desk-title">${deskCopy.next}</h2></div><span class="sbl-streak-seal" aria-label="${deskCopy.streak}: ${streak} ${deskCopy.days}">${deskCopy.streak} · ${streak}d</span></div>
         <div class="sbl-desk-recommendation"><div><strong>${local(nextSkill.title, state.locale)}</strong><p class="sbl-desk-why">${escapeHtml(reason)}</p></div><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${deskCopy.continue}</button></div>
@@ -473,7 +490,7 @@ function renderHome(state) {
         <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
         <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Funktionale Spur' : state.locale === 'en' ? 'Functional track' : 'Ruta funcional'}</span><span class="viz-stat-value">${funcPct}%</span><span class="text-small">L0-L5</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'techTrackLabel')}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
-      </div>
+      </div>`}
     </section>
     ${renderLedgerSpine(state)}
     ${renderHeatmap(state)}
@@ -860,13 +877,20 @@ export function renderAppMarkup(state, options = {}) {
 }
 
 function loadStored() {
+  // Continuidad landing→lab: ?lang= explícito gana una vez; después persiste
+  // la elección del propio lab en localStorage.
+  let forced = null;
+  try {
+    const urlLang = new URLSearchParams(globalThis.location?.search || '').get('lang');
+    forced = ['es', 'en', 'de'].includes(urlLang) ? urlLang : null;
+  } catch { /* entorno sin URLSearchParams (VM de tests): sin idioma forzado */ }
   try {
     const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if (!value) return createInitialState();
+    if (!value) return createInitialState(forced ? { locale: forced } : {});
     const validation = validateProgressImport(value);
-    if (!validation.valid) return createInitialState();
+    if (!validation.valid) return createInitialState(forced ? { locale: forced } : {});
     return createInitialState({
-      locale: value.locale, track: value.track, progress: value.progress,
+      locale: forced || value.locale, track: value.track, progress: value.progress,
       diagnosticCompleted: value.settings?.diagnosticCompleted,
       diagnosticScore: value.settings?.diagnosticScore,
       recommendedLevel: value.settings?.recommendedLevel,
