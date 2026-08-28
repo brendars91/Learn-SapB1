@@ -43,7 +43,7 @@ export const CASES = [
     hints: { es: '¿Qué declaración se presenta con ese código?' }
   }),
   decision('SYN-CASE-03', 2, {
-    q: { es: 'SYN-SO-0001 está parcialmente entregado. ¿Qué comprobar antes de copiar?', en: 'SYN-SO-0001 is partially delivered. What to check before copying?', de: 'SYN-SO-0001 teiligeliefert. Was prüfen?' },
+    q: { es: 'SYN-SO-0001 está parcialmente entregado. ¿Qué comprobar antes de copiar?', en: 'SYN-SO-0001 is partially delivered. What to check before copying?', de: 'SYN-SO-0001 teilgeliefert. Was prüfen?' },
     opts: { es: ['Solo el total original', 'Cantidades abiertas, almacén y relación base-destino', 'Cerrar el pedido'], en: ['Only the original total', 'Open quantities, warehouse, base-target link', 'Close the order'], de: ['Nur Summe', 'Offene Mengen, Lager, Bezug', 'Schließen'] },
     ok: 1,
     why: { es: 'El documento destino debe respetar la cantidad realmente abierta y conservar trazabilidad.', en: 'The target must respect the truly open quantity and keep traceability.', de: 'Zielbeleg respektiert offene Menge.' },

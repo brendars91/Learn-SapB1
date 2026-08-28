@@ -4,7 +4,7 @@ import { calculateMastery, recommendNext, scanSensitiveInput, lintPrompt, valida
 import { b1Window } from './ui-b1.mjs';
 import { trText, trNode, trList } from './i18n.mjs';
 import { MASTERCLASS } from './masterclass.mjs';
-import { getActivity, validateActivityDetailed } from './activities.mjs';
+import { getActivity, validateActivityDetailed, mapAnswerToLocale, journalSideTexts, journalSideKey } from './activities.mjs';
 import { ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS } from './advanced.mjs';
 import { CAREER, getTicket, careerProgress, kpiSnapshot } from './career.mjs';
 
@@ -53,7 +53,52 @@ function updateSkill(progress, skillId, change) {
 
 export function reduceState(state, action) {
   switch (action.type) {
-    case 'SET_LOCALE': return ['es', 'en', 'de'].includes(action.locale) ? { ...state, locale: action.locale, toast: '' } : state;
+    case 'SET_LOCALE': {
+      if (!['es', 'en', 'de'].includes(action.locale)) return state;
+      // i18n: el feedback de actividad y las respuestas viven en state como texto YA
+      // localizado (FEEDBACK[locale], opciones de selects, tokens de secuencia). Al
+      // cambiar de idioma se re-deriva TODO con el locale activo: respuestas mapeadas
+      // por posición entre opciones equivalentes y feedback re-validado, para que ni
+      // el bloque de corrección quede congelado ni un check correcto se invalide.
+      let activityFeedback = state.activityFeedback;
+      let activityAnswers = state.activityAnswers;
+      let activitySequence = state.activitySequence;
+      if (state.selectedSkillId) {
+        const skill = SKILLS.find(s => s.id === state.selectedSkillId);
+        const oldActivity = skill ? getActivity(skill, state.locale) : null;
+        const activity = skill ? getActivity(skill, action.locale) : null;
+        if (activity && !activity.unavailable) {
+          if (activity.type === 'simulator' && oldActivity?.type === 'simulator') {
+            activityAnswers = Object.fromEntries(Object.entries(activityAnswers).map(([key, value]) => {
+              const index = Number(key.replace('sim-', ''));
+              const oldOptions = oldActivity.targets[index]?.options || [];
+              const newOptions = activity.targets[index]?.options || [];
+              return [key, mapAnswerToLocale(value, oldOptions, newOptions)];
+            }));
+          } else if ((activity.type === 'config' || activity.type === 'consequence')) {
+            activitySequence = activitySequence.map(value => mapAnswerToLocale(value, oldActivity?.tokens || [], activity.tokens || []));
+          } else if (activity.type === 'journal') {
+            activityAnswers = Object.fromEntries(Object.entries(activityAnswers).map(([key, value]) => {
+              if (!key.startsWith('side-')) return [key, value];
+              const semantic = journalSideKey(value);
+              return [key, semantic ? journalSideTexts(action.locale)[semantic] : value];
+            }));
+          }
+          if (activityFeedback) {
+            const revalidated = validateActivityDetailed(activity, activityAnswers, activitySequence);
+            const passed = revalidated.correct;
+            activityFeedback = {
+              correct: passed,
+              message: passed ? (activity.resolution || translate(action.locale, 'actRightPrompt')) : translate(action.locale, 'actWrongPrompt'),
+              details: revalidated.details
+            };
+          }
+        } else if (activityFeedback) {
+          activityFeedback = null;
+        }
+      }
+      return { ...state, locale: action.locale, toast: '', activityAnswers, activitySequence, activityFeedback };
+    }
     case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
     case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
     case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0, toast: '' };
@@ -191,8 +236,8 @@ function svgDiagram(diagram, locale) {
   if (kind === 'hub') {
     const cx = 300, cy = 84, r = 44;
     body = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="rgba(74,163,255,0.16)" stroke="${theme.stroke}" stroke-width="1.6"/>
-      <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--sbl-ink, #e8edf7)">${escapeHtml(local(nodes[nodes.length - 1]?.t || nodes[0].t, locale))}</text>
-      <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="10" fill="${theme.dim}">${escapeHtml(local(nodes[nodes.length - 1]?.s || '', locale))}</text>`
+      <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--sbl-ink, #e8edf7)">${local(nodes[nodes.length - 1]?.t || nodes[0].t, locale)}</text>
+      <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="10" fill="${theme.dim}">${local(nodes[nodes.length - 1]?.s || '', locale)}</text>`
       + nodes.slice(0, 4).map((node, i) => {
         const angle = (Math.PI * 2 * i) / Math.min(nodes.length - 1, 4) - Math.PI / 2;
         const x = cx + Math.cos(angle) * 175 - 60, y = cy + Math.sin(angle) * 74 - 20;
@@ -242,8 +287,8 @@ function svgDiagram(diagram, locale) {
         const x = 60 + i * 160;
         const last = i === n - 1;
         return `<circle cx="${x}" cy="52" r="${last ? 10 : 7}" fill="${last ? 'var(--sbl-gold, #ffc857)' : 'var(--sbl-accent, #4aa3ff)'}"/>`
-          + `<text x="${x}" y="30" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--sbl-ink, #e8edf7)">${escapeHtml(local(node.t, locale))}</text>`
-          + `<text x="${x}" y="80" text-anchor="middle" font-size="10" fill="${theme.dim}">${escapeHtml(local(node.s, locale))}</text>`;
+          + `<text x="${x}" y="30" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--sbl-ink, #e8edf7)">${local(node.t, locale)}</text>`
+          + `<text x="${x}" y="80" text-anchor="middle" font-size="10" fill="${theme.dim}">${local(node.s, locale)}</text>`;
       }).join('');
     return wrap(100, 600, cap, body);
   }
@@ -273,7 +318,7 @@ function renderHeatmap(state) {
     const mastered = levelSkills.filter(s => state.progress[s.id]?.mastered).length;
     const pct = Math.round((mastered / levelSkills.length) * 100);
     const heat = pct === 0 ? ' sbl-heat-0' : pct < 34 ? ' sbl-heat-1' : pct < 67 ? ' sbl-heat-2' : pct < 100 ? ' sbl-heat-3' : ' sbl-heat-4';
-    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${escapeHtml(local(level.title, state.locale))}: ${pct}%" aria-label="${escapeHtml(local(level.title, state.locale))} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${escapeHtml(local(level.title, state.locale).slice(0, 14))}</span></button>`;
+    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${local(level.title, state.locale)}: ${pct}%" aria-label="${local(level.title, state.locale)} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${local(level.title, state.locale).slice(0, 14)}</span></button>`;
   }).join('');
   return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><div class="sbl-heatmap">${cells}</div></section>`;
 }
@@ -438,7 +483,7 @@ function renderLearnMode(state, skill) {
   const pathHtml = (skill.path || []).length ? `<div class="sbl-detail-grid__full"><h4>${t(state, 'pathLabel')}</h4><div class="sbl-path">${skill.path.map((crumb, i) => `${i ? '<span class="sep">›</span>' : ''}<span class="crumb">${escapeHtml(trText(crumb, state.locale))}</span>`).join('')}</div></div>` : '';
   const ex = skill.example;
   const exHtml = ex ? `<div class="sbl-example"><h4>${t(state, 'exampleLabel')}</h4><p><strong>${escapeHtml(trNode(ex.q, state.locale))}</strong></p><pre class="sbl-figure">${(ex.show || []).map(l => escapeHtml(trText(l, state.locale))).join('\n')}</pre>${ex.a ? `<p class="text-small"><em>${escapeHtml(trNode(ex.a, state.locale))}</em></p>` : ''}</div>` : '';
-  const anHtml = an ? `<div class="sbl-anchor"><h4>${t(state, 'anchorLabel')}</h4><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${escapeHtml(local(an, state.locale))}</em></p></div>` : '';
+  const anHtml = an ? `<div class="sbl-anchor"><h4>${t(state, 'anchorLabel')}</h4><span class="glyph" aria-hidden="true">${an.g}</span><p><em>${local(an, state.locale)}</em></p></div>` : '';
   return `<div class="sbl-learn">
     ${anHtml}
     ${renderMasterclass(state, skill)}
@@ -495,10 +540,13 @@ function renderActivityBody(state, activity) {
   }
   if (activity.type === 'journal') {
     const amount = v => Number(String(v||'0').replace(/\./g,'').replace(',','.')) || 0;
-    const debit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Debe'?amount(A[`amount-${i}`]):0),0);
-    const credit = activity.lines.reduce((sum,_,i)=>sum+(A[`side-${i}`]==='Haber'?amount(A[`amount-${i}`]):0),0);
+    // Los lados se guardan y comparan con el texto del locale activo (Debe/Haber,
+    // Debit/Credit, Soll/Haben): SET_LOCALE re-mapea las respuestas al cambiar idioma.
+    const sides = journalSideTexts(state.locale);
+    const debit = activity.lines.reduce((sum,_,i)=>sum+(journalSideKey(A[`side-${i}`])==='debit'?amount(A[`amount-${i}`]):0),0);
+    const credit = activity.lines.reduce((sum,_,i)=>sum+(journalSideKey(A[`side-${i}`])==='credit'?amount(A[`amount-${i}`]):0),0);
     const balanced = debit>0 && Math.abs(debit-credit)<.005;
-    return `<div class="act-journal"><div class="act-jhead"><span>${t(state, 'actAccount')}</span><span>${t(state, 'actSide')}</span><span>${t(state, 'actAmount')}</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(trText(line[0], state.locale))}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option value="Debe"${A[`side-${i}`]==='Debe'?' selected':''}>${t(state, 'actDebit')}</option><option value="Haber"${A[`side-${i}`]==='Haber'?' selected':''}>${t(state, 'actCredit')}</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ ${t(state, 'actDebit')} <output>${debit.toFixed(2).replace('.',',')}</output> · Σ ${t(state, 'actCredit')} <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?`✓ ${t(state, 'actBalanced')}`:`⚠ ${t(state, 'actDifference')} `+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div><p class="act-account-notice">${t(state, 'accountNotice')}</p></div>`;
+    return `<div class="act-journal"><div class="act-jhead"><span>${t(state, 'actAccount')}</span><span>${t(state, 'actSide')}</span><span>${t(state, 'actAmount')}</span></div>${activity.lines.map((line,i)=>`<div class="act-jline"><strong>${escapeHtml(trText(line[0], state.locale))}</strong><select class="form-select" data-activity-input="side-${i}"><option value="">—</option><option value="${sides.debit}"${journalSideKey(A[`side-${i}`])==='debit'?' selected':''}>${t(state, 'actDebit')}</option><option value="${sides.credit}"${journalSideKey(A[`side-${i}`])==='credit'?' selected':''}>${t(state, 'actCredit')}</option></select><input class="form-control" inputmode="decimal" data-activity-input="amount-${i}" value="${escapeHtml(A[`amount-${i}`]||'')}" placeholder="0,00"></div>`).join('')}<div class="act-balance${balanced?' is-balanced':''}">Σ ${t(state, 'actDebit')} <output>${debit.toFixed(2).replace('.',',')}</output> · Σ ${t(state, 'actCredit')} <output>${credit.toFixed(2).replace('.',',')}</output> · ${balanced?`✓ ${t(state, 'actBalanced')}`:`⚠ ${t(state, 'actDifference')} `+Math.abs(debit-credit).toFixed(2).replace('.',',')}</div><p class="act-account-notice">${t(state, 'accountNotice')}</p></div>`;
   }
   return '';
 }

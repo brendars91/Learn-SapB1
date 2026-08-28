@@ -32,8 +32,8 @@ export const MASTERCLASS = {
   ],
   war: { q: { es: 'El cliente llama: "el sistema está lento".', en: 'Client calls: "the system is slow".' },
     sympt: [{ es: 'Los usuarios reportan lentitud difusa: todo va lento, nadie sabe qué.', en: 'Users report diffuse slowness: everything is slow, nobody knows what.' }],
-    root: [{ es: 'Causa raíz: (1) Un día de cierre genera miles de asientos pesados; (2) license monitor + dashboards por usuario.', en: 'Root cause: (1) A closing day generates thousands of heavy journal entries; (2) license monitor + per-user dashboards.' }],
-    fix: [{ es: 'Resolución: leer el hilo del cierre, no el sistema entero: Query de cancelación + revisar licencias activas.', en: 'Fix: read the closing thread, not the whole system: cancellation query + review active licenses.' }] },
+    root: [{ es: '(1) Un día de cierre genera miles de asientos pesados; (2) license monitor + dashboards por usuario.', en: '(1) A closing day generates thousands of heavy journal entries; (2) license monitor + per-user dashboards.' }],
+    fix: [{ es: 'Leer el hilo del cierre, no el sistema entero: Query de cancelación + revisar licencias activas.', en: 'Read the closing thread, not the whole system: cancellation query + review active licenses.' }] },
   bp: [
     { es: 'Aprende la ruta de menú de cada documento a frío: Ventas→Pedido, Ventas→Entrega, Ventas→Factura...', en: 'Learn each document\'s menu path cold: Sales→Order, Sales→Delivery, Sales→Invoice...' },
     { practice: true, es: 'Práctica pro: pon un hábito de 2 minutos: antes de operar, dibuja el módulo en papel y sus 3 pantallas clave.', en: 'Pro practice: build a 2-minute habit: before operating, sketch the module and its 3 key screens on paper.' }
