@@ -27,7 +27,8 @@ export function recommendNext(skills, progress = {}, now = new Date(), options =
     const state = progress[skill.id] || {};
     const mastery = Number(state.mastery) || 0;
     const reviewAt = state.nextReview ? new Date(state.nextReview).getTime() : 0;
-    const overdue = reviewAt <= time ? 60 : 0;
+    // A new skill has no review date: it must not be treated as overdue.
+    const overdue = reviewAt > 0 && reviewAt <= time ? 60 : 0;
     const blockedPrerequisites = (skill.prerequisites || []).filter(id => (progress[id]?.mastery || 0) < 80).length;
     const prerequisiteBoost = blockedPrerequisites ? -80 * blockedPrerequisites : 0;
     const score = (100 - mastery) + overdue + (Number(skill.riskWeight) || 1) * 8 + prerequisiteBoost - skill.level * 2;
@@ -35,6 +36,43 @@ export function recommendNext(skills, progress = {}, now = new Date(), options =
   });
   ranked.sort((a, b) => b.score - a.score || a.skill.level - b.skill.level || a.skill.id.localeCompare(b.skill.id));
   return ranked[0]?.skill || null;
+}
+
+/** Skill ids whose persisted review date is due, oldest first. Pure + UTC-safe. */
+export function deriveDueReviews(progress = {}, now = new Date()) {
+  const time = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  return Object.entries(progress)
+    .filter(([, record]) => record?.explored && record.nextReview && new Date(record.nextReview).getTime() <= time)
+    .sort((a, b) => new Date(a[1].nextReview) - new Date(b[1].nextReview) || a[0].localeCompare(b[0]))
+    .map(([skillId]) => skillId);
+}
+
+/** Consecutive UTC practice days ending today or yesterday; multiple skills/day count once. */
+export function deriveGlobalStreak(progress = {}, now = new Date()) {
+  const dayKey = value => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  };
+  const days = new Set(Object.values(progress).map(record => dayKey(record?.lastPractised)).filter(value => value !== null));
+  if (!days.size) return 0;
+  const DAY = 86400000;
+  const today = dayKey(now);
+  let cursor = days.has(today) ? today : today - DAY;
+  let streak = 0;
+  while (days.has(cursor)) { streak += 1; cursor -= DAY; }
+  return streak;
+}
+
+const RECOMMENDATION_REASON = {
+  es: { overdue: 'Repaso vencido: consolida antes de avanzar', learning: 'Continúa una habilidad en curso', fresh: 'Siguiente paso recomendado en tu ruta' },
+  en: { overdue: 'Review due: consolidate before moving on', learning: 'Continue a skill already in progress', fresh: 'Recommended next step in your path' },
+  de: { overdue: 'Wiederholung fällig: festigen vor dem nächsten Schritt', learning: 'Eine begonnene Kompetenz fortsetzen', fresh: 'Empfohlener nächster Schritt auf deinem Pfad' }
+};
+
+export function recommendationReason(record = {}, now = new Date(), locale = 'es') {
+  const copy = RECOMMENDATION_REASON[locale] || RECOMMENDATION_REASON.es;
+  if (record.nextReview && new Date(record.nextReview).getTime() <= new Date(now).getTime()) return copy.overdue;
+  return record.explored ? copy.learning : copy.fresh;
 }
 
 export function scanSensitiveInput(value = '') {

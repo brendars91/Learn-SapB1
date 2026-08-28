@@ -45,7 +45,7 @@ test('practice and challenge update dimensions but failed safety cannot master',
   assert.equal(challenged.progress['SYN-SK-L4-03'].mastered, false);
 });
 
-test('one correct answer cannot master a skill and mastery requires repeated verified retrieval', () => {
+test('mastery requires repeated verified retrieval and remains earned after a later miss', () => {
   const id = 'SYN-SK-L4-03';
   let state = reduceState(createInitialState(), { type: 'PRACTISE_SKILL', skillId: id, now: '2026-08-22T00:00:00.000Z' });
   state = reduceState(state, { type: 'ASSESS_SKILL', skillId: id, correct: true, safetyGatePassed: true, now: '2026-08-22T01:00:00.000Z' });
@@ -56,7 +56,7 @@ test('one correct answer cannot master a skill and mastery requires repeated ver
   state = reduceState(state, { type: 'ASSESS_SKILL', skillId: id, correct: true, safetyGatePassed: true, now: '2026-08-24T01:00:00.000Z' });
   assert.equal(state.progress[id].mastered, true);
   state = reduceState(state, { type: 'ASSESS_SKILL', skillId: id, correct: false, safetyGatePassed: true, now: '2026-08-25T01:00:00.000Z' });
-  assert.equal(state.progress[id].mastered, false);
+  assert.equal(state.progress[id].mastered, true);
   assert.equal(state.progress[id].streak, 0);
 });
 

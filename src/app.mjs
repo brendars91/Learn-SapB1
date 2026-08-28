@@ -1,6 +1,6 @@
 // app.mjs v2 — Motor entender-primero con visualizaciones SVG y evaluación 4 pasos.
 import { I18N, LEVELS, SKILLS, CASES, INCIDENTS, BOSSES, EVIDENCE, DIAGNOSTIC, PROCESS_STEPS, translate } from './content.mjs';
-import { calculateMastery, recommendNext, scanSensitiveInput, lintPrompt, validateProgressImport, nextReviewDate } from './domain.mjs';
+import { calculateMastery, recommendNext, scanSensitiveInput, lintPrompt, validateProgressImport, nextReviewDate, deriveDueReviews, deriveGlobalStreak, recommendationReason } from './domain.mjs';
 import { b1Window } from './ui-b1.mjs';
 import { trText, trNode, trList } from './i18n.mjs';
 import { MASTERCLASS } from './masterclass.mjs';
@@ -36,7 +36,7 @@ export function createInitialState(saved = {}) {
     consoleTab: 'queries', consoleQuery: null, consoleOpen: null,
     levelFilter: saved.levelFilter ?? 'all',
     trackFilter: saved.trackFilter || 'all',
-    assessmentResult: null,
+    assessmentResult: null, masteryMoment: null, skillDetailOpen: true,
     caseIndex: Number(saved.caseIndex) || 0,
     incidentIndex: Number(saved.incidentIndex) || 0,
     bossIndex: Number(saved.bossIndex) || 0,
@@ -100,8 +100,8 @@ export function reduceState(state, action) {
       return { ...state, locale: action.locale, toast: '', activityAnswers, activitySequence, activityFeedback };
     }
     case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
-    case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
-    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0, toast: '' };
+    case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, skillDetailOpen: action.view === 'map' ? false : state.skillDetailOpen, assessmentResult: null, masteryMoment: null, toast: '' } : state;
+    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillDetailOpen: true, skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, masteryMoment: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0, toast: '' };
     case 'SET_SKILL_MODE': return { ...state, skillMode: ['learn','guided','prove'].includes(action.mode) ? action.mode : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0 };
     case 'ACTIVITY_ANSWER': return { ...state, activityAnswers: { ...state.activityAnswers, [action.key]: action.value }, activityFeedback: null };
     case 'ACTIVITY_TOGGLE': {
@@ -117,6 +117,7 @@ export function reduceState(state, action) {
     case 'ANSWER_STEP_PRINCIPLE': return { ...state, assessmentPrinciple: action.index, assessmentStep: Math.max(state.assessmentStep, 2) };
     case 'REVEAL_REASONING': return { ...state, assessmentShown: true, assessmentStep: 3 };
     case 'SET_LEVEL_FILTER': return { ...state, levelFilter: action.value, toast: '' };
+    case 'OPEN_LEVEL': return { ...state, view: 'map', levelFilter: action.value, skillDetailOpen: false, assessmentResult: null, masteryMoment: null, toast: '' };
     case 'SET_CONSOLE_TAB': return ['queries','dashboards','vibe'].includes(action.tab) ? { ...state, consoleTab: action.tab, consoleQuery: null, toast: '' } : state;
     case 'OPEN_CONSOLE_QUERY': return { ...state, consoleQuery: action.id, toast: '' };
     case 'CLOSE_CONSOLE_QUERY': return { ...state, consoleQuery: null, toast: '' };
@@ -152,12 +153,17 @@ export function reduceState(state, action) {
       const correctAttempts = action.correct ? (existing.correctAttempts || 0) + 1 : (existing.correctAttempts || 0);
       const principleBonus = action.principleCorrect ? 5 : 0;
       if (principleBonus) { dimensions.verification = Math.min(100, dimensions.verification + principleBonus); }
+      // Mastery is monotonic: later practice may reset the streak, never erase an earned competency.
+      const mastered = Boolean(existing.mastered || (action.correct && mastery.mastered && correctAttempts >= 3));
+      const masteryMoment = !existing.mastered && mastered ? { skillId: action.skillId, achievedAt: now.toISOString() } : null;
       return {
         ...state,
-        progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: mastery.score, mastered: action.correct && mastery.mastered, explored: true, streak, correctAttempts, safetyGatePassed, lastPractised: now.toISOString(), nextReview: nextReviewDate(streak, now) }),
-        assessmentResult: { kind: 'skill', correct: action.correct, safetyGatePassed, principleCorrect: action.principleCorrect }
+        progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: mastery.score, mastered, explored: true, streak, correctAttempts, safetyGatePassed, lastPractised: now.toISOString(), nextReview: nextReviewDate(streak, now) }),
+        assessmentResult: { kind: 'skill', correct: action.correct, safetyGatePassed, principleCorrect: action.principleCorrect },
+        masteryMoment
       };
     }
+    case 'CLEAR_MASTERY_MOMENT': return { ...state, masteryMoment: null };
     case 'CLEAR_SKILL_ASSESSMENT': return { ...state, assessmentResult: null, assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false };
     case 'ANSWER_DECISION': return { ...state, assessmentResult: { kind: action.kind, correct: action.correct, rationale: action.rationale } };
     case 'NEXT_DECISION': {
@@ -202,7 +208,9 @@ function local(value, locale) { return escapeHtml(trNode(value, locale)); }
 
 function navButton(state, view, key) {
   const selected = state.view === view;
-  return `<button type="button" class="btn${selected ? ' btn-primary' : ''}" data-action="nav" data-view="${view}" aria-pressed="${selected}">${t(state, key)}</button>`;
+  const dueCount = view === 'map' ? deriveDueReviews(state.progress, renderNow(state)).length : 0;
+  const due = dueCount ? `<span class="sbl-review-count" aria-label="${state.locale === 'de' ? 'Fällige Wiederholungen' : state.locale === 'en' ? 'Reviews due' : 'Repasos vencidos'}">${dueCount}</span>` : '';
+  return `<button type="button" class="btn${selected ? ' btn-primary' : ''}" data-action="nav" data-view="${view}" aria-pressed="${selected}">${t(state, key)}${due}</button>`;
 }
 
 // ─── Diagramas SVG por arquetipo ─────────────────────────────────────────────
@@ -323,6 +331,22 @@ function renderHeatmap(state) {
   return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><div class="sbl-heatmap">${cells}</div></section>`;
 }
 
+// ─── Espina del Ledger: nueve capítulos de una misma ruta ────────────────────
+function renderLedgerSpine(state) {
+  const title = state.locale === 'de' ? 'Der Lernpfad im Ledger' : state.locale === 'en' ? 'The learning path in the ledger' : 'La ruta de aprendizaje en el ledger';
+  const intro = state.locale === 'de' ? 'Jeder Knoten ist ein Kapitel. Öffne ein Niveau, um seine Kompetenzen zu sehen.' : state.locale === 'en' ? 'Each node is a chapter. Open a level to inspect its competencies.' : 'Cada nodo es un capítulo. Abre un nivel para inspeccionar sus competencias.';
+  const nodes = LEVELS.map(level => {
+    const skills = SKILLS.filter(skill => skill.level === level.id);
+    const mastered = skills.filter(skill => state.progress[skill.id]?.mastered).length;
+    const explored = skills.filter(skill => state.progress[skill.id]?.explored).length;
+    const pct = Math.round(mastered / Math.max(1, skills.length) * 100);
+    const status = pct === 100 ? 'is-complete' : explored > 0 ? 'is-progress' : 'is-new';
+    const statusText = pct === 100 ? t(state, 'masteredStatus') : explored > 0 ? t(state, 'learningStatus') : t(state, 'newStatus');
+    return `<button type="button" class="sbl-spine-node ${status}" data-action="spine-level" data-value="${level.id}" aria-label="${local(level.title, state.locale)} ${pct}%"><span class="sbl-spine-index">${String(level.id).padStart(2, '0')}</span><span class="sbl-spine-copy"><strong>${local(level.title, state.locale)}</strong><small>${statusText} · ${pct}%</small></span><span class="sbl-spine-mark" aria-hidden="true">${pct === 100 ? '✓' : explored > 0 ? '◐' : '○'}</span></button>`;
+  }).join('');
+  return `<section class="sbl-spine" aria-labelledby="spine-title"><div class="sbl-spine-head"><span class="sbl-kicker">L0—L8</span><h2 id="spine-title">${title}</h2><p>${intro}</p></div><div class="sbl-spine-track"><svg class="sbl-spine-svg" viewBox="0 0 32 800" preserveAspectRatio="none" aria-hidden="true"><line x1="16" y1="0" x2="16" y2="800" vector-effect="non-scaling-stroke"/></svg><div class="sbl-spine-nodes">${nodes}</div></div></section>`;
+}
+
 function renderChrome(state) {
   return `<div class="sbl-stack">
     <div class="sbl-topline">
@@ -391,17 +415,29 @@ function renderDiagnostic(state) {
   </section>`;
 }
 
+function renderNow(state) { return state.__renderNow instanceof Date ? state.__renderNow : new Date(); }
+
 function progressStats(state) {
   const records = Object.values(state.progress);
   const explored = records.filter(record => record.explored).length;
   const mastered = records.filter(record => record.mastered).length;
-  const due = records.filter(record => record.nextReview && new Date(record.nextReview) <= new Date()).length;
+  const due = deriveDueReviews(state.progress, renderNow(state)).length;
   return { explored, mastered, due, percent: Math.round((mastered / SKILLS.length) * 100) };
 }
 
 function renderHome(state) {
   const stats = progressStats(state);
-  const nextSkill = recommendNext(SKILLS, state.progress, new Date(), { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
+  const now = renderNow(state);
+  const dueIds = deriveDueReviews(state.progress, now);
+  const dueSkills = dueIds.map(id => SKILLS.find(skill => skill.id === id)).filter(Boolean);
+  const streak = deriveGlobalStreak(state.progress, now);
+  const nextSkill = recommendNext(SKILLS, state.progress, now, { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
+  const reason = recommendationReason(state.progress[nextSkill.id] || {}, now, state.locale);
+  const deskCopy = {
+    es: { title: 'Tu escritorio de hoy', due: 'Repasos de hoy', clear: 'Nada vencido hoy', streak: 'Racha', days: 'días', next: 'Siguiente recomendada', continue: 'Continuar' },
+    en: { title: "Today's desk", due: 'Reviews today', clear: 'Nothing due today', streak: 'Streak', days: 'days', next: 'Recommended next', continue: 'Continue' },
+    de: { title: 'Dein heutiger Schreibtisch', due: 'Heutige Wiederholungen', clear: 'Heute ist nichts fällig', streak: 'Serie', days: 'Tage', next: 'Als Nächstes empfohlen', continue: 'Weiter' }
+  }[state.locale];
   const byTrack = trackId => SKILLS.filter(s => s.track === trackId || s.track === 'dual');
   const trackPct = list => Math.round(list.filter(s => state.progress[s.id]?.mastered).length / Math.max(1, list.length) * 100);
   const funcPct = trackPct(byTrack('functional'));
@@ -412,17 +448,19 @@ function renderHome(state) {
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>
+      <section class="sbl-desk" aria-labelledby="desk-title">
+        <div class="sbl-desk-row"><div><span class="sbl-kicker">${deskCopy.title}</span><h2 id="desk-title">${deskCopy.next}</h2></div><span class="sbl-streak-seal" aria-label="${deskCopy.streak}: ${streak} ${deskCopy.days}">${deskCopy.streak} · ${streak}d</span></div>
+        <div class="sbl-desk-recommendation"><div><strong>${local(nextSkill.title, state.locale)}</strong><p class="sbl-desk-why">${escapeHtml(reason)}</p></div><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${deskCopy.continue}</button></div>
+        <div class="sbl-desk-reviews"><span class="text-small"><strong>${deskCopy.due}: ${dueSkills.length}</strong></span>${dueSkills.length ? dueSkills.slice(0, 5).map(skill => `<button type="button" class="sbl-review-chip" data-action="select-skill" data-skill="${skill.id}">${local(skill.title, state.locale)}</button>`).join('') : `<span class="text-muted">${deskCopy.clear}</span>`}</div>
+      </section>
       <div class="viz-grid">
         <div class="card viz-stat"><span class="text-muted">${t(state, 'mastery')}</span><span class="viz-stat-value">${stats.percent}%</span><span class="text-small">${stats.mastered}/72</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
         <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Funktionale Spur' : state.locale === 'en' ? 'Functional track' : 'Ruta funcional'}</span><span class="viz-stat-value">${funcPct}%</span><span class="text-small">L0-L5</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'techTrackLabel')}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
       </div>
-      <div class="sbl-actions">
-        <button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${t(state, 'begin')} · ${local(nextSkill.title, state.locale)}</button>
-        <button type="button" class="btn" data-action="nav" data-view="ai">${state.locale === 'de' ? 'Erweiterte Konsole öffnen' : state.locale === 'en' ? 'Open advanced console' : 'Abrir consola avanzada'}</button>
-      </div>
     </section>
+    ${renderLedgerSpine(state)}
     ${renderHeatmap(state)}
     ${renderLevelBars(state)}
   </div>`;
@@ -438,11 +476,16 @@ function renderLevelBars(state) {
     }).join('')}</div>
   </section>`;
 }
-function skillStatus(state, skill) {
+function skillStatusKey(state, skill) {
   const record = state.progress[skill.id];
-  if (record?.mastered) return t(state, 'masteredStatus');
-  if (record?.explored) return t(state, 'learningStatus');
-  return t(state, 'newStatus');
+  if (record?.mastered) return 'mastered';
+  if (record?.explored) return 'learning';
+  return 'new';
+}
+
+function skillStatus(state, skill) {
+  const key = skillStatusKey(state, skill);
+  return t(state, key === 'mastered' ? 'masteredStatus' : key === 'learning' ? 'learningStatus' : 'newStatus');
 }
 
 
@@ -593,6 +636,7 @@ function renderSkillDetail(state, skill) {
         <button type="button" class="btn${mode === 'prove' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="prove" aria-pressed="${mode === 'prove'}">${t(state, 'proveSkill')}</button>
       </div></div>
     <h2 id="skill-title">${local(skill.title, state.locale)}</h2>
+    ${state.progress[skill.id]?.nextReview && new Date(state.progress[skill.id].nextReview) <= renderNow(state) ? `<div class="sbl-review-badge">${state.locale === 'de' ? 'Wiederholung fällig' : state.locale === 'en' ? 'Review due' : 'Repaso vencido'}</div>` : ''}
     ${mode === 'learn' ? renderLearnMode(state, skill) : renderProveMode(state, skill)}
   </article>`;
 }
@@ -600,13 +644,36 @@ function renderSkillDetail(state, skill) {
 function renderMap(state) {
   const selected = SKILLS.find(skill => skill.id === state.selectedSkillId) || SKILLS[0];
   const filtered = SKILLS.filter(skill => (state.levelFilter === 'all' || String(skill.level) === String(state.levelFilter)) && (state.trackFilter === 'all' || skill.track === state.trackFilter || skill.track === 'dual'));
+  const dueIds = deriveDueReviews(state.progress, renderNow(state));
+  const dueSkills = dueIds.map(id => SKILLS.find(skill => skill.id === id)).filter(Boolean);
+  const reviewCopy = {
+    es: { title: 'Repasos que reclaman tu atención', body: 'Consolida estas competencias antes de abrir una ruta nueva.', badge: 'Repaso vencido' },
+    en: { title: 'Reviews calling for your attention', body: 'Consolidate these competencies before opening a new path.', badge: 'Review due' },
+    de: { title: 'Fällige Wiederholungen', body: 'Festige diese Kompetenzen, bevor du einen neuen Pfad öffnest.', badge: 'Wiederholung fällig' }
+  }[state.locale];
+  const reviewBanner = dueSkills.length ? `<aside class="sbl-review-banner" aria-labelledby="review-banner-title"><div><span class="sbl-kicker">${reviewCopy.badge}</span><h2 id="review-banner-title">${reviewCopy.title}</h2><p>${reviewCopy.body}</p></div><div class="sbl-review-banner-list">${dueSkills.slice(0, 5).map(skill => `<button type="button" class="sbl-review-chip" data-action="select-skill" data-skill="${skill.id}">${local(skill.title, state.locale)}</button>`).join('')}</div></aside>` : '';
   return `<div class="sbl-stack">
+    ${reviewBanner}
     <div class="viz-controls">
       <label class="form-label">${t(state, 'level')}<select class="form-select" data-action="level-filter"><option value="all">${t(state, 'allLevels')}</option>${LEVELS.map(level => `<option value="${level.id}"${String(state.levelFilter) === String(level.id) ? ' selected' : ''}>${level.id} · ${local(level.title, state.locale)}</option>`).join('')}</select></label>
       <label class="form-label">${t(state, 'track')}<select class="form-select" data-action="track-filter"><option value="all">${t(state, 'allTracks')}</option><option value="functional"${state.trackFilter === 'functional' ? ' selected' : ''}>${t(state, 'trackFunctional')}</option><option value="technical"${state.trackFilter === 'technical' ? ' selected' : ''}>${t(state, 'trackTechnical')}</option><option value="dual"${state.trackFilter === 'dual' ? ' selected' : ''}>${t(state, 'trackDual')}</option></select></label>
     </div>
-    <div class="sbl-levels">${LEVELS.filter(level => filtered.some(skill => skill.level === level.id)).map(level => `<section class="sbl-level-group" aria-labelledby="level-${level.id}"><div class="sbl-level-heading"><h2 id="level-${level.id}">${t(state, 'level')} ${level.id} · ${local(level.title, state.locale)}</h2><span class="text-small">${filtered.filter(skill => skill.level === level.id).length}/8</span></div><div class="viz-grid">${filtered.filter(skill => skill.level === level.id).map(skill => `<button type="button" class="btn viz-tile sbl-node${skill.id === selected.id ? ' is-selected' : ''}" data-action="select-skill" data-skill="${skill.id}" aria-pressed="${skill.id === selected.id}">${local(skill.title, state.locale)}<span class="sbl-node-meta text-small">${skillStatus(state, skill)}</span></button>`).join('')}</div></section>`).join('')}</div>
-    ${renderSkillDetail(state, selected)}
+    <div class="sbl-levels">${LEVELS.filter(level => filtered.some(skill => skill.level === level.id)).map(level => {
+      const levelSkills = filtered.filter(skill => skill.level === level.id);
+      const mastered = levelSkills.filter(skill => state.progress[skill.id]?.mastered).length;
+      const pct = Math.round(mastered / Math.max(1, levelSkills.length) * 100);
+      return `<section class="sbl-level-group" aria-labelledby="level-${level.id}">
+        <div class="sbl-level-heading"><div><h2 id="level-${level.id}">${t(state, 'level')} ${level.id} · ${local(level.title, state.locale)}</h2><span class="text-small">${mastered}/${levelSkills.length} ${t(state, 'masteredStatus')}</span></div><div class="sbl-level-progress" role="progressbar" aria-label="${local(level.title, state.locale)}" aria-valuemin="0" aria-valuemax="${levelSkills.length}" aria-valuenow="${mastered}"><span style="width:${pct}%"></span></div></div>
+        <div class="viz-grid">${levelSkills.map(skill => {
+          const statusKey = skillStatusKey(state, skill);
+          const status = skillStatus(state, skill);
+          const icon = statusKey === 'mastered' ? '✓' : statusKey === 'learning' ? '◐' : '○';
+          const selectedClass = skill.id === selected.id ? ' is-selected' : '';
+          return `<button type="button" class="btn viz-tile sbl-node is-${statusKey}${selectedClass}" data-action="select-skill" data-skill="${skill.id}" aria-pressed="${skill.id === selected.id}" aria-label="${local(skill.title, state.locale)} — ${status}"><span class="sbl-node-title">${local(skill.title, state.locale)}</span><span class="sbl-node-meta"><span class="sbl-node-status" aria-hidden="true">${icon}</span><span class="text-small">${status}</span></span></button>`;
+        }).join('')}</div>
+      </section>`;
+    }).join('')}</div>
+    ${state.skillDetailOpen ? renderSkillDetail(state, selected) : ''}
   </div>`;
 }
 
@@ -760,8 +827,21 @@ function toastText(state) {
   return state.toast ? `<div class="sbl-toast" role="status">${t(state, map[state.toast] || state.toast)}</div>` : '';
 }
 
-export function renderAppMarkup(state) {
-  return `${renderChrome(state)}<main class="sbl-main">${toastText(state)}${renderView(state)}<div class="sbl-toolbar"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(state, 'export')}</button><label class="form-label sbl-file">${t(state, 'import')}<input class="form-control" type="file" accept="application/json" data-action="import-progress"></label><button type="button" class="btn btn-ghost" data-action="reset-progress">${t(state, 'reset')}</button></div></main></div>`;
+function renderMasteryMoment(state) {
+  if (!state.masteryMoment) return '';
+  const skill = SKILLS.find(entry => entry.id === state.masteryMoment.skillId);
+  if (!skill) return '';
+  const copy = {
+    es: { eyebrow: 'Entrada iluminada', title: 'Competencia dominada', body: 'Tu criterio ya queda registrado en el ledger.', close: 'Continuar la ruta' },
+    en: { eyebrow: 'Illuminated entry', title: 'Competency mastered', body: 'Your judgement is now recorded in the ledger.', close: 'Continue the path' },
+    de: { eyebrow: 'Illuminierter Eintrag', title: 'Kompetenz gemeistert', body: 'Dein Urteilsvermögen ist nun im Ledger verzeichnet.', close: 'Pfad fortsetzen' }
+  }[state.locale];
+  return `<div class="sbl-mastery-veil" role="presentation"><section class="sbl-mastery-moment" role="dialog" aria-modal="true" aria-labelledby="mastery-title" aria-describedby="mastery-body"><span class="sbl-mastery-flourish" aria-hidden="true">❦</span><span class="sbl-kicker">${copy.eyebrow}</span><h2 id="mastery-title">${copy.title}</h2><strong>${local(skill.title, state.locale)}</strong><p id="mastery-body">${copy.body}</p><div class="sbl-mastery-rule" aria-hidden="true"></div><button type="button" class="btn btn-primary" data-action="clear-mastery-moment">${copy.close}</button></section></div>`;
+}
+
+export function renderAppMarkup(state, options = {}) {
+  const rendered = options.now ? { ...state, __renderNow: new Date(options.now) } : state;
+  return `${renderChrome(rendered)}<main class="sbl-main">${toastText(rendered)}${renderView(rendered)}<div class="sbl-toolbar"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(rendered, 'export')}</button><label class="form-label sbl-file">${t(rendered, 'import')}<input class="form-control" type="file" accept="application/json" data-action="import-progress"></label><button type="button" class="btn btn-ghost" data-action="reset-progress">${t(rendered, 'reset')}</button></div></main>${renderMasteryMoment(rendered)}</div>`;
 }
 
 function loadStored() {
@@ -800,6 +880,7 @@ export function mountSapB1Lab(root) {
   const render = () => {
     root.innerHTML = renderAppMarkup(state);
     root.setAttribute('lang', state.locale);
+    if (state.masteryMoment) root.querySelector('[data-action="clear-mastery-moment"]')?.focus();
     if (globalThis.lucide?.createIcons) globalThis.lucide.createIcons({ attrs: { width: 16, height: 16 } });
   };
   const dispatch = action => { state = reduceState(state, action); saveStored(state); render(); };
@@ -826,8 +907,12 @@ export function mountSapB1Lab(root) {
       const activity = getActivity(skill, state.locale);
       const result = validateActivityDetailed(activity, state.activityAnswers, state.activitySequence, state.locale);
       const passed = result.correct;
+      // Capture before dispatch: dispatch mutates the closure's state synchronously.
+      // Reading state.activityFeedback afterwards made the first successful proof look
+      // already recorded, so ASSESS_SKILL never ran and mastery could not progress.
+      const wasAlreadyCorrect = state.activityFeedback?.correct === true;
       dispatch({ type: 'ACTIVITY_FEEDBACK', correct: passed, message: passed ? (activity.resolution || translate(state.locale, 'actRightPrompt')) : translate(state.locale, 'actWrongPrompt'), details: result.details });
-      if (passed && state.skillMode === 'prove' && state.activityFeedback?.correct !== true) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
+      if (passed && state.skillMode === 'prove' && !wasAlreadyCorrect) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
     }
     else if (action === 'activity-hint') dispatch({ type: 'ACTIVITY_HINT' });
     else if (action === 'step-decide') dispatch({ type: 'ANSWER_STEP_DECIDE', index: Number(control.dataset.index) });
@@ -843,12 +928,14 @@ export function mountSapB1Lab(root) {
     else if (action === 'practise-skill') dispatch({ type: 'PRACTISE_SKILL', skillId: control.dataset.skill });
     else if (action === 'assess-skill') dispatch({ type: 'ASSESS_SKILL', skillId: control.dataset.skill, correct: control.dataset.correct === 'true', safetyGatePassed: control.dataset.safety === 'true' });
     else if (action === 'clear-skill-assessment') dispatch({ type: 'CLEAR_SKILL_ASSESSMENT' });
+    else if (action === 'clear-mastery-moment') dispatch({ type: 'CLEAR_MASTERY_MOMENT' });
     else if (action === 'answer-decision') dispatch({ type: 'ANSWER_DECISION', kind: control.dataset.kind, correct: control.dataset.correct === 'true', rationale: control.dataset.rationale });
     else if (action === 'next-decision') dispatch({ type: 'NEXT_DECISION', kind: control.dataset.kind });
     else if (action === 'select-boss') dispatch({ type: 'SELECT_BOSS', index: control.dataset.index });
     else if (action === 'select-process') dispatch({ type: 'SELECT_PROCESS', process: control.dataset.process });
     else if (action === 'select-process-step') dispatch({ type: 'SELECT_PROCESS_STEP', index: control.dataset.index });
     else if (action === 'set-level-filter') dispatch({ type: 'SET_LEVEL_FILTER', value: control.dataset.value });
+    else if (action === 'spine-level') dispatch({ type: 'OPEN_LEVEL', value: control.dataset.value });
     else if (action === 'analyze-prompt') {
       const prompt = root.querySelector('#sbl-prompt')?.value || '';
       dispatch({ type: 'PROMPT_RESULT', prompt, result: lintPrompt(prompt) });
