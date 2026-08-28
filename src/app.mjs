@@ -8,7 +8,7 @@ import { getActivity, validateActivityDetailed, mapAnswerToLocale, journalSideTe
 import { LEVEL_VIZ } from './viz.mjs';
 import { VIZ_RENDERERS } from './viz-render.mjs';
 import { ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS } from './advanced.mjs';
-import { CAREER, getTicket, careerProgress, kpiSnapshot } from './career.mjs';
+import { CAREER, getTicket, careerProgress, kpiSnapshot, forensicChain, activeCaseFile } from './career.mjs';
 
 const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
 const VIEWS = ['home', 'career', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence'];
@@ -491,6 +491,7 @@ function renderHome(state) {
         <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Funktionale Spur' : state.locale === 'en' ? 'Functional track' : 'Ruta funcional'}</span><span class="viz-stat-value">${funcPct}%</span><span class="text-small">L0-L5</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'techTrackLabel')}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
       </div>`}
+      ${!virgin ? renderCareerStrip(state) : ''}
     </section>
     ${renderLedgerSpine(state)}
     ${renderHeatmap(state)}
@@ -532,6 +533,15 @@ function renderMasterclass(state, skill) {
   const e2e = (mc.e2e || []).map(step => `<li>${escapeHtml(loc(step))}</li>`).join('');
   const bp = (mc.bp || []).map(b => `<li>${escapeHtml(loc(b))}</li>`).join('');
   const war = mc.war;
+  const chain = forensicChain(skill, mc, L, LEVELS);
+  const chainHtml = chain ? `<div class="sbl-chain" aria-label="${t(state, 'chainTitle')}">
+    <h4>${t(state, 'chainTitle')}</h4>
+    <ol class="sbl-chain__links">${chain.links.map(l => `<li class="sbl-chain__link${l.closed ? ' is-closed' : ' is-open'}">
+      <span class="sbl-chain__tag">${t(state, l.labelKey)}</span>
+      <span class="sbl-chain__text">${escapeHtml(l.text)}</span>
+      <span class="sbl-chain__state" aria-hidden="true">${l.closed ? '✓' : '…'}</span>
+    </li>`).join('')}</ol>
+  </div>` : '';
   const warHtml = war ? `<div class="sbl-war" data-correct="false">
     <h4>⚠️ ${escapeHtml(loc(war.q))}</h4>
     <p class="war-line"><strong>${t(state, 'warSymptom')}</strong> ${(war.sympt || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
@@ -546,6 +556,7 @@ function renderMasterclass(state, skill) {
       <div class="mc-block"><h4>🔗 ${t(state, 'mcE2E')}</h4><ol>${e2e}</ol></div>
     </div>
     ${warHtml}
+    ${chainHtml}
     <div class="mc-block mc-bp"><h4>🏆 ${t(state, 'mcBestPractices')}</h4><ul>${bp}</ul></div>
   </section>`;
 }
@@ -798,6 +809,25 @@ function renderConsole(state) {
     <div class="csl-tabs">${tabBtn('queries',translate(L, 'cslQueries'))}${tabBtn('dashboards',translate(L, 'cslDashboards'))}${tabBtn('vibe',translate(L, 'cslVibecoding'))}</div></header>
     ${body}
   </section>`;
+}
+
+function renderCareerStrip(state) {
+  const L = state.locale;
+  const file = activeCaseFile(SKILLS, state.progress, MASTERCLASS, L, LEVELS, (sk, pr, now) => recommendNext(sk, pr, now, { track: state.track, recommendedLevel: state.recommendedLevel }));
+  if (!file) return '';
+  const kpiHtml = file.kpis.map(k => `<span class="cr-strip__kpi"><span class="text-muted">${escapeHtml(trNode(k.label, L))}</span> <strong>${k.value}${k.unit}</strong></span>`).join('');
+  return `<aside class="cr-strip card" aria-label="${t(state, 'crActiveCase')}">
+    <div class="cr-strip__head">
+      <span class="sbl-kicker">${t(state, 'crActiveCase')}</span>
+      <strong>${file.chain.ticketId} · ${escapeHtml(file.chain.from)}</strong>
+    </div>
+    <p class="cr-strip__subject">${escapeHtml(file.chain.subject)}</p>
+    <div class="cr-strip__kpis">${kpiHtml}</div>
+    <div class="sbl-actions">
+      <button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${file.skill.id}">${t(state, 'chainOpen')}</button>
+      <button type="button" class="btn" data-action="nav" data-view="career">${escapeHtml(file.role)}</button>
+    </div>
+  </aside>`;
 }
 
 function renderCareer(state) {
