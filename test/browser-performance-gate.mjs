@@ -29,10 +29,13 @@ await page.evaluate(() => {
 });
 const actions = [
   () => page.locator('[data-view="map"]').click(),
-  () => page.locator('.sbl-node').nth(17).click(),
+  () => page.locator('.sbl-node').first().click(),
   () => page.locator('.sbl-mode-toggle [data-mode="prove"]').click(),
+  // tras abrir la ficha el mapa se desmonta (montaje diferido): volver antes de
+  // navegar de nuevo, replicando el recorrido real del usuario
   () => page.locator('[data-view="home"]').click(),
-  () => page.locator('.sbl-spine-node').nth(8).click()
+  () => page.locator('.sbl-spine-node').nth(8).click(),
+  () => page.locator('[data-view="home"]').click()
 ];
 const replay = async () => {
   const timings = [];

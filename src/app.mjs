@@ -5,6 +5,8 @@ import { b1Window } from './ui-b1.mjs';
 import { trText, trNode, trList } from './i18n.mjs';
 import { MASTERCLASS } from './masterclass.mjs';
 import { getActivity, validateActivityDetailed, mapAnswerToLocale, journalSideTexts, journalSideKey } from './activities.mjs';
+import { LEVEL_VIZ } from './viz.mjs';
+import { VIZ_RENDERERS } from './viz-render.mjs';
 import { ADVANCED_QUERIES, DASHBOARD_PATTERNS, VIBE_PATTERNS } from './advanced.mjs';
 import { CAREER, getTicket, careerProgress, kpiSnapshot } from './career.mjs';
 
@@ -306,8 +308,12 @@ function wrap(h, w, cap, body) {
   return `<figure class="sbl-diagram" role="img" aria-label="${escapeHtml(cap)}"><svg viewBox="0 0 ${Math.max(w, 320)} ${h + 14}" preserveAspectRatio="xMidYMin meet"><defs><marker id="sblArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--sbl-accent, #4aa3ff)"/></marker></defs>${body}</svg><figcaption>${escapeHtml(cap)}</figcaption></figure>`;
 }
 
-// ─── Radar de dominio (4 dimensiones) ────────────────────────────────────────
-function svgRadar(record, state) {
+// ─── Instrumento de dominio por nivel (antes: radar único) ───────────────────
+function svgRadar(record, state, level = 0) {
+  const viz = LEVEL_VIZ[level] || LEVEL_VIZ[0];
+  const renderer = VIZ_RENDERERS[viz.instrument];
+  if (renderer) return renderer(record, state, viz);
+  // Fallback: radar clásico si el nivel no tuviera instrumento
   const dims = [['knowledge', 'dimensionKnowledge'], ['application', 'dimensionApplication'], ['verification', 'dimensionVerification'], ['risk', 'dimensionRisk']];
   const cx = 110, cy = 92, R = 62;
   const pt = (i, r) => { const a = (Math.PI * 2 * i) / 4 - Math.PI / 2; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; };
@@ -554,7 +560,7 @@ function renderLearnMode(state, skill) {
       <button type="button" class="btn" data-action="practise-skill" data-skill="${skill.id}">${t(state, 'markPractice')}</button>
       <button type="button" class="btn btn-primary" data-action="set-skill-mode" data-mode="prove">${t(state, 'proveSkill')}</button>
     </div>
-    <div class="sbl-radar-row">${svgRadar(record, state)}<div class="sbl-stack"><span class="viz-badge">${skillStatus(state, skill)} · ${record.mastery || 0}%</span><span class="text-small">${local(LEVELS[skill.level].title, state.locale)}</span></div></div>
+    <div class="sbl-radar-row">${svgRadar(record, state, skill.level)}<div class="sbl-stack"><span class="viz-badge">${skillStatus(state, skill)} · ${record.mastery || 0}%</span><span class="text-small">${local(LEVELS[skill.level].title, state.locale)}</span></div></div>
   </div>`;
 }
 

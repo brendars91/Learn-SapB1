@@ -45,7 +45,9 @@ const strip = source => source
 
 const contentBundle = [terms, i18n, base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, advanced, career, contentSource].map(strip).join('\n\n');
 const uib1Css = await readFile(path.join(projectRoot, 'src/ui-b1.css'), 'utf8');
-const runtime = [contentBundle, strip(domainSource), strip(appSource)].join('\n\n');
+const vizSource = await readFile(path.join(projectRoot, 'src/viz.mjs'), 'utf8');
+const vizRenderSource = await readFile(path.join(projectRoot, 'src/viz-render.mjs'), 'utf8');
+const runtime = [contentBundle, strip(vizSource), strip(vizRenderSource), strip(domainSource), strip(appSource)].join('\n\n');
 
 const fragment = `${shell.trim()}\n<style>\n${styles.trim()}\n${uib1Css.trim()}\n${activitiesCss.trim()}\n${consoleCss.trim()}\n</style>\n<script>\n(() => {\n'use strict';\n${runtime}\nconst sapB1LabRoot = document.getElementById('sap-b1-mastery-lab');\nmountSapB1Lab(sapB1LabRoot);\n})();\n</script>\n`;
 
