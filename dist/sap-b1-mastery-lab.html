@@ -277,23 +277,27 @@ a.btn {
 .sbl-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
 .sbl-steps li {
   display: grid;
-  grid-template-columns: 1.6rem 1fr;
+  grid-template-columns: minmax(1.6rem, max-content) minmax(0, 1fr);
   gap: var(--s2);
   align-items: baseline;
   padding-block: var(--s1);
   border-bottom: 1px dotted var(--rule);
 }
-.sbl-steps li::before {
-  content: counter(list-item);
+/* El número vive en span.sbl-step-n (emitido por app.mjs); un ::before con
+   counter(list-item) siempre rendía "0" porque display:grid anula list-item. */
+.sbl-steps li > .sbl-step-n {
   font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--accent);
+  box-sizing: border-box;
+  min-width: 1.6rem;
   text-align: center;
+  color: var(--accent);
+  font-size: 0.75rem;
   border: 1px solid var(--rule-strong);
   background: var(--paper-deep);
   padding: 0.05em 0.3em;
 }
-.sbl-senior .sbl-steps li::before { border-color: var(--accent); color: var(--accent); }
+.sbl-steps li > span:last-child { min-width: 0; }
+.sbl-senior .sbl-steps li > .sbl-step-n { border-color: var(--accent); }
 
 /* distractors */
 .sbl-distractors { display: grid; gap: var(--s2); }
