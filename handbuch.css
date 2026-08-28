@@ -453,6 +453,7 @@
   padding-inline: var(--sc-gutter);
   padding-left: calc(var(--hb-folio-w) + var(--sc-gutter));
   position: relative;
+  overflow: hidden; /* contiene filetes ornamentales: cero scroll-x móvil */
   background: var(--sc-canvas);
 }
 @media (max-width: 900px) { .hb-atem { padding-left: var(--sc-gutter); } }
