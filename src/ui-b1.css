@@ -106,3 +106,12 @@
   border-top: 1px solid var(--b1-line); background: #f4f1ea;
   font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-style: italic;
 }
+
+@media (max-width: 40rem) {
+  .b1 { box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; box-shadow: none; }
+  .b1-titlebar, .b1-toolbar, .b1-menubar, .b1-tabs, .b1-status { min-width: 0; flex-wrap: wrap; }
+  .b1-ttext { min-width: 0; overflow-wrap: anywhere; }
+  .b1-header { grid-template-columns: minmax(0, 1fr); }
+  .b1-body { min-width: 0; padding-inline: 8px; }
+  .b1-grid { max-width: 100%; }
+}

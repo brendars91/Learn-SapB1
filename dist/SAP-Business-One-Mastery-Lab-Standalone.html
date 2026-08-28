@@ -36,6 +36,10 @@
   --accent-ink: #fdf9f0;
   --good: #2e5e3a;
   --bad: #8a2f2f;
+  --gold: #9a7432;          /* filete de maestría: tinta dorada, no brillo */
+  --r: 4px;                /* radio único: ledger editorial, no SaaS blando */
+  --motion: 180ms ease-out; /* microinteracción funcional */
+  --motion-mastery: 900ms ease-out;
   /* Shared aliases consumed by activities.css and console.css. */
   --paper-2: var(--paper-deep);
   --line: var(--rule);
@@ -90,7 +94,8 @@ textarea { color: var(--ink); }
 }
 
 /* layout */
-.sbl-stack { display: grid; gap: var(--s4); }
+.sbl-stack { display: grid; gap: var(--s4); min-width: 0; }
+.sbl-stack > *, .sbl-main > * { min-width: 0; max-width: 100%; }
 .sbl-topline,
 .sbl-nav,
 .sbl-toolbar,
@@ -154,13 +159,14 @@ a.btn {
   background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--ink);
-  border-radius: 0;
+  border-radius: var(--r);
+  min-height: 2.75rem;
   padding: var(--s2) var(--s4);
   cursor: pointer;
   text-decoration: none;
-  transition: background 160ms ease-out, color 160ms ease-out, box-shadow 160ms ease-out;
+  transition: transform var(--motion);
 }
-.btn:hover { background: var(--paper-deep); box-shadow: 2px 2px 0 var(--rule-strong); }
+.btn:hover { background: var(--paper-deep); border-color: var(--accent); box-shadow: 2px 2px 0 var(--rule-strong); transform: translateY(-2px); }
 .btn:active { transform: translate(1px, 1px); box-shadow: none; }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 .btn-primary {
@@ -168,19 +174,24 @@ a.btn {
   border-color: var(--accent);
   color: var(--accent-ink);
 }
-.btn-primary:hover { background: #6b2525; box-shadow: 2px 2px 0 var(--rule-strong); }
+.btn-primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); box-shadow: 2px 2px 0 var(--rule-strong); }
 .btn:focus-visible,
 .form-select:focus-visible,
 .form-control:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+.sbl-review-chip:focus-visible,
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 .btn-ghost { border-color: var(--rule-strong); color: var(--ink-soft); }
 
 /* nav buttons */
 .sbl-nav .btn { border-color: transparent; border-bottom: 2px solid transparent; padding: var(--s1) var(--s2); }
 .sbl-nav .btn:hover { background: transparent; box-shadow: none; border-bottom-color: var(--rule-strong); }
-.sbl-nav .btn[aria-current="true"] { border-bottom-color: var(--accent); color: var(--accent); }
+.sbl-nav .btn[aria-pressed="true"] { border-bottom-color: var(--accent); color: var(--accent-ink); }
 
 /* forms */
 .form-label { display: inline-grid; gap: var(--s1); font-size: var(--step--1); color: var(--ink-soft); }
@@ -189,11 +200,28 @@ a.btn {
   background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--rule-strong);
-  border-radius: 0;
+  border-radius: var(--r);
+  min-height: 2.75rem;
   padding: var(--s2) var(--s3);
   font-family: var(--serif);
   font-size: var(--step--1);
 }
+.form-select {
+  appearance: none;
+  padding-right: var(--s8);
+  background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+  background-position: calc(100% - var(--s4)) 50%, calc(100% - var(--s3)) 50%;
+  background-size: var(--s2) var(--s2), var(--s2) var(--s2);
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+/* mode tabs: available is quiet, active unmistakable, disabled distinct */
+.sbl-mode-toggle { display: flex; flex-wrap: wrap; gap: var(--s1); padding-bottom: var(--s2); border-bottom: 1px solid var(--rule); }
+.sbl-mode-toggle .btn { border-color: transparent; border-bottom-color: var(--rule-strong); border-radius: var(--r) var(--r) 0 0; background: transparent; color: var(--ink-soft); box-shadow: none; }
+.sbl-mode-toggle .btn:hover { color: var(--accent); border-bottom-color: var(--accent); transform: translateY(-2px); }
+.sbl-mode-toggle .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.sbl-mode-toggle .btn:disabled { color: var(--ink-soft); opacity: .45; }
 
 /* progress */
 .sbl-progress-track {
@@ -202,7 +230,7 @@ a.btn {
   border-radius: 0;
   background: repeating-linear-gradient(90deg, transparent 0 7px, var(--paper-deep) 7px 8px);
 }
-.sbl-progress-fill { height: 100%; background: var(--accent); transition: width 240ms ease-out; }
+.sbl-progress-fill { height: 100%; background: var(--accent); }
 
 /* lists and grids */
 .sbl-choice-list,
@@ -217,7 +245,11 @@ a.btn {
   border-radius: 0;
   padding: var(--s3) var(--s4);
 }
-.sbl-level-group { display: grid; gap: var(--s2); padding-block: var(--s3); border-bottom: 1px solid var(--rule); }
+.sbl-level-group {
+  display: grid; gap: var(--s2); padding-block: var(--s3); border-bottom: 1px solid var(--rule);
+  content-visibility: auto; contain-intrinsic-block-size: 13rem;
+}
+article.card[aria-labelledby="skill-title"] { content-visibility: auto; contain-intrinsic-block-size: 60rem; }
 .sbl-level-heading,
 .sbl-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); flex-wrap: wrap; }
 
@@ -231,7 +263,7 @@ a.btn {
   padding: var(--s2) var(--s3);
   cursor: pointer;
   font-family: var(--serif);
-  transition: border-color 140ms ease-out, box-shadow 140ms ease-out;
+  transition: transform var(--motion);
 }
 .sbl-node:hover { border-color: var(--ink-soft); box-shadow: 2px 2px 0 var(--paper-edge); }
 .sbl-node.is-selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
@@ -302,8 +334,134 @@ a.btn {
 
 /* radar + heatmap */
 .sbl-radar { background: var(--paper); border: 1px solid var(--rule); padding: var(--s3); }
-.sbl-heatmap { display: grid; gap: var(--s1); }
-.sbl-heatcell { border: 1px solid var(--rule); background: var(--paper-deep); }
+.sbl-heatmap { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: var(--s2); }
+.sbl-heat-cell {
+  display: grid; gap: var(--s1); justify-items: start; min-height: 4.5rem;
+  padding: var(--s3); border: 1px solid var(--rule); border-radius: var(--r);
+  color: var(--ink); text-align: left; cursor: pointer;
+  transition: transform var(--motion);
+}
+.sbl-heat-cell:hover { border-color: var(--accent); transform: translateY(-2px); }
+.sbl-heat-num { font-size: var(--step-1); font-weight: 700; line-height: 1; }
+.sbl-heat-lab { color: var(--ink-soft); line-height: 1.25; }
+.sbl-heat-0 { background: var(--paper-deep); }
+.sbl-heat-1 { background: color-mix(in srgb, var(--paper-deep) 85%, var(--accent)); }
+.sbl-heat-2 { background: color-mix(in srgb, var(--paper-deep) 68%, var(--accent)); }
+.sbl-heat-3 { background: color-mix(in srgb, var(--paper-deep) 48%, var(--accent)); }
+.sbl-heat-4 { background: var(--accent); color: var(--accent-ink); }
+.sbl-heat-4 .sbl-heat-lab { color: var(--accent-ink); }
+
+/* escritorio vivo — la home responde al progreso persistido */
+.sbl-desk {
+  display: grid; gap: var(--s3); margin-block: var(--s6); padding: var(--s4);
+  border: 1px solid var(--accent); border-radius: var(--r); background: var(--paper-deep);
+  text-align: left;
+}
+.sbl-desk-row, .sbl-desk-recommendation {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s4); min-width: 0;
+}
+.sbl-desk-row h2 { margin: 0; }
+.sbl-desk-why { margin: var(--s1) 0 0; color: var(--ink-soft); font-size: var(--step--1); }
+.sbl-streak-seal {
+  flex: none; padding: var(--s1) var(--s2); border: 1px double var(--gold);
+  border-radius: var(--r); color: var(--accent); font-size: var(--step--1); font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+.sbl-desk-reviews { display: flex; align-items: center; flex-wrap: wrap; gap: var(--s2); padding-top: var(--s2); border-top: 1px solid var(--rule); }
+.sbl-review-chip {
+  min-height: 2rem; padding: var(--s1) var(--s2); border: 1px solid var(--rule);
+  border-radius: var(--r); background: var(--paper); color: var(--ink); cursor: pointer;
+  font: inherit; font-size: var(--step--1); transition: transform var(--motion);
+}
+.sbl-review-chip:hover { border-color: var(--accent); transform: translateY(-2px); }
+.sbl-review-count {
+  display: inline-grid; place-items: center; min-width: 1.2rem; height: 1.2rem; margin-left: var(--s1);
+  padding-inline: var(--s1); border-radius: var(--r); background: var(--accent); color: var(--accent-ink); font-size: var(--step--1);
+}
+.sbl-review-banner {
+  display: grid; gap: var(--s3); padding: var(--s4); border: 1px solid var(--accent); border-radius: var(--r);
+  background: color-mix(in srgb, var(--paper-deep) 80%, var(--accent));
+}
+.sbl-review-banner h2, .sbl-review-badge { margin: 0; }
+.sbl-review-banner-list { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.sbl-review-badge {
+  display: inline-block; margin-bottom: var(--s3); padding: var(--s1) var(--s2);
+  border: 1px solid var(--accent); border-radius: var(--r); background: var(--paper-deep); color: var(--accent); font-size: var(--step--1); font-weight: 700;
+}
+
+/* espina del ledger — ruta vertical de nueve capítulos */
+.sbl-spine {
+  display: grid; grid-template-columns: minmax(15rem, .75fr) minmax(18rem, 1.25fr);
+  gap: var(--s8); padding: var(--s8); border: 1px solid var(--rule); border-radius: var(--r); background: var(--paper-deep);
+}
+.sbl-spine-head { align-self: start; position: sticky; top: var(--s4); }
+.sbl-spine-head h2 { color: var(--accent); }
+.sbl-spine-track { position: relative; }
+.sbl-spine-svg { position: absolute; inset: 0 auto 0 var(--s4); width: var(--s8); height: 100%; }
+.sbl-spine-svg line { stroke: var(--rule-strong); stroke-width: 1; stroke-dasharray: 3 5; }
+.sbl-spine-nodes { position: relative; display: grid; gap: var(--s3); }
+.sbl-spine-node {
+  display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 1.75rem; align-items: center; gap: var(--s3);
+  min-height: 4rem; padding: var(--s2) var(--s3); border: 1px solid var(--rule); border-radius: var(--r);
+  background: var(--paper); color: var(--ink); text-align: left; cursor: pointer;
+  transition: transform var(--motion);
+}
+.sbl-spine-node:hover { border-color: var(--accent); transform: translateX(var(--s1)); }
+.sbl-spine-index { font-family: var(--mono); color: var(--accent); font-weight: 700; }
+.sbl-spine-copy { display: grid; gap: var(--s1); min-width: 0; }
+.sbl-spine-copy strong, .sbl-spine-copy small { overflow-wrap: anywhere; }
+.sbl-spine-copy small { color: var(--ink-soft); }
+.sbl-spine-mark { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border: 1px solid currentColor; border-radius: 50%; }
+.sbl-spine-node.is-progress { border-left: 3px solid var(--accent); }
+.sbl-spine-node.is-progress .sbl-spine-mark { color: var(--accent); }
+.sbl-spine-node.is-complete { border-color: var(--gold); background: color-mix(in srgb, var(--paper) 90%, var(--gold)); }
+.sbl-spine-node.is-complete .sbl-spine-mark { color: var(--good); }
+
+/* mapa de competencia — estado visible por símbolo + texto + color */
+.sbl-level-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(8rem, 28%); align-items: end; gap: var(--s4); }
+.sbl-level-heading h2 { margin-bottom: var(--s1); }
+.sbl-level-progress { height: var(--s2); overflow: hidden; border: 1px solid var(--rule); border-radius: var(--r); background: var(--paper-deep); }
+.sbl-level-progress > span { display: block; height: 100%; background: var(--accent); transition: transform var(--motion); transform-origin: left; }
+.sbl-node { display: flex; flex-direction: column; align-items: stretch; justify-content: space-between; gap: var(--s3); min-height: 6.5rem; text-align: left; }
+.sbl-node-title { font-weight: 650; line-height: 1.25; }
+.sbl-node-meta { display: flex; align-items: center; gap: var(--s1); color: var(--ink-soft); }
+.sbl-node-status { display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; border: 1px solid currentColor; border-radius: 50%; font-weight: 800; line-height: 1; }
+.sbl-node.is-new .sbl-node-status { color: var(--ink-soft); }
+.sbl-node.is-learning { border-left: 3px solid var(--accent); }
+.sbl-node.is-learning .sbl-node-status { color: var(--accent); }
+.sbl-node.is-mastered { border-color: color-mix(in srgb, var(--good) 65%, var(--rule)); background: color-mix(in srgb, var(--paper) 92%, var(--good)); }
+.sbl-node.is-mastered .sbl-node-status { color: var(--good); }
+
+/* entrada iluminada — clímax editorial, no gamificación infantil */
+.sbl-mastery-veil {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+  padding: var(--s4); background: color-mix(in srgb, var(--ink) 72%, transparent);
+  animation: sbl-veil-in var(--motion-mastery) both;
+}
+.sbl-mastery-moment {
+  position: relative; width: min(34rem, 100%); overflow: hidden;
+  padding: var(--s8) var(--s6); border: 1px solid var(--gold); border-radius: var(--r);
+  background: var(--paper); color: var(--ink); text-align: center;
+  box-shadow: 0 var(--s4) var(--s8) color-mix(in srgb, var(--ink) 28%, transparent);
+  animation: sbl-entry-in var(--motion-mastery) both;
+}
+.sbl-mastery-moment::before { content: ''; position: absolute; inset: var(--s2); border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent); pointer-events: none; }
+.sbl-mastery-flourish { display: block; margin-bottom: var(--s2); color: var(--gold); font-size: var(--step-3); line-height: 1; }
+.sbl-mastery-moment h2 { margin-block: var(--s2); color: var(--accent); }
+.sbl-mastery-moment strong { display: block; font-family: var(--serif); font-size: var(--step-1); }
+.sbl-mastery-rule { width: 5rem; height: 1px; margin: var(--s4) auto; background: var(--gold); }
+@keyframes sbl-veil-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sbl-entry-in { from { opacity: 0; transform: translateY(var(--s4)) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .sbl-mastery-veil, .sbl-mastery-moment { animation: none; }
+}
+
+/* feedback toast — anuncio de estado, no decoración */
+.sbl-toast {
+  margin: 0 0 var(--s3); padding: var(--s2) var(--s3);
+  border-left: 3px solid var(--accent); background: var(--paper-deep);
+  color: var(--ink); font-size: var(--step--1);
+}
 
 /* evidence */
 .sbl-evidence { font-size: var(--step--1); }
@@ -407,6 +565,32 @@ a.btn {
   font-size: var(--step--1);
   font-style: italic;
   color: var(--ink-soft);
+}
+
+/* mobile ledger: reflow rather than hiding horizontal overflow */
+@media (max-width: 40rem) {
+  #sap-b1-mastery-lab { padding: var(--s3); }
+  .sbl-topline { align-items: stretch; }
+  .sbl-topline > *, .sbl-topline .viz-controls, .sbl-topline .form-label { width: 100%; }
+  .sbl-nav { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: thin; }
+  .sbl-nav .btn { flex: 0 0 auto; }
+  .sbl-cover { padding: var(--s6) var(--s3); outline-offset: 2px; }
+  .sbl-cover h1 { font-size: var(--step-3); overflow-wrap: anywhere; }
+  .sbl-heatmap { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sbl-heat-cell { padding: var(--s1); overflow-wrap: anywhere; }
+  .sbl-spine { grid-template-columns: minmax(0, 1fr); gap: var(--s4); padding: var(--s3); }
+  .sbl-spine-head { position: static; }
+  .sbl-spine-node { grid-template-columns: 2rem minmax(0, 1fr) 1.5rem; gap: var(--s2); min-height: 3.5rem; padding-inline: var(--s2); }
+  .sbl-learn, .sbl-learn *, .sbl-example { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+  .sbl-figure { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .sbl-toolbar, .sbl-actions { align-items: stretch; }
+  .sbl-toolbar .btn, .sbl-actions .btn { flex: 1 1 12rem; }
+  .sbl-level-heading { grid-template-columns: minmax(0, 1fr); }
+  .sbl-level-progress { width: 100%; }
+  .sbl-review-banner { padding: var(--s3); }
+  .sbl-mastery-veil { padding: var(--s3); }
+  .sbl-mastery-moment { padding: var(--s6) var(--s4); }
+  .csl-lvlrow { grid-template-columns: minmax(0, 1fr) 3rem; }
 }
 
 /* a11y */
@@ -520,6 +704,15 @@ a.btn {
   padding: 8px 10px; font-size: 11.5px; color: #555;
   border-top: 1px solid var(--b1-line); background: #f4f1ea;
   font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-style: italic;
+}
+
+@media (max-width: 40rem) {
+  .b1 { box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; box-shadow: none; }
+  .b1-titlebar, .b1-toolbar, .b1-menubar, .b1-tabs, .b1-status { min-width: 0; flex-wrap: wrap; }
+  .b1-ttext { min-width: 0; overflow-wrap: anywhere; }
+  .b1-header { grid-template-columns: minmax(0, 1fr); }
+  .b1-body { min-width: 0; padding-inline: 8px; }
+  .b1-grid { max-width: 100%; }
 }
 /* Actividades prácticas: el usuario opera, audita, ordena y construye. */
 .sbl-activity{display:grid;gap:1rem;border-top:3px double var(--ink);padding-top:1rem}
@@ -10121,7 +10314,8 @@ function recommendNext(skills, progress = {}, now = new Date(), options = {}) {
     const state = progress[skill.id] || {};
     const mastery = Number(state.mastery) || 0;
     const reviewAt = state.nextReview ? new Date(state.nextReview).getTime() : 0;
-    const overdue = reviewAt <= time ? 60 : 0;
+    // A new skill has no review date: it must not be treated as overdue.
+    const overdue = reviewAt > 0 && reviewAt <= time ? 60 : 0;
     const blockedPrerequisites = (skill.prerequisites || []).filter(id => (progress[id]?.mastery || 0) < 80).length;
     const prerequisiteBoost = blockedPrerequisites ? -80 * blockedPrerequisites : 0;
     const score = (100 - mastery) + overdue + (Number(skill.riskWeight) || 1) * 8 + prerequisiteBoost - skill.level * 2;
@@ -10129,6 +10323,43 @@ function recommendNext(skills, progress = {}, now = new Date(), options = {}) {
   });
   ranked.sort((a, b) => b.score - a.score || a.skill.level - b.skill.level || a.skill.id.localeCompare(b.skill.id));
   return ranked[0]?.skill || null;
+}
+
+/** Skill ids whose persisted review date is due, oldest first. Pure + UTC-safe. */
+function deriveDueReviews(progress = {}, now = new Date()) {
+  const time = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  return Object.entries(progress)
+    .filter(([, record]) => record?.explored && record.nextReview && new Date(record.nextReview).getTime() <= time)
+    .sort((a, b) => new Date(a[1].nextReview) - new Date(b[1].nextReview) || a[0].localeCompare(b[0]))
+    .map(([skillId]) => skillId);
+}
+
+/** Consecutive UTC practice days ending today or yesterday; multiple skills/day count once. */
+function deriveGlobalStreak(progress = {}, now = new Date()) {
+  const dayKey = value => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  };
+  const days = new Set(Object.values(progress).map(record => dayKey(record?.lastPractised)).filter(value => value !== null));
+  if (!days.size) return 0;
+  const DAY = 86400000;
+  const today = dayKey(now);
+  let cursor = days.has(today) ? today : today - DAY;
+  let streak = 0;
+  while (days.has(cursor)) { streak += 1; cursor -= DAY; }
+  return streak;
+}
+
+const RECOMMENDATION_REASON = {
+  es: { overdue: 'Repaso vencido: consolida antes de avanzar', learning: 'Continúa una habilidad en curso', fresh: 'Siguiente paso recomendado en tu ruta' },
+  en: { overdue: 'Review due: consolidate before moving on', learning: 'Continue a skill already in progress', fresh: 'Recommended next step in your path' },
+  de: { overdue: 'Wiederholung fällig: festigen vor dem nächsten Schritt', learning: 'Eine begonnene Kompetenz fortsetzen', fresh: 'Empfohlener nächster Schritt auf deinem Pfad' }
+};
+
+function recommendationReason(record = {}, now = new Date(), locale = 'es') {
+  const copy = RECOMMENDATION_REASON[locale] || RECOMMENDATION_REASON.es;
+  if (record.nextReview && new Date(record.nextReview).getTime() <= new Date(now).getTime()) return copy.overdue;
+  return record.explored ? copy.learning : copy.fresh;
 }
 
 function scanSensitiveInput(value = '') {
@@ -10279,7 +10510,7 @@ function createInitialState(saved = {}) {
     consoleTab: 'queries', consoleQuery: null, consoleOpen: null,
     levelFilter: saved.levelFilter ?? 'all',
     trackFilter: saved.trackFilter || 'all',
-    assessmentResult: null,
+    assessmentResult: null, masteryMoment: null, skillDetailOpen: true,
     caseIndex: Number(saved.caseIndex) || 0,
     incidentIndex: Number(saved.incidentIndex) || 0,
     bossIndex: Number(saved.bossIndex) || 0,
@@ -10343,8 +10574,8 @@ function reduceState(state, action) {
       return { ...state, locale: action.locale, toast: '', activityAnswers, activitySequence, activityFeedback };
     }
     case 'SET_TRACK': return ['functional', 'technical', 'dual'].includes(action.track) ? { ...state, track: action.track, toast: '' } : state;
-    case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, assessmentResult: null, toast: '' } : state;
-    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0, toast: '' };
+    case 'NAVIGATE': return VIEWS.includes(action.view) ? { ...state, view: action.view, skillDetailOpen: action.view === 'map' ? false : state.skillDetailOpen, assessmentResult: null, masteryMoment: null, toast: '' } : state;
+    case 'SELECT_SKILL': return { ...state, selectedSkillId: action.skillId, view: 'map', skillDetailOpen: true, skillMode: 'learn', assessmentStep: 0, assessmentChoice: null, assessmentShown: false, assessmentResult: null, masteryMoment: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0, toast: '' };
     case 'SET_SKILL_MODE': return { ...state, skillMode: ['learn','guided','prove'].includes(action.mode) ? action.mode : 'learn', assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false, assessmentResult: null, activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0 };
     case 'ACTIVITY_ANSWER': return { ...state, activityAnswers: { ...state.activityAnswers, [action.key]: action.value }, activityFeedback: null };
     case 'ACTIVITY_TOGGLE': {
@@ -10360,6 +10591,7 @@ function reduceState(state, action) {
     case 'ANSWER_STEP_PRINCIPLE': return { ...state, assessmentPrinciple: action.index, assessmentStep: Math.max(state.assessmentStep, 2) };
     case 'REVEAL_REASONING': return { ...state, assessmentShown: true, assessmentStep: 3 };
     case 'SET_LEVEL_FILTER': return { ...state, levelFilter: action.value, toast: '' };
+    case 'OPEN_LEVEL': return { ...state, view: 'map', levelFilter: action.value, skillDetailOpen: false, assessmentResult: null, masteryMoment: null, toast: '' };
     case 'SET_CONSOLE_TAB': return ['queries','dashboards','vibe'].includes(action.tab) ? { ...state, consoleTab: action.tab, consoleQuery: null, toast: '' } : state;
     case 'OPEN_CONSOLE_QUERY': return { ...state, consoleQuery: action.id, toast: '' };
     case 'CLOSE_CONSOLE_QUERY': return { ...state, consoleQuery: null, toast: '' };
@@ -10395,12 +10627,17 @@ function reduceState(state, action) {
       const correctAttempts = action.correct ? (existing.correctAttempts || 0) + 1 : (existing.correctAttempts || 0);
       const principleBonus = action.principleCorrect ? 5 : 0;
       if (principleBonus) { dimensions.verification = Math.min(100, dimensions.verification + principleBonus); }
+      // Mastery is monotonic: later practice may reset the streak, never erase an earned competency.
+      const mastered = Boolean(existing.mastered || (action.correct && mastery.mastered && correctAttempts >= 3));
+      const masteryMoment = !existing.mastered && mastered ? { skillId: action.skillId, achievedAt: now.toISOString() } : null;
       return {
         ...state,
-        progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: mastery.score, mastered: action.correct && mastery.mastered, explored: true, streak, correctAttempts, safetyGatePassed, lastPractised: now.toISOString(), nextReview: nextReviewDate(streak, now) }),
-        assessmentResult: { kind: 'skill', correct: action.correct, safetyGatePassed, principleCorrect: action.principleCorrect }
+        progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: mastery.score, mastered, explored: true, streak, correctAttempts, safetyGatePassed, lastPractised: now.toISOString(), nextReview: nextReviewDate(streak, now) }),
+        assessmentResult: { kind: 'skill', correct: action.correct, safetyGatePassed, principleCorrect: action.principleCorrect },
+        masteryMoment
       };
     }
+    case 'CLEAR_MASTERY_MOMENT': return { ...state, masteryMoment: null };
     case 'CLEAR_SKILL_ASSESSMENT': return { ...state, assessmentResult: null, assessmentStep: 0, assessmentChoice: null, assessmentPrinciple: null, assessmentShown: false };
     case 'ANSWER_DECISION': return { ...state, assessmentResult: { kind: action.kind, correct: action.correct, rationale: action.rationale } };
     case 'NEXT_DECISION': {
@@ -10445,7 +10682,9 @@ function local(value, locale) { return escapeHtml(trNode(value, locale)); }
 
 function navButton(state, view, key) {
   const selected = state.view === view;
-  return `<button type="button" class="btn${selected ? ' btn-primary' : ''}" data-action="nav" data-view="${view}" aria-pressed="${selected}">${t(state, key)}</button>`;
+  const dueCount = view === 'map' ? deriveDueReviews(state.progress, renderNow(state)).length : 0;
+  const due = dueCount ? `<span class="sbl-review-count" aria-label="${state.locale === 'de' ? 'Fällige Wiederholungen' : state.locale === 'en' ? 'Reviews due' : 'Repasos vencidos'}">${dueCount}</span>` : '';
+  return `<button type="button" class="btn${selected ? ' btn-primary' : ''}" data-action="nav" data-view="${view}" aria-pressed="${selected}">${t(state, key)}${due}</button>`;
 }
 
 // ─── Diagramas SVG por arquetipo ─────────────────────────────────────────────
@@ -10566,6 +10805,22 @@ function renderHeatmap(state) {
   return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><div class="sbl-heatmap">${cells}</div></section>`;
 }
 
+// ─── Espina del Ledger: nueve capítulos de una misma ruta ────────────────────
+function renderLedgerSpine(state) {
+  const title = state.locale === 'de' ? 'Der Lernpfad im Ledger' : state.locale === 'en' ? 'The learning path in the ledger' : 'La ruta de aprendizaje en el ledger';
+  const intro = state.locale === 'de' ? 'Jeder Knoten ist ein Kapitel. Öffne ein Niveau, um seine Kompetenzen zu sehen.' : state.locale === 'en' ? 'Each node is a chapter. Open a level to inspect its competencies.' : 'Cada nodo es un capítulo. Abre un nivel para inspeccionar sus competencias.';
+  const nodes = LEVELS.map(level => {
+    const skills = SKILLS.filter(skill => skill.level === level.id);
+    const mastered = skills.filter(skill => state.progress[skill.id]?.mastered).length;
+    const explored = skills.filter(skill => state.progress[skill.id]?.explored).length;
+    const pct = Math.round(mastered / Math.max(1, skills.length) * 100);
+    const status = pct === 100 ? 'is-complete' : explored > 0 ? 'is-progress' : 'is-new';
+    const statusText = pct === 100 ? t(state, 'masteredStatus') : explored > 0 ? t(state, 'learningStatus') : t(state, 'newStatus');
+    return `<button type="button" class="sbl-spine-node ${status}" data-action="spine-level" data-value="${level.id}" aria-label="${local(level.title, state.locale)} ${pct}%"><span class="sbl-spine-index">${String(level.id).padStart(2, '0')}</span><span class="sbl-spine-copy"><strong>${local(level.title, state.locale)}</strong><small>${statusText} · ${pct}%</small></span><span class="sbl-spine-mark" aria-hidden="true">${pct === 100 ? '✓' : explored > 0 ? '◐' : '○'}</span></button>`;
+  }).join('');
+  return `<section class="sbl-spine" aria-labelledby="spine-title"><div class="sbl-spine-head"><span class="sbl-kicker">L0—L8</span><h2 id="spine-title">${title}</h2><p>${intro}</p></div><div class="sbl-spine-track"><svg class="sbl-spine-svg" viewBox="0 0 32 800" preserveAspectRatio="none" aria-hidden="true"><line x1="16" y1="0" x2="16" y2="800" vector-effect="non-scaling-stroke"/></svg><div class="sbl-spine-nodes">${nodes}</div></div></section>`;
+}
+
 function renderChrome(state) {
   return `<div class="sbl-stack">
     <div class="sbl-topline">
@@ -10634,17 +10889,29 @@ function renderDiagnostic(state) {
   </section>`;
 }
 
+function renderNow(state) { return state.__renderNow instanceof Date ? state.__renderNow : new Date(); }
+
 function progressStats(state) {
   const records = Object.values(state.progress);
   const explored = records.filter(record => record.explored).length;
   const mastered = records.filter(record => record.mastered).length;
-  const due = records.filter(record => record.nextReview && new Date(record.nextReview) <= new Date()).length;
+  const due = deriveDueReviews(state.progress, renderNow(state)).length;
   return { explored, mastered, due, percent: Math.round((mastered / SKILLS.length) * 100) };
 }
 
 function renderHome(state) {
   const stats = progressStats(state);
-  const nextSkill = recommendNext(SKILLS, state.progress, new Date(), { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
+  const now = renderNow(state);
+  const dueIds = deriveDueReviews(state.progress, now);
+  const dueSkills = dueIds.map(id => SKILLS.find(skill => skill.id === id)).filter(Boolean);
+  const streak = deriveGlobalStreak(state.progress, now);
+  const nextSkill = recommendNext(SKILLS, state.progress, now, { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
+  const reason = recommendationReason(state.progress[nextSkill.id] || {}, now, state.locale);
+  const deskCopy = {
+    es: { title: 'Tu escritorio de hoy', due: 'Repasos de hoy', clear: 'Nada vencido hoy', streak: 'Racha', days: 'días', next: 'Siguiente recomendada', continue: 'Continuar' },
+    en: { title: "Today's desk", due: 'Reviews today', clear: 'Nothing due today', streak: 'Streak', days: 'days', next: 'Recommended next', continue: 'Continue' },
+    de: { title: 'Dein heutiger Schreibtisch', due: 'Heutige Wiederholungen', clear: 'Heute ist nichts fällig', streak: 'Serie', days: 'Tage', next: 'Als Nächstes empfohlen', continue: 'Weiter' }
+  }[state.locale];
   const byTrack = trackId => SKILLS.filter(s => s.track === trackId || s.track === 'dual');
   const trackPct = list => Math.round(list.filter(s => state.progress[s.id]?.mastered).length / Math.max(1, list.length) * 100);
   const funcPct = trackPct(byTrack('functional'));
@@ -10655,17 +10922,19 @@ function renderHome(state) {
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>
+      <section class="sbl-desk" aria-labelledby="desk-title">
+        <div class="sbl-desk-row"><div><span class="sbl-kicker">${deskCopy.title}</span><h2 id="desk-title">${deskCopy.next}</h2></div><span class="sbl-streak-seal" aria-label="${deskCopy.streak}: ${streak} ${deskCopy.days}">${deskCopy.streak} · ${streak}d</span></div>
+        <div class="sbl-desk-recommendation"><div><strong>${local(nextSkill.title, state.locale)}</strong><p class="sbl-desk-why">${escapeHtml(reason)}</p></div><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${deskCopy.continue}</button></div>
+        <div class="sbl-desk-reviews"><span class="text-small"><strong>${deskCopy.due}: ${dueSkills.length}</strong></span>${dueSkills.length ? dueSkills.slice(0, 5).map(skill => `<button type="button" class="sbl-review-chip" data-action="select-skill" data-skill="${skill.id}">${local(skill.title, state.locale)}</button>`).join('') : `<span class="text-muted">${deskCopy.clear}</span>`}</div>
+      </section>
       <div class="viz-grid">
         <div class="card viz-stat"><span class="text-muted">${t(state, 'mastery')}</span><span class="viz-stat-value">${stats.percent}%</span><span class="text-small">${stats.mastered}/72</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
         <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Funktionale Spur' : state.locale === 'en' ? 'Functional track' : 'Ruta funcional'}</span><span class="viz-stat-value">${funcPct}%</span><span class="text-small">L0-L5</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'techTrackLabel')}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
       </div>
-      <div class="sbl-actions">
-        <button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${t(state, 'begin')} · ${local(nextSkill.title, state.locale)}</button>
-        <button type="button" class="btn" data-action="nav" data-view="ai">${state.locale === 'de' ? 'Erweiterte Konsole öffnen' : state.locale === 'en' ? 'Open advanced console' : 'Abrir consola avanzada'}</button>
-      </div>
     </section>
+    ${renderLedgerSpine(state)}
     ${renderHeatmap(state)}
     ${renderLevelBars(state)}
   </div>`;
@@ -10681,11 +10950,16 @@ function renderLevelBars(state) {
     }).join('')}</div>
   </section>`;
 }
-function skillStatus(state, skill) {
+function skillStatusKey(state, skill) {
   const record = state.progress[skill.id];
-  if (record?.mastered) return t(state, 'masteredStatus');
-  if (record?.explored) return t(state, 'learningStatus');
-  return t(state, 'newStatus');
+  if (record?.mastered) return 'mastered';
+  if (record?.explored) return 'learning';
+  return 'new';
+}
+
+function skillStatus(state, skill) {
+  const key = skillStatusKey(state, skill);
+  return t(state, key === 'mastered' ? 'masteredStatus' : key === 'learning' ? 'learningStatus' : 'newStatus');
 }
 
 
@@ -10836,6 +11110,7 @@ function renderSkillDetail(state, skill) {
         <button type="button" class="btn${mode === 'prove' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="prove" aria-pressed="${mode === 'prove'}">${t(state, 'proveSkill')}</button>
       </div></div>
     <h2 id="skill-title">${local(skill.title, state.locale)}</h2>
+    ${state.progress[skill.id]?.nextReview && new Date(state.progress[skill.id].nextReview) <= renderNow(state) ? `<div class="sbl-review-badge">${state.locale === 'de' ? 'Wiederholung fällig' : state.locale === 'en' ? 'Review due' : 'Repaso vencido'}</div>` : ''}
     ${mode === 'learn' ? renderLearnMode(state, skill) : renderProveMode(state, skill)}
   </article>`;
 }
@@ -10843,13 +11118,36 @@ function renderSkillDetail(state, skill) {
 function renderMap(state) {
   const selected = SKILLS.find(skill => skill.id === state.selectedSkillId) || SKILLS[0];
   const filtered = SKILLS.filter(skill => (state.levelFilter === 'all' || String(skill.level) === String(state.levelFilter)) && (state.trackFilter === 'all' || skill.track === state.trackFilter || skill.track === 'dual'));
+  const dueIds = deriveDueReviews(state.progress, renderNow(state));
+  const dueSkills = dueIds.map(id => SKILLS.find(skill => skill.id === id)).filter(Boolean);
+  const reviewCopy = {
+    es: { title: 'Repasos que reclaman tu atención', body: 'Consolida estas competencias antes de abrir una ruta nueva.', badge: 'Repaso vencido' },
+    en: { title: 'Reviews calling for your attention', body: 'Consolidate these competencies before opening a new path.', badge: 'Review due' },
+    de: { title: 'Fällige Wiederholungen', body: 'Festige diese Kompetenzen, bevor du einen neuen Pfad öffnest.', badge: 'Wiederholung fällig' }
+  }[state.locale];
+  const reviewBanner = dueSkills.length ? `<aside class="sbl-review-banner" aria-labelledby="review-banner-title"><div><span class="sbl-kicker">${reviewCopy.badge}</span><h2 id="review-banner-title">${reviewCopy.title}</h2><p>${reviewCopy.body}</p></div><div class="sbl-review-banner-list">${dueSkills.slice(0, 5).map(skill => `<button type="button" class="sbl-review-chip" data-action="select-skill" data-skill="${skill.id}">${local(skill.title, state.locale)}</button>`).join('')}</div></aside>` : '';
   return `<div class="sbl-stack">
+    ${reviewBanner}
     <div class="viz-controls">
       <label class="form-label">${t(state, 'level')}<select class="form-select" data-action="level-filter"><option value="all">${t(state, 'allLevels')}</option>${LEVELS.map(level => `<option value="${level.id}"${String(state.levelFilter) === String(level.id) ? ' selected' : ''}>${level.id} · ${local(level.title, state.locale)}</option>`).join('')}</select></label>
       <label class="form-label">${t(state, 'track')}<select class="form-select" data-action="track-filter"><option value="all">${t(state, 'allTracks')}</option><option value="functional"${state.trackFilter === 'functional' ? ' selected' : ''}>${t(state, 'trackFunctional')}</option><option value="technical"${state.trackFilter === 'technical' ? ' selected' : ''}>${t(state, 'trackTechnical')}</option><option value="dual"${state.trackFilter === 'dual' ? ' selected' : ''}>${t(state, 'trackDual')}</option></select></label>
     </div>
-    <div class="sbl-levels">${LEVELS.filter(level => filtered.some(skill => skill.level === level.id)).map(level => `<section class="sbl-level-group" aria-labelledby="level-${level.id}"><div class="sbl-level-heading"><h2 id="level-${level.id}">${t(state, 'level')} ${level.id} · ${local(level.title, state.locale)}</h2><span class="text-small">${filtered.filter(skill => skill.level === level.id).length}/8</span></div><div class="viz-grid">${filtered.filter(skill => skill.level === level.id).map(skill => `<button type="button" class="btn viz-tile sbl-node${skill.id === selected.id ? ' is-selected' : ''}" data-action="select-skill" data-skill="${skill.id}" aria-pressed="${skill.id === selected.id}">${local(skill.title, state.locale)}<span class="sbl-node-meta text-small">${skillStatus(state, skill)}</span></button>`).join('')}</div></section>`).join('')}</div>
-    ${renderSkillDetail(state, selected)}
+    <div class="sbl-levels">${LEVELS.filter(level => filtered.some(skill => skill.level === level.id)).map(level => {
+      const levelSkills = filtered.filter(skill => skill.level === level.id);
+      const mastered = levelSkills.filter(skill => state.progress[skill.id]?.mastered).length;
+      const pct = Math.round(mastered / Math.max(1, levelSkills.length) * 100);
+      return `<section class="sbl-level-group" aria-labelledby="level-${level.id}">
+        <div class="sbl-level-heading"><div><h2 id="level-${level.id}">${t(state, 'level')} ${level.id} · ${local(level.title, state.locale)}</h2><span class="text-small">${mastered}/${levelSkills.length} ${t(state, 'masteredStatus')}</span></div><div class="sbl-level-progress" role="progressbar" aria-label="${local(level.title, state.locale)}" aria-valuemin="0" aria-valuemax="${levelSkills.length}" aria-valuenow="${mastered}"><span style="width:${pct}%"></span></div></div>
+        <div class="viz-grid">${levelSkills.map(skill => {
+          const statusKey = skillStatusKey(state, skill);
+          const status = skillStatus(state, skill);
+          const icon = statusKey === 'mastered' ? '✓' : statusKey === 'learning' ? '◐' : '○';
+          const selectedClass = skill.id === selected.id ? ' is-selected' : '';
+          return `<button type="button" class="btn viz-tile sbl-node is-${statusKey}${selectedClass}" data-action="select-skill" data-skill="${skill.id}" aria-pressed="${skill.id === selected.id}" aria-label="${local(skill.title, state.locale)} — ${status}"><span class="sbl-node-title">${local(skill.title, state.locale)}</span><span class="sbl-node-meta"><span class="sbl-node-status" aria-hidden="true">${icon}</span><span class="text-small">${status}</span></span></button>`;
+        }).join('')}</div>
+      </section>`;
+    }).join('')}</div>
+    ${state.skillDetailOpen ? renderSkillDetail(state, selected) : ''}
   </div>`;
 }
 
@@ -11003,8 +11301,21 @@ function toastText(state) {
   return state.toast ? `<div class="sbl-toast" role="status">${t(state, map[state.toast] || state.toast)}</div>` : '';
 }
 
-function renderAppMarkup(state) {
-  return `${renderChrome(state)}<main class="sbl-main">${toastText(state)}${renderView(state)}<div class="sbl-toolbar"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(state, 'export')}</button><label class="form-label sbl-file">${t(state, 'import')}<input class="form-control" type="file" accept="application/json" data-action="import-progress"></label><button type="button" class="btn btn-ghost" data-action="reset-progress">${t(state, 'reset')}</button></div></main></div>`;
+function renderMasteryMoment(state) {
+  if (!state.masteryMoment) return '';
+  const skill = SKILLS.find(entry => entry.id === state.masteryMoment.skillId);
+  if (!skill) return '';
+  const copy = {
+    es: { eyebrow: 'Entrada iluminada', title: 'Competencia dominada', body: 'Tu criterio ya queda registrado en el ledger.', close: 'Continuar la ruta' },
+    en: { eyebrow: 'Illuminated entry', title: 'Competency mastered', body: 'Your judgement is now recorded in the ledger.', close: 'Continue the path' },
+    de: { eyebrow: 'Illuminierter Eintrag', title: 'Kompetenz gemeistert', body: 'Dein Urteilsvermögen ist nun im Ledger verzeichnet.', close: 'Pfad fortsetzen' }
+  }[state.locale];
+  return `<div class="sbl-mastery-veil" role="presentation"><section class="sbl-mastery-moment" role="dialog" aria-modal="true" aria-labelledby="mastery-title" aria-describedby="mastery-body"><span class="sbl-mastery-flourish" aria-hidden="true">❦</span><span class="sbl-kicker">${copy.eyebrow}</span><h2 id="mastery-title">${copy.title}</h2><strong>${local(skill.title, state.locale)}</strong><p id="mastery-body">${copy.body}</p><div class="sbl-mastery-rule" aria-hidden="true"></div><button type="button" class="btn btn-primary" data-action="clear-mastery-moment">${copy.close}</button></section></div>`;
+}
+
+function renderAppMarkup(state, options = {}) {
+  const rendered = options.now ? { ...state, __renderNow: new Date(options.now) } : state;
+  return `${renderChrome(rendered)}<main class="sbl-main">${toastText(rendered)}${renderView(rendered)}<div class="sbl-toolbar"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(rendered, 'export')}</button><label class="form-label sbl-file">${t(rendered, 'import')}<input class="form-control" type="file" accept="application/json" data-action="import-progress"></label><button type="button" class="btn btn-ghost" data-action="reset-progress">${t(rendered, 'reset')}</button></div></main>${renderMasteryMoment(rendered)}</div>`;
 }
 
 function loadStored() {
@@ -11043,6 +11354,7 @@ function mountSapB1Lab(root) {
   const render = () => {
     root.innerHTML = renderAppMarkup(state);
     root.setAttribute('lang', state.locale);
+    if (state.masteryMoment) root.querySelector('[data-action="clear-mastery-moment"]')?.focus();
     if (globalThis.lucide?.createIcons) globalThis.lucide.createIcons({ attrs: { width: 16, height: 16 } });
   };
   const dispatch = action => { state = reduceState(state, action); saveStored(state); render(); };
@@ -11069,8 +11381,12 @@ function mountSapB1Lab(root) {
       const activity = getActivity(skill, state.locale);
       const result = validateActivityDetailed(activity, state.activityAnswers, state.activitySequence, state.locale);
       const passed = result.correct;
+      // Capture before dispatch: dispatch mutates the closure's state synchronously.
+      // Reading state.activityFeedback afterwards made the first successful proof look
+      // already recorded, so ASSESS_SKILL never ran and mastery could not progress.
+      const wasAlreadyCorrect = state.activityFeedback?.correct === true;
       dispatch({ type: 'ACTIVITY_FEEDBACK', correct: passed, message: passed ? (activity.resolution || translate(state.locale, 'actRightPrompt')) : translate(state.locale, 'actWrongPrompt'), details: result.details });
-      if (passed && state.skillMode === 'prove' && state.activityFeedback?.correct !== true) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
+      if (passed && state.skillMode === 'prove' && !wasAlreadyCorrect) dispatch({ type: 'ASSESS_SKILL', skillId: skill.id, correct: true, safetyGatePassed: true, principleCorrect: true });
     }
     else if (action === 'activity-hint') dispatch({ type: 'ACTIVITY_HINT' });
     else if (action === 'step-decide') dispatch({ type: 'ANSWER_STEP_DECIDE', index: Number(control.dataset.index) });
@@ -11086,12 +11402,14 @@ function mountSapB1Lab(root) {
     else if (action === 'practise-skill') dispatch({ type: 'PRACTISE_SKILL', skillId: control.dataset.skill });
     else if (action === 'assess-skill') dispatch({ type: 'ASSESS_SKILL', skillId: control.dataset.skill, correct: control.dataset.correct === 'true', safetyGatePassed: control.dataset.safety === 'true' });
     else if (action === 'clear-skill-assessment') dispatch({ type: 'CLEAR_SKILL_ASSESSMENT' });
+    else if (action === 'clear-mastery-moment') dispatch({ type: 'CLEAR_MASTERY_MOMENT' });
     else if (action === 'answer-decision') dispatch({ type: 'ANSWER_DECISION', kind: control.dataset.kind, correct: control.dataset.correct === 'true', rationale: control.dataset.rationale });
     else if (action === 'next-decision') dispatch({ type: 'NEXT_DECISION', kind: control.dataset.kind });
     else if (action === 'select-boss') dispatch({ type: 'SELECT_BOSS', index: control.dataset.index });
     else if (action === 'select-process') dispatch({ type: 'SELECT_PROCESS', process: control.dataset.process });
     else if (action === 'select-process-step') dispatch({ type: 'SELECT_PROCESS_STEP', index: control.dataset.index });
     else if (action === 'set-level-filter') dispatch({ type: 'SET_LEVEL_FILTER', value: control.dataset.value });
+    else if (action === 'spine-level') dispatch({ type: 'OPEN_LEVEL', value: control.dataset.value });
     else if (action === 'analyze-prompt') {
       const prompt = root.querySelector('#sbl-prompt')?.value || '';
       dispatch({ type: 'PROMPT_RESULT', prompt, result: lintPrompt(prompt) });
