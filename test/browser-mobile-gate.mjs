@@ -37,6 +37,18 @@ for (const width of [320, 390]) {
       }));
       assert.equal(measure.overflow, 0, `${locale} ${width}px ${view} overflow`);
       assert.ok(measure.targets.every(height => height >= 44), `${locale} ${width}px ${view} target below 44px: ${Math.min(...measure.targets)}`);
+      // Detector de texto triturado: >=25 chars propios en columna <64px y alta
+      // >120px = texto colapsado letra-a-letra (regresión real detectada 28-Aug).
+      const crushed = await page.evaluate(() => {
+        const bad = [];
+        for (const el of document.querySelectorAll('main *')) {
+          const rect = el.getBoundingClientRect(); if (!rect.width || !rect.height) continue;
+          const own = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join(' ');
+          if (own.length >= 25 && rect.width < 64 && rect.height > 120) bad.push(el.className?.toString().slice(0, 40) || el.tagName);
+        }
+        return bad;
+      });
+      assert.deepEqual(crushed, [], `${locale} ${width}px ${view}: texto triturado ${JSON.stringify(crushed)}`);
       views.push({ view, ...measure });
     }
     await page.locator('.sbl-node').first().click();
