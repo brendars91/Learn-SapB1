@@ -28,7 +28,7 @@ for (const width of [320, 390]) {
     await page.locator('[data-action="locale"]').selectOption(locale);
     const views = [];
     for (const view of ['home', 'map']) {
-      await page.locator(`[data-view="${view}"]`).click();
+      await page.locator(`[data-view="${view}"]`).first().click();
       const measure = await page.evaluate(() => ({
         overflow: document.documentElement.scrollWidth - innerWidth,
         targets: [...document.querySelectorAll('button:not(:disabled), select, input')]

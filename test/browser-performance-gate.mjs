@@ -28,7 +28,7 @@ await page.evaluate(() => {
   try { new PerformanceObserver(list => window.__perf.shifts.push(...list.getEntries().filter(e => !e.hadRecentInput).map(e => e.value))).observe({ type: 'layout-shift', buffered: false }); } catch {}
 });
 const actions = [
-  () => page.locator('[data-view="map"]').click(),
+  () => page.locator('[data-view="map"]').first().click(),
   () => page.locator('.sbl-node').first().click(),
   () => page.locator('.sbl-mode-toggle [data-mode="prove"]').click(),
   // tras abrir la ficha el mapa se desmonta (montaje diferido): volver antes de
