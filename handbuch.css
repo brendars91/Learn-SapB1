@@ -152,6 +152,53 @@
   .hauptbuch__sum { border: 0; margin: 0; padding: 0; font-size: 0.68rem; }
 }
 
+/* ── Materialidades de capítulo ────────────────────────────────────────────
+   Cada acto conserva el mismo libro, pero cambia de soporte según su idea.
+   Gradientes CSS puros: sin assets, sin layout, sin coste de red. */
+
+/* Cap.1 · expediente urgente bajo luz fría de oficina */
+.hb-ch1-incident {
+  background:
+    radial-gradient(ellipse 55% 38% at 82% 35%, rgb(90 112 128 / 0.11), transparent 72%),
+    linear-gradient(90deg, transparent 0 7.8%, rgb(124 45 45 / 0.07) 7.8% 8%, transparent 8% 100%),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgb(74 66 53 / 0.045) 31px 32px),
+    var(--sc-canvas);
+}
+.hb-ch1-incident .hb-ticket {
+  box-shadow: 0 20px 38px -20px rgb(30 44 54 / 0.42), 8px 8px 0 rgb(124 45 45 / 0.07);
+}
+
+/* Cap.2 · libro mayor: columnas verticales y renglón de débito */
+.hb-ch2-cost {
+  background:
+    linear-gradient(90deg, transparent 0 49.8%, rgb(124 45 45 / 0.075) 49.8% 50%, transparent 50% 100%),
+    repeating-linear-gradient(90deg, transparent 0 24.8%, rgb(74 66 53 / 0.04) 24.8% 25%),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgb(74 66 53 / 0.055) 39px 40px),
+    linear-gradient(180deg, #f7f2e7, #f1eadb);
+}
+.hb-ch2-cost .hb-costlist b { text-shadow: 0 1px 0 rgb(255 255 255 / 0.55); }
+
+/* Cap.3 · mesa de arquitectura: retícula técnica y foco central */
+.hb-ch3-blueprint {
+  background:
+    radial-gradient(ellipse 66% 54% at 50% 48%, rgb(154 116 50 / 0.10), transparent 72%),
+    linear-gradient(rgb(74 66 53 / 0.040) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(74 66 53 / 0.040) 1px, transparent 1px),
+    linear-gradient(rgb(74 66 53 / 0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(74 66 53 / 0.014) 1px, transparent 1px),
+    var(--sc-canvas);
+  background-size: auto, 48px 48px, 48px 48px, 12px 12px, 12px 12px, auto;
+}
+
+/* Cap.5 · cuaderno de aprendizaje: margen, regla base y luz de salida */
+.hb-ch5-lab {
+  background:
+    radial-gradient(ellipse 60% 32% at 14% 10%, rgb(154 116 50 / 0.10), transparent 70%),
+    linear-gradient(90deg, transparent 0 6.8%, rgb(124 45 45 / 0.10) 6.8% 7%, transparent 7% 100%),
+    repeating-linear-gradient(0deg, transparent 0 35px, rgb(74 66 53 / 0.04) 35px 36px),
+    linear-gradient(180deg, #f8f3e9, #f0e8d7);
+}
+
 /* ── Retícula editorial ─────────────────────────────────────────────────── */
 
 .hb-chapter { padding-inline: var(--sc-gutter); padding-left: calc(var(--hb-folio-w) + var(--sc-gutter)); }
