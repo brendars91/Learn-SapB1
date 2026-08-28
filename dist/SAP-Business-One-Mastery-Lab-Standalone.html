@@ -336,7 +336,9 @@ a.btn {
 .sbl-diagram .viz-caption { font-size: var(--step--1); color: var(--ink-faint); font-style: italic; padding-top: var(--s2); }
 
 /* radar + heatmap */
-.sbl-radar { background: var(--paper); border: 1px solid var(--rule); padding: var(--s3); }
+.sbl-radar { background: var(--paper); border: 1px solid var(--rule-strong); padding: var(--s3); max-width: 22rem; justify-self: start; }
+.sbl-radar text { font-family: var(--mono); }
+.sbl-radar-row { display: flex; gap: var(--s4); align-items: center; flex-wrap: wrap; }
 .sbl-heatmap { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: var(--s2); }
 .sbl-heat-cell {
   display: grid; gap: var(--s1); justify-items: start; min-height: 4.5rem;
@@ -10786,14 +10788,23 @@ function wrap(h, w, cap, body) {
 // ─── Radar de dominio (4 dimensiones) ────────────────────────────────────────
 function svgRadar(record, state) {
   const dims = [['knowledge', 'dimensionKnowledge'], ['application', 'dimensionApplication'], ['verification', 'dimensionVerification'], ['risk', 'dimensionRisk']];
-  const cx = 84, cy = 80, R = 58;
+  const cx = 110, cy = 92, R = 62;
   const pt = (i, r) => { const a = (Math.PI * 2 * i) / 4 - Math.PI / 2; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; };
-  const rings = [0.33, 0.66, 1].map(f => `<polygon points="${dims.map((_, i) => pt(i, R * f).join(',')).join(' ')}" fill="none" stroke="rgba(255,255,255,0.14)"/>`).join('');
-  const spokes = dims.map((_, i) => { const [x, y] = pt(i, R); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,0.14)"/>`; }).join('');
+  const ring = f => `<polygon points="${dims.map((_, i) => pt(i, R * f).join(',')).join(' ')}" fill="none" stroke="var(--rule-strong)" stroke-width="${f === 1 ? 1.2 : 0.7}"/>`;
+  const rings = [0.33, 0.66, 1].map(ring).join('');
+  const spokes = dims.map((_, i) => { const [x, y] = pt(i, R); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--rule-strong)" stroke-width="0.7"/>`; }).join('');
   const vals = dims.map(([f]) => Math.max(0, Math.min(100, Number(record?.[f]) || 0)) / 100);
-  const poly = `<polygon points="${vals.map((v, i) => pt(i, R * v).join(',')).join(' ')}" fill="rgba(74,163,255,0.28)" stroke="var(--sbl-accent, #4aa3ff)" stroke-width="1.8"/>`;
-  const labels = dims.map(([f, key], i) => { const [x, y] = pt(i, R + 17); return `<text x="${x}" y="${y}" text-anchor="middle" font-size="9.5" fill="var(--sbl-dim, #8a93a6)">${escapeHtml(translate(state.locale, key).slice(0, 12))}</text>`; }).join('');
-  return `<svg class="sbl-radar" viewBox="0 0 168 164" role="img" aria-label="${t(state, 'radarLabel')}">${rings}${spokes}${poly}${labels}</svg>`;
+  const poly = `<polygon points="${vals.map((v, i) => pt(i, R * v).join(',')).join(' ')}" fill="rgba(139,44,44,0.16)" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"/>`;
+  const apexes = vals.map((v, i) => v > 0 ? pt(i, R * v) : null).filter(Boolean)
+    .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="var(--gold)" stroke="var(--accent)" stroke-width="1"/>`).join('');
+  const labels = dims.map(([f, key], i) => {
+    const lateral = i === 1 || i === 3;
+    const [x, y] = pt(i, R + (lateral ? 27 : 20));
+    const anchor = i === 1 ? 'end' : i === 3 ? 'start' : 'middle';
+    const dy = i === 0 ? -2 : i === 2 ? 8 : 3;
+    return `<text x="${x}" y="${y + dy}" text-anchor="${anchor}" font-size="9.5" letter-spacing="0.04em" fill="var(--ink-soft)">${escapeHtml(translate(state.locale, key))}</text>`;
+  }).join('');
+  return `<svg class="sbl-radar" viewBox="0 0 232 192" role="img" aria-label="${t(state, 'radarLabel')}">${rings}${spokes}${poly}${apexes}${labels}</svg>`;
 }
 
 // ─── Heatmap de dominio por nivel ────────────────────────────────────────────
