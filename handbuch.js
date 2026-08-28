@@ -108,10 +108,12 @@
       const distance = Math.abs(p - center);
       // Scale: 0.2 (pequeño) a 1.0 (protagonista). Usa una curva suave.
       const scale = reduced ? (distance < window / 2 ? 1 : 0.2) : Math.max(0.2, 1 - (distance / window));
+      const isProtagonistNow = scale > 0.95;
 
-      card.classList.remove('beleg--future', 'beleg--current', 'beleg--past');
+      card.classList.remove('beleg--future', 'beleg--current', 'beleg--past', 'beleg--now');
       card.style.setProperty('--hb-t', scale.toFixed(3));
       card.style.setProperty('--hb-scale', scale.toFixed(3));
+      if (isProtagonistNow) card.classList.add('beleg--now');
 
       // Pulse cuando llega a escala máxima
       const isProtagonist = scale > 0.95;

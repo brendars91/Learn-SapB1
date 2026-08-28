@@ -500,6 +500,16 @@
 
 /* ── Capítulo 4 · el pico ───────────────────────────────────────────────── */
 
+/* Atmósfera de sala de archivo: papel de estraza en grano + foco de lámpara
+   sobre la cadena. Solo gradientes CSS (cero peticiones, cero layout). */
+.hb-chapter--ink.hb-peak {
+  background:
+    radial-gradient(ellipse 62% 46% at 50% 38%, rgb(214 178 106 / 0.13), transparent 68%),
+    radial-gradient(ellipse 130% 90% at 50% 110%, rgb(0 0 0 / 0.6), transparent 55%),
+    repeating-linear-gradient(104deg, rgb(240 232 216 / 0.022) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(14deg, rgb(240 232 216 / 0.016) 0 2px, transparent 2px 7px),
+    var(--sc-canvas);
+}
 .hb-peak__stage {
   display: grid; grid-template-rows: auto 1fr auto;
   align-content: stretch; justify-items: center;
@@ -542,9 +552,13 @@
   background: linear-gradient(174deg, #fbf6ea 0%, #efe7d6 100%);
   border: 1px solid rgb(23 20 15 / 0.3);
   border-top: 3px solid var(--sc-accent);
+  box-shadow:
+    0 18px 34px -14px rgb(0 0 0 / 0.55),
+    0 2px 6px rgb(0 0 0 / 0.35),
+    inset 0 -5px 0 rgb(23 20 15 / 0.06);
   padding: var(--sc-3);
   display: grid; align-content: start; gap: var(--sc-2);
-  box-shadow: 0 22px 44px rgb(0 0 0 / 0.55);
+  backface-visibility: hidden;
   color: var(--sc-ink);
 }
 .beleg__kind { font-family: var(--sc-font-display); font-weight: 700; font-size: 0.92rem; letter-spacing: -0.01em; }
@@ -583,11 +597,38 @@
 @media (max-width: 720px) {
   .fenster__body { grid-template-columns: 1fr 1fr; }
   .fenster__buchung { font-size: 0.68rem; }
-  .kette { flex-direction: column; gap: var(--sc-3); min-height: auto; }
-  .beleg { flex: 0 0 auto; }
-  .beleg__paper { width: 100%; min-height: clamp(100px, 14vh, 140px); padding: var(--sc-2); }
-  .beleg__kind { font-size: 0.78rem; }
-  .beleg__eff { font-size: 0.52rem; }
+  /* Capítulo 4 en móvil: la cadena 3D colapsaba a fantasmas de 12px y la última
+     card quedaba cortada. Reinterpretación editorial: lista documental siempre
+     legible; el protagonista (driveChain → .beleg--now) crece y toma acento. */
+  .kette { flex-direction: column; gap: var(--sc-2); min-height: auto; }
+  .beleg {
+    flex: 0 0 auto; width: 100%;
+    transform: scale(calc(0.96 + var(--hb-scale) * 0.04));
+    opacity: 1;
+    transition: transform .25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+  .beleg__paper {
+    width: 100%; min-height: 0;
+    padding: var(--sc-2) var(--sc-3);
+    display: grid; grid-template-columns: 1fr auto; align-items: baseline;
+    column-gap: var(--sc-2); row-gap: 2px;
+  }
+  .beleg__kind { font-size: 0.82rem; }
+  .beleg__nr { font-size: 0.66rem; text-align: right; }
+  .beleg__eff {
+    grid-column: 1 / -1; margin-top: var(--sc-1);
+    display: flex; flex-wrap: wrap; gap: 4px var(--sc-2);
+    font-size: 0.6rem;
+  }
+  .beleg__eff li { border-left: 2px solid var(--sc-accent); padding-left: 6px; }
+  .beleg--now .beleg__paper {
+    border-color: var(--sc-accent);
+    box-shadow: 0 10px 26px rgb(0 0 0 / 0.45), 0 0 0 1px var(--sc-accent), 0 14px 40px -8px rgb(214 178 106 / 0.28);
+    background: linear-gradient(174deg, #fdf8ec 0%, #f3ebd9 100%);
+  }
+  .beleg--now .beleg__kind { color: var(--sc-accent); }
+  .beleg--now .beleg__eff li { border-left-color: var(--sc-accent); font-weight: 700; color: var(--sc-ink); }
   .hb-stufen { padding-right: 12vw; }
   .hb-peak__stage { padding-bottom: calc(var(--sc-6) + 54px); }
 }
