@@ -28,6 +28,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run browser smoke test
         run: npm run test:browser:local
+      - name: Run landing mobile UX gate
+        run: node test/landing-mobile-ux.mjs
       - name: Run Chapter 1 cold-open visual gate
         run: node test/ch1-cold-open-browser.mjs
       - name: Run Chapter 3 browser UX gate
@@ -36,8 +38,6 @@ jobs:
         run: node test/chapter4-browser-smoke.mjs
       - name: Run landing storytelling browser gate
         run: node test/landing-storytelling-browser.mjs
-      - name: Run landing mobile UX gate
-        run: node test/landing-mobile-ux.mjs
       - name: Run Chapter 3/4 visibility regression gate
         run: node test/ch3-ch4-visibility-regression.mjs
       - name: Run Chapter 3/4 visual integrity gate
