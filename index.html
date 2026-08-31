@@ -77,7 +77,40 @@
     <div class="hb-ch1-cold__clock">08:14</div>
     <blockquote>“The invoice for C20000 is gone.”</blockquote>
     <div class="hb-ch1-screens" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <article class="hb-case-screen hb-case-screen--bp" data-ch1-case-screen>
+        <header><span>Business Partner Master Data</span><b>C20000</b></header>
+        <div class="hb-case-screen__body">
+          <dl><div><dt>Code</dt><dd>C20000</dd></div><div><dt>Name</dt><dd>SYN Office Client</dd></div><div><dt>Balance</dt><dd>856.80</dd></div></dl>
+          <small>Start with the customer, not with a random document screen.</small>
+        </div>
+      </article>
+      <article class="hb-case-screen hb-case-screen--map" data-ch1-case-screen>
+        <header><span>Relationship Map</span><b>C20000</b></header>
+        <div class="hb-case-screen__map"><span>Sales Order<br><b>162</b></span><i>→</i><span>Delivery<br><b>5001</b></span><i>→</i><span>A/R Invoice<br><b>?</b></span></div>
+        <small class="hb-case-screen__note">Follow the relationship, not the menu.</small>
+      </article>
+      <article class="hb-case-screen hb-case-screen--order" data-ch1-case-screen>
+        <header><span>Sales Order</span><b>162</b></header>
+        <div class="hb-case-screen__body">
+          <dl><div><dt>Customer</dt><dd>C20000</dd></div><div><dt>Status</dt><dd>Closed</dd></div><div><dt>Target</dt><dd>Delivery 5001</dd></div></dl>
+          <small>One step closer: this order points to the delivery.</small>
+        </div>
+      </article>
+      <article class="hb-case-screen hb-case-screen--delivery" data-ch1-case-screen>
+        <header><span>Delivery</span><b>5001</b></header>
+        <div class="hb-case-screen__body">
+          <dl><div><dt>Base</dt><dd>Sales Order 162</dd></div><div><dt>Customer</dt><dd>C20000</dd></div><div><dt>Target</dt><dd>A/R Invoice</dd></div></dl>
+          <small>The delivery exposes the next document in the chain.</small>
+        </div>
+      </article>
+      <article class="hb-case-screen hb-case-screen--invoice" data-ch1-case-screen>
+        <header><span>A/R Invoice</span><b>1001-2026</b></header>
+        <div class="hb-case-screen__body">
+          <dl><div><dt>Customer</dt><dd>C20000</dd></div><div><dt>Total</dt><dd>856.80</dd></div><div><dt>Status</dt><dd>Cancelled → replaced</dd></div></dl>
+          <small>Found: the invoice existed, but the chain explains what happened.</small>
+        </div>
+      </article>
+      <span class="hb-ch1-more" data-ch1-more hidden>+1 more</span>
     </div>
     <p class="hb-ch1-counter"><strong data-ch1-screen-count>1</strong> <span>screen<span data-ch1-screen-plural></span> open</span></p>
     <p class="hb-ch1-reveal"><b>The system isn&rsquo;t broken.</b><em>The question is wrong.</em></p>
