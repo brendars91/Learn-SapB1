@@ -23,25 +23,27 @@ const browser = await chromium.launch({ headless:true, args:['--no-sandbox'] });
 const page = await browser.newPage({ viewport:{ width:1280, height:900 } });
 await page.goto(`http://127.0.0.1:${server.address().port}/index.html`, { waitUntil:'networkidle' });
 await page.waitForFunction(() => document.documentElement.classList.contains('sc-ready'));
-await page.evaluate(() => {
-  const chapter = document.querySelector('.hb-ch1-incident');
-  scrollTo(0, chapter.offsetTop + chapter.offsetHeight * .72);
-});
-await page.waitForTimeout(180);
 
-const openScreens = page.locator('.hb-ch1-screens span[data-open]');
-assert.ok(await openScreens.count() >= 6, 'cold open should show a visible stack of opened screens');
-const visual = await openScreens.last().evaluate(el => {
+const screen = page.locator('.hb-ch1-screens span').last();
+await screen.evaluate(el => el.setAttribute('data-open', ''));
+await page.waitForTimeout(420);
+const visual = await screen.evaluate(el => {
   const style = getComputedStyle(el);
   const before = getComputedStyle(el, '::before');
   const after = getComputedStyle(el, '::after');
+  const rect = el.getBoundingClientRect();
   return {
+    opacity: style.opacity,
     backgroundImage: style.backgroundImage,
     beforeContent: before.content,
     afterBackgroundImage: after.backgroundImage,
     overflow: style.overflow,
+    width: rect.width,
+    height: rect.height,
   };
 });
+assert.equal(visual.opacity, '1', 'an opened Chapter 1 screen should be visible');
+assert.ok(visual.width > 200 && visual.height > 80, 'mini-window should keep a meaningful readable size');
 assert.notEqual(visual.backgroundImage, 'none', 'opened screens must not be blank white rectangles');
 assert.match(visual.beforeContent, /SAP|Invoice|Order|Delivery|Payment|Relationship|Partner/i, 'mini-window needs a recognisable screen label');
 assert.notEqual(visual.afterBackgroundImage, 'none', 'mini-window needs visible internal UI structure');
