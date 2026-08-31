@@ -1,0 +1,149 @@
+/* Chapter 3 · Sequential process handoff
+   The current document leads. Completed documents remain visible and carry a
+   compact Processed stamp. Future documents do not appear before their turn. */
+
+.hb-ch3-blueprint .hb-zeichnung {
+  overflow: visible;
+}
+
+.hb-ch3-step,
+.hb-ch3-connector {
+  transform-box: fill-box;
+  transition:
+    opacity .34s ease,
+    transform .46s cubic-bezier(.2,.75,.2,1),
+    filter .34s ease;
+}
+
+.hb-ch3-step {
+  opacity: 0;
+  transform: translateY(10px) scale(.94);
+  filter: saturate(.7);
+}
+
+.hb-ch3-step__box {
+  fill: color-mix(in srgb, var(--sc-surface) 92%, transparent);
+  stroke: var(--hb-rule-hard);
+  stroke-width: 1.5;
+  transition: stroke .3s ease, stroke-width .3s ease, fill .3s ease;
+}
+
+.hb-ch3-step__name {
+  font-family: var(--hb-mono);
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: .035em;
+  text-anchor: middle;
+  fill: var(--sc-ink);
+}
+
+.hb-ch3-step--future {
+  opacity: 0;
+  transform: translateY(10px) scale(.94);
+  pointer-events: none;
+}
+
+.hb-ch3-step--current {
+  opacity: 1;
+  transform: translateY(-3px) scale(1.055);
+  filter: none;
+}
+
+.hb-ch3-step--current .hb-ch3-step__box {
+  fill: color-mix(in srgb, var(--sc-surface) 96%, white 4%);
+  stroke: var(--sc-accent);
+  stroke-width: 2.4;
+}
+
+.hb-ch3-step--past {
+  opacity: 1;
+  transform: none;
+  filter: saturate(.84);
+}
+
+.hb-ch3-step--past .hb-ch3-step__box {
+  stroke: color-mix(in srgb, var(--sc-ink) 34%, transparent);
+}
+
+.hb-ch3-stamp {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(.82) rotate(-2deg);
+  transition: opacity .28s ease, transform .36s cubic-bezier(.2,.8,.2,1);
+}
+
+.hb-ch3-stamp rect {
+  fill: color-mix(in srgb, var(--sc-accent) 9%, var(--sc-surface));
+  stroke: var(--sc-accent);
+  stroke-width: 1.25;
+}
+
+.hb-ch3-stamp text {
+  font-family: var(--hb-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  text-anchor: middle;
+  fill: var(--sc-accent);
+}
+
+.hb-ch3-step--past .hb-ch3-stamp {
+  opacity: 1;
+  transform: scale(1) rotate(-2deg);
+}
+
+.hb-ch3-connector {
+  opacity: 0;
+  transform: scaleX(.15);
+  transform-origin: left center;
+}
+
+.hb-ch3-connector path {
+  fill: none;
+  stroke: var(--sc-accent);
+  stroke-width: 2;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+.hb-ch3-connector--on {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.hb-ch3-blueprint .hb-zeichnung__eff {
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+.hb-ch3-step--past .hb-zeichnung__eff,
+.hb-ch3-step--current .hb-zeichnung__eff {
+  opacity: 1;
+}
+
+@media (max-width: 720px) {
+  .hb-ch3-blueprint .hb-wende {
+    gap: var(--sc-4);
+    padding-block: var(--sc-5);
+  }
+
+  .hb-ch3-blueprint .hb-zeichnung {
+    width: 112%;
+    margin-left: -6%;
+  }
+
+  .hb-ch3-step__name { font-size: 13px; }
+  .hb-ch3-stamp text { font-size: 8.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-ch3-step,
+  .hb-ch3-connector,
+  .hb-ch3-stamp,
+  .hb-ch3-step__box,
+  .hb-ch3-blueprint .hb-zeichnung__eff {
+    transition: none !important;
+  }
+}

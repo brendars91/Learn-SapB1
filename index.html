@@ -121,41 +121,58 @@
   </div>
 </section>
 
-<!-- ══ KAPITEL 3 ══ El giro. La lámina que se dibuja sola. -->
-<section class="hb-chapter hb-chapter--paper hb-ch3-blueprint" data-sc-act="pin" data-sc-span="2.2" data-hb-kap="The Turn" data-hb-num="3" data-hb-ledger="Delivery|Delivery 5001|—|—">
+<!-- ══ KAPITEL 3 ══ The handoff: each completed document passes the process forward. -->
+<section class="hb-chapter hb-chapter--paper hb-ch3-blueprint" data-sc-act="pin" data-sc-span="2.6" data-hb-kap="The Turn" data-hb-num="3" data-hb-ledger="Delivery|Delivery 5001|—|—">
   <div data-sc-stage class="hb-wende">
     <header class="hb-kaphead hb-kaphead--inset">
       <span class="hb-kaphead__num">Chapter 3</span>
       <h2 class="hb-kaphead__h2" data-sc-cue="0 0.9 0">No screen. A path.</h2>
     </header>
-    <svg class="hb-zeichnung" viewBox="0 0 900 300" aria-label="Diagram: each document inherits from the previous one and produces three effects" role="img">
+    <svg class="hb-zeichnung" viewBox="0 0 900 310" aria-label="Process path: Sales Order hands off to Delivery, then Invoice, then Payment" role="img">
       <g class="hb-zeichnung__grid" aria-hidden="true">
-        <path d="M0 260 H900"/><path d="M0 40 H900"/>
+        <path d="M0 270 H900"/><path d="M0 40 H900"/>
       </g>
-      <g class="hb-zeichnung__draw">
-        <path class="hb-draw" d="M60 150 H840"/>
-        <rect class="hb-draw" x="60" y="120" width="120" height="60"/>
-        <rect class="hb-draw" x="250" y="120" width="120" height="60"/>
-        <rect class="hb-draw" x="440" y="120" width="120" height="60"/>
-        <rect class="hb-draw" x="630" y="120" width="120" height="60"/>
-        <path class="hb-draw" d="M310 180 V235 H700"/>
-        <path class="hb-draw" d="M500 180 V235"/>
-        <path class="hb-draw" d="M690 180 V235"/>
+      <g class="hb-ch3-connector" data-ch3-connector="0">
+        <path d="M180 150 H238"/>
+        <path d="M230 143 L238 150 L230 157"/>
       </g>
-      <g class="hb-zeichnung__labels">
-        <text x="120" y="155">Sales Order</text>
-        <text x="310" y="155">Delivery</text>
-        <text x="500" y="155">Invoice</text>
-        <text x="690" y="155">Payment</text>
-        <text class="hb-zeichnung__eff" x="310" y="255">Stock</text>
-        <text class="hb-zeichnung__eff" x="500" y="255">Ledger</text>
-        <text class="hb-zeichnung__eff" x="690" y="255">Balance</text>
-        <text class="hb-zeichnung__abb" x="840" y="30">Fig. 3.1</text>
+      <g class="hb-ch3-connector" data-ch3-connector="1">
+        <path d="M370 150 H428"/>
+        <path d="M420 143 L428 150 L420 157"/>
       </g>
+      <g class="hb-ch3-connector" data-ch3-connector="2">
+        <path d="M560 150 H618"/>
+        <path d="M610 143 L618 150 L610 157"/>
+      </g>
+
+      <g class="hb-ch3-step" data-ch3-step="0" transform-origin="120px 150px">
+        <rect class="hb-ch3-step__box" x="60" y="118" width="120" height="64" rx="2"/>
+        <text class="hb-ch3-step__name" x="120" y="154">Sales Order</text>
+        <g class="hb-ch3-stamp" transform="translate(78 190)"><rect width="84" height="24" rx="2"/><text x="42" y="16">Processed</text></g>
+      </g>
+      <g class="hb-ch3-step" data-ch3-step="1" transform-origin="310px 150px">
+        <rect class="hb-ch3-step__box" x="250" y="118" width="120" height="64" rx="2"/>
+        <text class="hb-ch3-step__name" x="310" y="154">Delivery</text>
+        <g class="hb-ch3-stamp" transform="translate(268 190)"><rect width="84" height="24" rx="2"/><text x="42" y="16">Processed</text></g>
+        <text class="hb-zeichnung__eff" x="310" y="252">Stock</text>
+      </g>
+      <g class="hb-ch3-step" data-ch3-step="2" transform-origin="500px 150px">
+        <rect class="hb-ch3-step__box" x="440" y="118" width="120" height="64" rx="2"/>
+        <text class="hb-ch3-step__name" x="500" y="154">Invoice</text>
+        <g class="hb-ch3-stamp" transform="translate(458 190)"><rect width="84" height="24" rx="2"/><text x="42" y="16">Processed</text></g>
+        <text class="hb-zeichnung__eff" x="500" y="252">Ledger</text>
+      </g>
+      <g class="hb-ch3-step" data-ch3-step="3" transform-origin="690px 150px">
+        <rect class="hb-ch3-step__box" x="630" y="118" width="120" height="64" rx="2"/>
+        <text class="hb-ch3-step__name" x="690" y="154">Payment</text>
+        <g class="hb-ch3-stamp" transform="translate(648 190)"><rect width="84" height="24" rx="2"/><text x="42" y="16">Processed</text></g>
+        <text class="hb-zeichnung__eff" x="690" y="252">Balance</text>
+      </g>
+      <text class="hb-zeichnung__abb" x="840" y="30">Fig. 3.1</text>
     </svg>
     <div class="hb-wende__text">
-      <p data-sc-cue="0.28 0.72">Every document is born from another and leaves three footprints: it moves stock, writes a ledger entry, shifts the partner balance.</p>
-      <p data-sc-cue="0.62 1">Whoever knows those three footprints never memorises the screen. They read it.</p>
+      <p data-sc-cue="0.20 0.72">Each document completes its job, then hands the process to the next one. Nothing is crossed out; the chain keeps its history.</p>
+      <p data-sc-cue="0.58 1">Follow the handoff and the footprints become predictable: stock, ledger, balance.</p>
     </div>
   </div>
 </section>
