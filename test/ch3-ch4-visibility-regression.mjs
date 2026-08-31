@@ -56,7 +56,26 @@ async function setProgress(selector, progress) {
   }, { selector, progress });
 }
 
-// 1 · The A/R Invoice must be complete without an internal vertical crop/scroll.
+// Follow the actual reading direction: Chapter 3 first, then Chapter 4.
+// 1 · Payment should remain inside a comfortable visible band while active.
+await setProgress('.hb-ch3-blueprint', 0.80);
+await page.waitForFunction(() => document.querySelector('[data-ch3-step="3"]')?.classList.contains('hb-ch3-step--current'));
+const payment = await page.locator('[data-ch3-step="3"]').evaluate(el => {
+  const rect = el.getBoundingClientRect();
+  const stage = document.querySelector('.hb-ch3-blueprint [data-sc-stage]').getBoundingClientRect();
+  const drawing = document.querySelector('.hb-ch3-blueprint .hb-zeichnung').getBoundingClientRect();
+  return { top: rect.top, bottom: rect.bottom, center: rect.top + rect.height / 2, viewport: innerHeight, stageTop: stage.top, stageBottom: stage.bottom, drawingTop: drawing.top, drawingBottom: drawing.bottom };
+});
+assert.ok(payment.top >= 80, `Payment appears too high in the viewport: ${JSON.stringify(payment)}`);
+assert.ok(payment.bottom <= payment.viewport - 130, `Payment appears too low/cut off: ${JSON.stringify(payment)}`);
+
+// 2 · The first explanatory paragraph must persist once revealed; fast scrolling
+// must not make it disappear before Payment is read.
+const firstParagraph = page.locator('.hb-wende__text > p').first();
+const firstOpacity = Number(await firstParagraph.evaluate(el => getComputedStyle(el).opacity));
+assert.ok(firstOpacity >= .95, `First Chapter 3 paragraph should remain visible at Payment, opacity=${firstOpacity}`);
+
+// 3 · The A/R Invoice must be complete without an internal vertical crop/scroll.
 await setProgress('.hb-peak', 0.62);
 await page.waitForFunction(() => !document.querySelector('[data-fenster]').hidden && Number(getComputedStyle(document.querySelector('[data-fenster]')).opacity) >= .95);
 let invoice = await page.locator('[data-fenster]').evaluate(el => ({
@@ -64,29 +83,14 @@ let invoice = await page.locator('[data-fenster]').evaluate(el => ({
   scrollHeight: el.scrollHeight,
   overflowY: getComputedStyle(el).overflowY,
   bottom: el.getBoundingClientRect().bottom,
-  stageBottom: document.querySelector('.hb-peak__stage').getBoundingClientRect().bottom
+  stageBottom: document.querySelector('.hb-peak__stage').getBoundingClientRect().bottom,
+  hintBottom: document.querySelector('.fenster__hint').getBoundingClientRect().bottom
 }));
-assert.ok(invoice.scrollHeight <= invoice.clientHeight + 1, `A/R Invoice is internally cropped: scrollHeight=${invoice.scrollHeight}, clientHeight=${invoice.clientHeight}`);
-assert.ok(invoice.bottom <= invoice.stageBottom + 1, `A/R Invoice extends beyond the sticky stage: ${invoice.bottom} > ${invoice.stageBottom}`);
-
-// 2 · Payment should become current before the section is already at its run-out,
-// and stay inside a comfortable visible band while active.
-await setProgress('.hb-ch3-blueprint', 0.80);
-await page.waitForFunction(() => document.querySelector('[data-ch3-step="3"]')?.classList.contains('hb-ch3-step--current'));
-const payment = await page.locator('[data-ch3-step="3"]').evaluate(el => {
-  const rect = el.getBoundingClientRect();
-  return { top: rect.top, bottom: rect.bottom, center: rect.top + rect.height / 2, viewport: innerHeight };
-});
-assert.ok(payment.top >= 80, `Payment appears too high in the viewport: top=${payment.top}`);
-assert.ok(payment.bottom <= payment.viewport - 130, `Payment appears too low/cut off: bottom=${payment.bottom}, viewport=${payment.viewport}`);
-
-// 3 · The first explanatory paragraph must persist once revealed; fast scrolling
-// must not make it disappear before Payment is read.
-const firstParagraph = page.locator('.hb-wende__text > p').first();
-const firstOpacity = Number(await firstParagraph.evaluate(el => getComputedStyle(el).opacity));
-assert.ok(firstOpacity >= .95, `First Chapter 3 paragraph should remain visible at Payment, opacity=${firstOpacity}`);
+assert.ok(invoice.scrollHeight <= invoice.clientHeight + 1, `A/R Invoice is internally cropped: ${JSON.stringify(invoice)}`);
+assert.ok(invoice.hintBottom <= invoice.bottom + 1, `A/R Invoice ending is not visible: ${JSON.stringify(invoice)}`);
+assert.ok(invoice.bottom <= invoice.stageBottom + 1, `A/R Invoice extends beyond the sticky stage: ${JSON.stringify(invoice)}`);
 
 assert.deepEqual(errors, [], 'browser console errors');
-console.log(JSON.stringify({ invoice, payment, firstOpacity, errors }, null, 2));
+console.log(JSON.stringify({ payment, firstOpacity, invoice, errors }, null, 2));
 await browser.close();
 await new Promise(resolve => server.close(resolve));
