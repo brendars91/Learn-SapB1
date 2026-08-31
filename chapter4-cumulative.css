@@ -73,7 +73,8 @@
 }
 
 /* Once the live invoice opens, the document history remains present but gives
-   some vertical space back to the working surface. Nothing disappears. */
+   some vertical space back to the working surface. Nothing already processed
+   disappears; only not-yet-reached future documents can stay hidden. */
 .hb-peak--invoice-open .hb-peak__mid {
   gap: clamp(.45rem, 1.3vh, .8rem);
 }
@@ -275,14 +276,54 @@
   }
 }
 
-@media (max-height: 760px) and (min-width: 721px) {
+/* Short desktop screens do not have enough vertical room for a stacked
+   history + full invoice. When the live invoice opens, use the width instead:
+   processed documents stay visible on the left and the complete invoice sits
+   beside them, never below the viewport. */
+@media (max-height: 760px) and (min-width: 901px) {
+  .hb-peak--invoice-open .hb-peak__mid {
+    grid-template-columns: minmax(320px, .78fr) minmax(520px, 1.22fr);
+    align-items: center;
+    align-content: center;
+    column-gap: clamp(.8rem, 2vw, 1.5rem);
+  }
+
   .hb-peak--invoice-open .kette {
-    min-height: 130px;
+    min-height: 0;
+    max-height: none;
+    align-content: center;
+    justify-content: flex-start;
+    gap: .45rem;
+  }
+
+  .hb-peak--invoice-open .beleg--future {
+    display: none;
   }
 
   .hb-peak--invoice-open .beleg__paper {
-    min-height: 112px;
-    padding-block: .5rem;
+    width: clamp(104px, 9.2vw, 124px);
+    min-height: 102px;
+    padding: .45rem .55rem;
+    gap: .3rem;
+  }
+
+  .hb-peak--invoice-open .beleg__kind {
+    font-size: .78rem;
+  }
+
+  .hb-peak--invoice-open .beleg__nr {
+    font-size: .57rem;
+  }
+
+  .hb-peak--invoice-open .beleg__eff {
+    margin-top: .2rem;
+    padding-top: .25rem;
+    font-size: .52rem;
+    gap: 2px;
+  }
+
+  .hb-peak--invoice-open .fenster {
+    width: 100%;
   }
 
   .hb-peak .fenster__body {
@@ -299,6 +340,17 @@
   .hb-peak .fenster__buchung th,
   .hb-peak .fenster__buchung td {
     padding-block: 2px;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 721px) and (max-width: 900px) {
+  .hb-peak--invoice-open .kette {
+    min-height: 130px;
+  }
+
+  .hb-peak--invoice-open .beleg__paper {
+    min-height: 112px;
+    padding-block: .5rem;
   }
 }
 
