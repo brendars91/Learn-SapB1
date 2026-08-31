@@ -31,17 +31,20 @@ const server = createServer(async (request, response) => {
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 
 const browser = await chromium.launch({ headless: true, executablePath: chromium.executablePath(), args: ['--no-sandbox'] });
-const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-const errors = [];
-page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-page.on('pageerror', error => errors.push(error.message));
 const entrypoint = `http://127.0.0.1:${server.address().port}/index.html`;
+const errors = [];
 
-await page.goto(`${entrypoint}?visibility-regression`, { waitUntil: 'networkidle' });
-await page.waitForFunction(() => document.documentElement.classList.contains('sc-ready') && window.ScrollCraft?.instances?.length > 0);
-await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
+async function makePage(viewport, suffix) {
+  const page = await browser.newPage({ viewport });
+  page.on('console', message => { if (message.type() === 'error') errors.push(`${suffix}: ${message.text()}`); });
+  page.on('pageerror', error => errors.push(`${suffix}: ${error.message}`));
+  await page.goto(`${entrypoint}?visibility-regression=${suffix}`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.documentElement.classList.contains('sc-ready') && window.ScrollCraft?.instances?.length > 0);
+  await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
+  return page;
+}
 
-async function setProgress(selector, progress) {
+async function setProgress(page, selector, progress) {
   await page.evaluate(({ selector, progress }) => {
     const section = document.querySelector(selector);
     const rect = section.getBoundingClientRect();
@@ -56,11 +59,36 @@ async function setProgress(selector, progress) {
   }, { selector, progress });
 }
 
-// Follow the actual reading direction: Chapter 3 first, then Chapter 4.
-// 1 · Payment should remain inside a comfortable visible band while active.
-await setProgress('.hb-ch3-blueprint', 0.80);
-await page.waitForFunction(() => document.querySelector('[data-ch3-step="3"]')?.classList.contains('hb-ch3-step--current'));
-const payment = await page.locator('[data-ch3-step="3"]').evaluate(el => {
+async function measureInvoice(page, label) {
+  await setProgress(page, '.hb-peak', 0.62);
+  await page.waitForFunction(() => !document.querySelector('[data-fenster]').hidden && Number(getComputedStyle(document.querySelector('[data-fenster]')).opacity) >= .95);
+  const invoice = await page.locator('[data-fenster]').evaluate(el => ({
+    clientHeight: el.clientHeight,
+    scrollHeight: el.scrollHeight,
+    overflowY: getComputedStyle(el).overflowY,
+    top: el.getBoundingClientRect().top,
+    bottom: el.getBoundingClientRect().bottom,
+    stageTop: document.querySelector('.hb-peak__stage').getBoundingClientRect().top,
+    stageBottom: document.querySelector('.hb-peak__stage').getBoundingClientRect().bottom,
+    hintTop: document.querySelector('.fenster__hint').getBoundingClientRect().top,
+    hintBottom: document.querySelector('.fenster__hint').getBoundingClientRect().bottom,
+    viewport: innerHeight
+  }));
+  assert.ok(invoice.scrollHeight <= invoice.clientHeight + 1, `${label}: A/R Invoice is internally cropped: ${JSON.stringify(invoice)}`);
+  assert.notEqual(invoice.overflowY, 'auto', `${label}: A/R Invoice still relies on internal vertical scrolling`);
+  assert.notEqual(invoice.overflowY, 'scroll', `${label}: A/R Invoice still relies on internal vertical scrolling`);
+  assert.ok(invoice.hintTop >= invoice.top, `${label}: A/R Invoice ending starts above its visible window: ${JSON.stringify(invoice)}`);
+  assert.ok(invoice.hintBottom <= invoice.bottom + 1, `${label}: A/R Invoice ending is not visible: ${JSON.stringify(invoice)}`);
+  assert.ok(invoice.top >= 0, `${label}: A/R Invoice begins above the viewport: ${JSON.stringify(invoice)}`);
+  assert.ok(invoice.bottom <= invoice.viewport, `${label}: A/R Invoice extends below the viewport: ${JSON.stringify(invoice)}`);
+  return invoice;
+}
+
+// Follow the actual reading direction on the main desktop viewport.
+const desktop = await makePage({ width: 1280, height: 900 }, 'desktop');
+await setProgress(desktop, '.hb-ch3-blueprint', 0.80);
+await desktop.waitForFunction(() => document.querySelector('[data-ch3-step="3"]')?.classList.contains('hb-ch3-step--current'));
+const payment = await desktop.locator('[data-ch3-step="3"]').evaluate(el => {
   const rect = el.getBoundingClientRect();
   const stage = document.querySelector('.hb-ch3-blueprint [data-sc-stage]').getBoundingClientRect();
   const drawing = document.querySelector('.hb-ch3-blueprint .hb-zeichnung').getBoundingClientRect();
@@ -69,28 +97,24 @@ const payment = await page.locator('[data-ch3-step="3"]').evaluate(el => {
 assert.ok(payment.top >= 80, `Payment appears too high in the viewport: ${JSON.stringify(payment)}`);
 assert.ok(payment.bottom <= payment.viewport - 130, `Payment appears too low/cut off: ${JSON.stringify(payment)}`);
 
-// 2 · The first explanatory paragraph must persist once revealed; fast scrolling
-// must not make it disappear before Payment is read.
-const firstParagraph = page.locator('.hb-wende__text > p').first();
+const firstParagraph = desktop.locator('.hb-wende__text > p').first();
 const firstOpacity = Number(await firstParagraph.evaluate(el => getComputedStyle(el).opacity));
 assert.ok(firstOpacity >= .95, `First Chapter 3 paragraph should remain visible at Payment, opacity=${firstOpacity}`);
 
-// 3 · The A/R Invoice must be complete without an internal vertical crop/scroll.
-await setProgress('.hb-peak', 0.62);
-await page.waitForFunction(() => !document.querySelector('[data-fenster]').hidden && Number(getComputedStyle(document.querySelector('[data-fenster]')).opacity) >= .95);
-let invoice = await page.locator('[data-fenster]').evaluate(el => ({
-  clientHeight: el.clientHeight,
-  scrollHeight: el.scrollHeight,
-  overflowY: getComputedStyle(el).overflowY,
-  bottom: el.getBoundingClientRect().bottom,
-  stageBottom: document.querySelector('.hb-peak__stage').getBoundingClientRect().bottom,
-  hintBottom: document.querySelector('.fenster__hint').getBoundingClientRect().bottom
-}));
-assert.ok(invoice.scrollHeight <= invoice.clientHeight + 1, `A/R Invoice is internally cropped: ${JSON.stringify(invoice)}`);
-assert.ok(invoice.hintBottom <= invoice.bottom + 1, `A/R Invoice ending is not visible: ${JSON.stringify(invoice)}`);
-assert.ok(invoice.bottom <= invoice.stageBottom + 1, `A/R Invoice extends beyond the sticky stage: ${JSON.stringify(invoice)}`);
+const invoiceDesktop = await measureInvoice(desktop, '1280x900');
+await desktop.close();
+
+// Reproduce the invoice on the viewports where an internal max-height is most
+// likely to hide its bottom: a short desktop and a common phone viewport.
+const shortDesktop = await makePage({ width: 1280, height: 720 }, 'short-desktop');
+const invoiceShortDesktop = await measureInvoice(shortDesktop, '1280x720');
+await shortDesktop.close();
+
+const mobile = await makePage({ width: 390, height: 844 }, 'mobile');
+const invoiceMobile = await measureInvoice(mobile, '390x844');
+await mobile.close();
 
 assert.deepEqual(errors, [], 'browser console errors');
-console.log(JSON.stringify({ payment, firstOpacity, invoice, errors }, null, 2));
+console.log(JSON.stringify({ payment, firstOpacity, invoiceDesktop, invoiceShortDesktop, invoiceMobile, errors }, null, 2));
 await browser.close();
 await new Promise(resolve => server.close(resolve));
