@@ -48,6 +48,29 @@
   filter: saturate(.8) contrast(.97);
 }
 
+/* The previous implementation styled every span below .hb-ch1-screens as a
+   pseudo-window. Reset that legacy rule inside the real mini interfaces so
+   their labels stay ordinary inline content. */
+.hb-ch1-screens .hb-case-screen span {
+  position: static;
+  inset: auto;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  opacity: 1;
+  overflow: visible;
+  transform: none;
+  transition: none;
+}
+
+.hb-ch1-screens .hb-case-screen span::before,
+.hb-ch1-screens .hb-case-screen span::after {
+  content: none;
+}
+
 .hb-case-screen header {
   min-height: 31px;
   display: flex;
