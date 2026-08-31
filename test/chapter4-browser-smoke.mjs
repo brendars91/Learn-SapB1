@@ -55,11 +55,36 @@ async function setPeakProgress(progress) {
     const travel = Math.max(1, rect.height - innerHeight);
     scrollTo({ top: top + travel * p, left: 0, behavior: 'instant' });
   }, progress);
+
   await page.waitForFunction(p => {
     const peak = document.querySelector('.hb-peak');
     const actual = Number(getComputedStyle(peak).getPropertyValue('--sc-p'));
     return Math.abs(actual - p) <= 0.03;
   }, progress);
+
+  const activeIndex = Math.min(4, Math.floor((progress + 0.1) / 0.2));
+
+  // ScrollCraft publishes --sc-p first; handbuch intentionally consumes that
+  // value on the following frame. Wait for those semantic classes rather than
+  // racing the two RAF loops.
+  await page.waitForFunction(expected => {
+    const cards = [...document.querySelectorAll('[data-beleg-card]')];
+    return cards.every((card, index) => {
+      if (index < expected) return card.classList.contains('beleg--past');
+      if (index === expected) return card.classList.contains('beleg--current');
+      return card.classList.contains('beleg--future');
+    });
+  }, activeIndex);
+
+  // The transition is part of the UX contract too. Resolve only once the state
+  // the reader actually sees has settled, without a timing magic number.
+  await page.waitForFunction(expected => {
+    const cards = [...document.querySelectorAll('[data-beleg-card]')];
+    return cards.every((card, index) => {
+      const opacity = Number(getComputedStyle(card).opacity);
+      return index <= expected ? opacity >= 0.9 : opacity <= 0.08;
+    });
+  }, activeIndex);
 }
 
 async function chapterState() {
@@ -101,7 +126,7 @@ await setPeakProgress(0.62);
 let state = await chapterState();
 assert.ok(Math.abs(state.progress - 0.62) <= 0.03, `Chapter 4 probe missed requested progress: ${state.progress}`);
 for (let i = 0; i <= 3; i += 1) {
-  assert.ok(state.cards[i].opacity >= 0.9, `Chapter 4 card ${i} should remain visible at Invoice step, got ${state.cards[i].opacity}`);
+  assert.ok(state.cards[i].opacity >= 0.9, `Chapter 4 card ${i} should remain visible at Invoice step, got ${state.cards[i].opacity}; classes=${state.cards[i].classes.join(',')}`);
 }
 assert.ok(state.cards[4].opacity <= 0.08, `Payment should remain hidden before its turn, got ${state.cards[4].opacity}`);
 assert.ok(state.cards[3].width > state.cards[2].width * 1.025, 'Invoice should visibly stand out from already-landed documents');
