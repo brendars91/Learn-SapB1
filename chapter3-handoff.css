@@ -144,6 +144,13 @@
     padding-block: .8rem calc(58px + .7rem);
   }
 
+  /* The chapter title is context, not a transient animation on a phone. Keep
+     it readable while the user follows Delivery -> Invoice -> Payment. */
+  .hb-ch3-blueprint .hb-kaphead__h2 {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   .hb-ch3-blueprint .hb-zeichnung { display: none; }
 
   .hb-ch3-mobile-path {
