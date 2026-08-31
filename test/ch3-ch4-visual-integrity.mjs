@@ -61,6 +61,13 @@ async function setProgress(page, selector, progress) {
 
 const shortDesktop = await makePage({ width: 1280, height: 720 }, 'short-desktop');
 
+await setProgress(shortDesktop, '.hb-ch3-blueprint', 0.10);
+const firstParagraphEarlyOpacity = await shortDesktop.locator('.hb-ch3-blueprint .hb-wende__text > p:first-child').evaluate(el => Number(getComputedStyle(el).opacity));
+assert.ok(firstParagraphEarlyOpacity <= .15, `Chapter 3 first paragraph should still reveal in sequence, not be forced visible from the start: ${firstParagraphEarlyOpacity}`);
+
+await setProgress(shortDesktop, '.hb-ch3-blueprint', 0.40);
+await shortDesktop.waitForFunction(() => Number(getComputedStyle(document.querySelector('.hb-ch3-blueprint .hb-wende__text > p:first-child')).opacity) >= .95);
+
 await setProgress(shortDesktop, '.hb-ch3-blueprint', 0.80);
 await shortDesktop.waitForFunction(() => document.querySelector('[data-ch3-step="3"]')?.classList.contains('hb-ch3-step--current'));
 const chapter3 = await shortDesktop.evaluate(() => {
@@ -74,6 +81,13 @@ assert.ok(chapter3.paragraphs.every(p => p.opacity >= .95), `Both Chapter 3 para
 
 await setProgress(shortDesktop, '.hb-peak', 0.62);
 await shortDesktop.waitForFunction(() => !document.querySelector('[data-fenster]').hidden && Number(getComputedStyle(document.querySelector('[data-fenster]')).opacity) >= .95);
+await shortDesktop.waitForFunction(() => {
+  const reached = [...document.querySelectorAll('[data-beleg-card]')].slice(0, 4);
+  return reached.every(el => {
+    const style = getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) >= .9;
+  });
+});
 const chapter4 = await shortDesktop.evaluate(() => {
   const chain = document.querySelector('.hb-peak .kette').getBoundingClientRect();
   const invoice = document.querySelector('[data-fenster]').getBoundingClientRect();
@@ -114,6 +128,6 @@ assert.ok(chapter4.rule && chapter4.rule.top >= 0 && chapter4.rule.bottom <= cha
 
 await shortDesktop.close();
 assert.deepEqual(errors, [], 'browser console errors');
-console.log(JSON.stringify({ chapter3, chapter4, errors }, null, 2));
+console.log(JSON.stringify({ firstParagraphEarlyOpacity, chapter3, chapter4, errors }, null, 2));
 await browser.close();
 await new Promise(resolve => server.close(resolve));
