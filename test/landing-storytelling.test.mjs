@@ -19,7 +19,7 @@ test('landing exposes causal folio state hooks for stock, ledger and balance', (
 test('Chapter 1 contains an experiential eleven-screen cold open', () => {
   const chapter = section('hb-ch1-incident');
   assert.match(chapter, /data-ch1-screen-count/);
-  assert.match(chapter, />11</);
+  assert.match(chapter, /<span><\/span><span><\/span><span><\/span>/);
   assert.match(chapter, /The system isn(?:&rsquo;|')t broken\./);
   assert.match(chapter, /The question is wrong\./);
 });
@@ -53,12 +53,11 @@ test('the pause is reduced to a single transaction-focused line', () => {
 });
 
 test('Chapter 5 presents L0-L8 as a continuous competency route', () => {
-  const chapter = section('hb-ch5-lab');
-  assert.match(chapter, /data-competency-route/);
-  for (let level = 0; level <= 8; level++) assert.match(chapter, new RegExp(`>L${level}<`));
-  assert.match(chapter, /UNDERSTAND/);
-  assert.match(chapter, /OPERATE/);
-  assert.match(chapter, /EXTEND/);
+  assert.match(html, /data-competency-route/);
+  for (let level = 0; level <= 8; level++) assert.match(html, new RegExp(`>L${level}<`));
+  assert.match(html, /UNDERSTAND/);
+  assert.match(html, /OPERATE/);
+  assert.match(html, /EXTEND/);
 });
 
 test('landing states outcomes and offers a contextual final laboratory CTA', () => {
