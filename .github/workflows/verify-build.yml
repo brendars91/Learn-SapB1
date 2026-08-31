@@ -32,6 +32,8 @@ jobs:
         run: node test/chapter3-browser-smoke.mjs
       - name: Run Chapter 4 browser UX gate
         run: node test/chapter4-browser-smoke.mjs
+      - name: Run landing storytelling browser gate
+        run: node test/landing-storytelling-browser.mjs
       - name: Verify generated offline artifacts
         run: |
           test -s dist/SAP-Business-One-Mastery-Lab-Standalone.html
