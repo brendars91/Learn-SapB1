@@ -55,7 +55,26 @@ async function setProgress(progress) {
     const actual = Number(getComputedStyle(chapter).getPropertyValue('--sc-p'));
     return Math.abs(actual - p) <= 0.035;
   }, progress);
-  await page.waitForTimeout(120);
+}
+
+async function waitForSettledState(activeIndex) {
+  await page.waitForFunction(index => {
+    const steps = [...document.querySelectorAll('[data-ch3-step]')];
+    const connectors = [...document.querySelectorAll('[data-ch3-connector]')];
+    const stepStatesOk = steps.every((step, i) => {
+      const opacity = Number(getComputedStyle(step).opacity);
+      if (i < index) return step.classList.contains('hb-ch3-step--past') && opacity >= 0.9;
+      if (i === index) return step.classList.contains('hb-ch3-step--current') && opacity >= 0.9;
+      return step.classList.contains('hb-ch3-step--future') && opacity <= 0.08;
+    });
+    const connectorStatesOk = connectors.every((connector, i) => {
+      const opacity = Number(getComputedStyle(connector).opacity);
+      return i < index
+        ? connector.classList.contains('hb-ch3-connector--on') && opacity >= 0.9
+        : !connector.classList.contains('hb-ch3-connector--on') && opacity <= 0.08;
+    });
+    return stepStatesOk && connectorStatesOk;
+  }, activeIndex);
 }
 
 async function state() {
@@ -72,12 +91,14 @@ async function state() {
 }
 
 await setProgress(0.12);
+await waitForSettledState(0);
 let s = await state();
 assert.ok(s.steps[0].classes.includes('hb-ch3-step--current'), 'Sales Order should be current first');
 assert.ok(s.steps.slice(1).every(step => step.classes.includes('hb-ch3-step--future') && step.opacity <= 0.08), 'future documents should stay hidden before their turn');
 assert.ok(s.connectors.every(connector => connector.opacity <= 0.08), 'handoff connectors should be hidden before completion');
 
 await setProgress(0.40);
+await waitForSettledState(1);
 s = await state();
 assert.ok(s.steps[0].classes.includes('hb-ch3-step--past'), 'Sales Order should remain as a completed step');
 assert.ok(s.steps[1].classes.includes('hb-ch3-step--current'), 'Delivery should become current second');
@@ -85,12 +106,14 @@ assert.ok(s.connectors[0].classes.includes('hb-ch3-connector--on') && s.connecto
 assert.ok(s.steps[2].opacity <= 0.08 && s.steps[3].opacity <= 0.08, 'Invoice and Payment should still be hidden');
 
 await setProgress(0.68);
+await waitForSettledState(2);
 s = await state();
 assert.ok(s.steps[2].classes.includes('hb-ch3-step--current'), 'Invoice should become current third');
 assert.ok(s.steps[0].opacity >= 0.9 && s.steps[1].opacity >= 0.9, 'completed steps should remain visible');
 assert.ok(s.connectors[0].opacity >= 0.9 && s.connectors[1].opacity >= 0.9, 'completed handoffs should remain visible');
 
 await setProgress(0.92);
+await waitForSettledState(3);
 s = await state();
 assert.ok(s.steps[3].classes.includes('hb-ch3-step--current'), 'Payment should be the final current step');
 assert.ok(s.steps.slice(0, 3).every(step => step.classes.includes('hb-ch3-step--past') && step.opacity >= 0.9), 'all previous documents should remain completed and visible');
