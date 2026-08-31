@@ -65,7 +65,7 @@
 
 @media (max-width:900px) {
   .folio-effects { display:none; }
-  .folio-mobile-current { display:block; }
+  .folio-mobile-current { display:block; flex:1 1 8rem; min-width:6rem; max-width:10rem; overflow:hidden; text-overflow:ellipsis; }
   .folio__head { display:none; }
   .hb-ch1-cold { grid-template-columns:1fr; grid-template-areas:"clock" "quote" "screens" "counter" "reveal"; padding:var(--sc-4); }
   .hb-ch1-screens { min-height:170px; }
@@ -77,8 +77,11 @@
 }
 
 @media (max-width:560px) {
-  .folio { gap:var(--sc-2); }
-  .folio-mobile-current { max-width:9rem; overflow:hidden; text-overflow:ellipsis; }
+  .folio { gap:var(--sc-2); padding-inline:var(--sc-3); }
+  .folio .belegkette { gap:4px; flex:0 0 auto; }
+  .folio .hauptbuch { display:none; }
+  .folio-mobile-current { flex:1 1 7rem; min-width:5.5rem; max-width:8rem; }
+  .folio__lab { flex:0 0 auto; }
   .hb-route-levels span { font-size:.68rem; }
   .hb-route-levels b { width:2.25rem; height:2.25rem; }
   .fenster__proof { position:static; justify-content:flex-end; margin-bottom:.55rem; }
