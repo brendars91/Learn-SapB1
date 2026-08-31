@@ -79,7 +79,6 @@ for (const viewport of [
   assert.ok(shell.overflow <= 1, `${viewport.label}: horizontal overflow ${JSON.stringify(shell)}`);
   assert.ok(shell.folio.top > viewport.height * .82, `${viewport.label}: mobile folio should be a bottom bar ${JSON.stringify(shell.folio)}`);
 
-  // Chapter 1: intermediate mobile widths must not fall back to tiny desktop UI text.
   await page.evaluate(() => {
     const chapter = document.querySelector('.hb-ch1-incident');
     scrollTo({ top: chapter.offsetTop + chapter.offsetHeight * .72, behavior:'instant' });
@@ -94,10 +93,10 @@ for (const viewport of [
   assert.ok(ch1.left >= 0 && ch1.right <= viewport.width, `${viewport.label}: Chapter 1 case screen clipped ${JSON.stringify(ch1)}`);
   assert.ok(ch1.minTextPx >= 10.5, `${viewport.label}: Chapter 1 contains sub-10.5px UI text ${JSON.stringify(ch1)}`);
 
-  // Chapter 3: every width using the mobile shell must use the vertical mobile narrative.
   await setProgress(page, '.hb-ch3-blueprint', .80);
   await page.waitForFunction(() => document.querySelector('[data-ch3-mobile-step="3"]')?.classList.contains('hb-ch3-mobile-step--current'));
   const ch3 = await page.evaluate(() => {
+    const headingEl = document.querySelector('.hb-ch3-blueprint .hb-kaphead__h2');
     const heading = document.querySelector('.hb-ch3-blueprint .hb-kaphead').getBoundingClientRect();
     const desktop = document.querySelector('.hb-ch3-blueprint .hb-zeichnung');
     const mobile = document.querySelector('[data-ch3-mobile-path]');
@@ -107,6 +106,7 @@ for (const viewport of [
     return {
       desktopDisplay:getComputedStyle(desktop).display,
       mobileDisplay:mobile ? getComputedStyle(mobile).display : null,
+      headingOpacity:Number(getComputedStyle(headingEl).opacity),
       headingBottom:heading.bottom,
       mobileTop:mobileRect?.top ?? null,
       mobileBottom:mobileRect?.bottom ?? null,
@@ -117,10 +117,10 @@ for (const viewport of [
   });
   assert.equal(ch3.desktopDisplay, 'none', `${viewport.label}: Chapter 3 desktop SVG is still visible ${JSON.stringify(ch3)}`);
   assert.ok(ch3.mobileDisplay && ch3.mobileDisplay !== 'none', `${viewport.label}: Chapter 3 mobile path missing ${JSON.stringify(ch3)}`);
+  assert.ok(ch3.headingOpacity >= .85, `${viewport.label}: Chapter 3 heading becomes too faint ${JSON.stringify(ch3)}`);
   assert.ok(ch3.mobileTop - ch3.headingBottom <= viewport.height * .14, `${viewport.label}: Chapter 3 wastes too much vertical space before the path ${JSON.stringify(ch3)}`);
   assert.ok(ch3.paymentTop >= 0 && ch3.paymentBottom <= ch3.folioTop - 8, `${viewport.label}: Payment is clipped/covered ${JSON.stringify(ch3)}`);
 
-  // Chapter 4: all reached documents and live invoice stay inside the phone canvas.
   await setProgress(page, '.hb-peak', .62);
   await page.waitForFunction(() => !document.querySelector('[data-fenster]').hidden);
   const ch4 = await page.evaluate(() => {
@@ -140,7 +140,6 @@ for (const viewport of [
   assert.notEqual(ch4.overflowY, 'auto', `${viewport.label}: nested scroll returned in Chapter 4`);
   assert.ok(ch4.touch.every(h => h >= 44), `${viewport.label}: Chapter 4 touch target below 44px ${JSON.stringify(ch4.touch)}`);
 
-  // Chapter 5: the whole mobile shell uses a readable single-column learning route.
   await page.locator('.hb-ch5-lab').scrollIntoViewIfNeeded();
   const ch5 = await page.evaluate(() => {
     const route = document.querySelector('.hb-route-levels');
