@@ -142,8 +142,10 @@
 
     const invoiceStart = (3 - 0.5) * step;
     const f = p < invoiceStart ? 0 : reduced ? 1 : clamp01((p - invoiceStart) / 0.08);
+    const invoiceOpen = f > 0;
+    peak.classList.toggle('hb-peak--invoice-open', invoiceOpen);
     if (fenster) {
-      fenster.hidden = f <= 0;
+      fenster.hidden = !invoiceOpen;
       fenster.style.setProperty('--hb-fenster', f.toFixed(3));
     }
   }
