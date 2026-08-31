@@ -2,8 +2,48 @@
    The current document leads. Completed documents remain visible and carry a
    compact Processed stamp. Future documents do not appear before their turn. */
 
+/* handbuch.css gives .hb-wende height:100%, which wins over the generic
+   ScrollCraft stage height and makes this sticky stage as tall as the whole
+   pinned section. Pin Chapter 3 explicitly to the viewport so the process path
+   does not drift upward while its progress advances. */
+.hb-ch3-blueprint .hb-wende.sc-stage {
+  height: 100vh;
+  height: 100svh;
+  min-height: 100svh;
+  box-sizing: border-box;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: stretch;
+  gap: clamp(var(--sc-3), 2vh, var(--sc-5));
+  padding-block: clamp(var(--sc-4), 3vh, var(--sc-6));
+}
+
+.hb-ch3-blueprint .hb-kaphead {
+  margin: 0;
+}
+
 .hb-ch3-blueprint .hb-zeichnung {
   overflow: visible;
+  align-self: center;
+  width: 100%;
+  max-height: min(43svh, 360px);
+}
+
+.hb-ch3-blueprint .hb-wende__text {
+  align-self: end;
+  gap: clamp(var(--sc-2), 1.2vh, var(--sc-3));
+}
+
+/* Keep the first explanation present throughout the handoff. ScrollCraft's
+   original cue fades it back out after .72, which makes fast scrollers miss the
+   premise exactly when Invoice and Payment arrive. */
+.hb-ch3-blueprint .hb-wende__text > p:first-child {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.hb-ch3-blueprint .consultant-rule {
+  margin-top: clamp(var(--sc-1), 1.2vh, var(--sc-3));
+  padding-block: var(--sc-2);
 }
 
 .hb-ch3-step,
@@ -124,18 +164,46 @@
 }
 
 @media (max-width: 720px) {
-  .hb-ch3-blueprint .hb-wende {
-    gap: var(--sc-4);
-    padding-block: var(--sc-5);
+  .hb-ch3-blueprint .hb-wende.sc-stage {
+    gap: var(--sc-3);
+    padding-block: var(--sc-4);
   }
 
   .hb-ch3-blueprint .hb-zeichnung {
-    width: 112%;
-    margin-left: -6%;
+    width: 108%;
+    margin-left: -4%;
+    max-height: min(39svh, 310px);
+  }
+
+  .hb-ch3-blueprint .hb-wende__text p {
+    font-size: clamp(.9rem, 3.8vw, 1.05rem);
+  }
+
+  .hb-ch3-blueprint .consultant-rule {
+    margin-top: var(--sc-1);
   }
 
   .hb-ch3-step__name { font-size: 13px; }
   .hb-ch3-stamp text { font-size: 8.5px; }
+}
+
+@media (max-height: 760px) and (min-width: 721px) {
+  .hb-ch3-blueprint .hb-wende.sc-stage {
+    gap: var(--sc-3);
+    padding-block: var(--sc-3);
+  }
+
+  .hb-ch3-blueprint .hb-zeichnung {
+    max-height: 38svh;
+  }
+
+  .hb-ch3-blueprint .hb-wende__text p {
+    font-size: 1rem;
+  }
+
+  .hb-ch3-blueprint .consultant-rule {
+    margin-top: var(--sc-1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
