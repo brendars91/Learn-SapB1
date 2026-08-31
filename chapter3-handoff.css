@@ -2,8 +2,37 @@
    The current document leads. Completed documents remain visible and carry a
    compact Processed stamp. Future documents do not appear before their turn. */
 
+/* Keep the complete Chapter 3 story inside the sticky viewport. The base
+   handbook layout centres a tall stack; once the copy and rules grew, that
+   could place the process diagram above the clipped stage. Here the stage is
+   explicitly divided into header / drawing / copy so the active document stays
+   in a stable reading band all the way through Payment. */
+.hb-ch3-blueprint .hb-wende {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: stretch;
+  gap: clamp(var(--sc-3), 2.2vh, var(--sc-5));
+  padding-block: clamp(var(--sc-4), 3vh, var(--sc-6));
+}
+
+.hb-ch3-blueprint .hb-kaphead {
+  margin: 0;
+}
+
 .hb-ch3-blueprint .hb-zeichnung {
   overflow: visible;
+  align-self: center;
+  width: 100%;
+  max-height: min(43svh, 360px);
+}
+
+.hb-ch3-blueprint .hb-wende__text {
+  align-self: end;
+  gap: clamp(var(--sc-2), 1.3vh, var(--sc-3));
+}
+
+.hb-ch3-blueprint .consultant-rule {
+  margin-top: clamp(var(--sc-2), 1.4vh, var(--sc-4));
+  padding-block: var(--sc-2);
 }
 
 .hb-ch3-step,
@@ -125,17 +154,45 @@
 
 @media (max-width: 720px) {
   .hb-ch3-blueprint .hb-wende {
-    gap: var(--sc-4);
-    padding-block: var(--sc-5);
+    gap: var(--sc-3);
+    padding-block: var(--sc-4);
   }
 
   .hb-ch3-blueprint .hb-zeichnung {
-    width: 112%;
-    margin-left: -6%;
+    width: 108%;
+    margin-left: -4%;
+    max-height: min(39svh, 310px);
+  }
+
+  .hb-ch3-blueprint .hb-wende__text p {
+    font-size: clamp(.9rem, 3.8vw, 1.05rem);
+  }
+
+  .hb-ch3-blueprint .consultant-rule {
+    margin-top: var(--sc-1);
   }
 
   .hb-ch3-step__name { font-size: 13px; }
   .hb-ch3-stamp text { font-size: 8.5px; }
+}
+
+@media (max-height: 760px) and (min-width: 721px) {
+  .hb-ch3-blueprint .hb-wende {
+    gap: var(--sc-3);
+    padding-block: var(--sc-3);
+  }
+
+  .hb-ch3-blueprint .hb-zeichnung {
+    max-height: 38svh;
+  }
+
+  .hb-ch3-blueprint .hb-wende__text p {
+    font-size: 1rem;
+  }
+
+  .hb-ch3-blueprint .consultant-rule {
+    margin-top: var(--sc-1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
