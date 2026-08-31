@@ -1,0 +1,276 @@
+/* Chapter 1 · contextual missing-invoice case screens
+   Five meaningful SAP B1 views tell the investigation story. The numeric
+   counter may still reach eleven; overflow is summarized as +N more. */
+
+.hb-ch1-screens {
+  min-height: 250px;
+  isolation: isolate;
+}
+
+.hb-case-screen {
+  --case-i: 0;
+  position: absolute;
+  left: 7%;
+  top: 16%;
+  width: 86%;
+  min-height: 142px;
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--hb-rule-hard) 88%, transparent);
+  background: color-mix(in srgb, var(--sc-surface) 96%, white 4%);
+  box-shadow: 0 10px 26px rgb(23 20 15 / .09);
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform:
+    translate(calc(var(--case-i) * 9px), calc(var(--case-i) * -7px))
+    scale(.965);
+  transform-origin: 50% 85%;
+  transition:
+    opacity .24s ease,
+    transform .36s cubic-bezier(.2,.78,.2,1),
+    filter .3s ease;
+}
+
+.hb-case-screen:nth-of-type(1) { --case-i: 0; }
+.hb-case-screen:nth-of-type(2) { --case-i: 1; }
+.hb-case-screen:nth-of-type(3) { --case-i: 2; }
+.hb-case-screen:nth-of-type(4) { --case-i: 3; }
+.hb-case-screen:nth-of-type(5) { --case-i: 4; }
+
+.hb-case-screen[data-open] {
+  opacity: 1;
+  transform:
+    translate(calc(var(--case-i) * 9px), calc(var(--case-i) * -7px))
+    scale(1);
+}
+
+.hb-case-screen[data-open]:not(:last-of-type) {
+  filter: saturate(.8) contrast(.97);
+}
+
+/* The previous implementation styled every span below .hb-ch1-screens as a
+   pseudo-window. Reset that legacy rule inside the real mini interfaces so
+   their labels stay ordinary inline content. */
+.hb-ch1-screens .hb-case-screen span {
+  position: static;
+  inset: auto;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  opacity: 1;
+  overflow: visible;
+  transform: none;
+  transition: none;
+}
+
+.hb-ch1-screens .hb-case-screen span::before,
+.hb-ch1-screens .hb-case-screen span::after {
+  content: none;
+}
+
+.hb-case-screen header {
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 7px 10px 6px;
+  border-bottom: 1px solid var(--hb-rule);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--sc-accent) 9%, transparent), transparent 42%),
+    color-mix(in srgb, var(--sc-ink) 5%, var(--sc-surface));
+  font-family: var(--hb-mono);
+  font-size: clamp(.55rem, .8vw, .7rem);
+  line-height: 1;
+  letter-spacing: .04em;
+}
+
+.hb-case-screen header span {
+  color: var(--sc-ink);
+  font-weight: 700;
+}
+
+.hb-case-screen header b {
+  color: var(--sc-accent);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.hb-case-screen__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px;
+}
+
+.hb-case-screen dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+}
+
+.hb-case-screen dl div {
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid color-mix(in srgb, var(--hb-rule) 82%, transparent);
+  background: color-mix(in srgb, var(--sc-canvas) 24%, transparent);
+}
+
+.hb-case-screen dt {
+  margin: 0 0 3px;
+  font-family: var(--hb-mono);
+  font-size: .48rem;
+  line-height: 1.1;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+}
+
+.hb-case-screen dd {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--hb-mono);
+  font-size: clamp(.56rem, .78vw, .68rem);
+  line-height: 1.2;
+  color: var(--sc-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.hb-case-screen small,
+.hb-case-screen__note {
+  display: block;
+  margin: 0;
+  font-size: clamp(.57rem, .76vw, .67rem);
+  line-height: 1.3;
+  color: var(--sc-ink-soft);
+}
+
+.hb-case-screen--invoice {
+  border-color: color-mix(in srgb, var(--sc-accent) 58%, var(--hb-rule-hard));
+  box-shadow: 0 13px 32px rgb(23 20 15 / .13);
+}
+
+.hb-case-screen--invoice header {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--sc-accent) 16%, transparent), transparent 58%),
+    color-mix(in srgb, var(--sc-ink) 5%, var(--sc-surface));
+}
+
+.hb-case-screen__map {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 10px 8px;
+}
+
+.hb-case-screen__map > span {
+  min-width: 0;
+  padding: 8px 5px;
+  border: 1px solid var(--hb-rule);
+  background: color-mix(in srgb, var(--sc-canvas) 24%, transparent);
+  text-align: center;
+  font-family: var(--hb-mono);
+  font-size: clamp(.5rem, .7vw, .62rem);
+  line-height: 1.35;
+  color: var(--sc-ink-soft);
+}
+
+.hb-case-screen__map b {
+  color: var(--sc-ink);
+  font-size: .95em;
+}
+
+.hb-case-screen__map i {
+  font-family: var(--hb-mono);
+  font-style: normal;
+  color: var(--sc-accent);
+}
+
+.hb-case-screen--map .hb-case-screen__note {
+  padding: 0 10px 10px;
+}
+
+/* Override the legacy generic .hb-ch1-screens span rule. This is now a compact
+   overflow indicator, never another pseudo-window. */
+.hb-ch1-screens .hb-ch1-more {
+  position: absolute;
+  z-index: 20;
+  left: auto;
+  right: 1%;
+  top: auto;
+  bottom: 2%;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  padding: 5px 7px;
+  border: 1px solid color-mix(in srgb, var(--sc-accent) 48%, var(--hb-rule-hard));
+  background: var(--sc-surface);
+  box-shadow: 0 4px 12px rgb(23 20 15 / .08);
+  opacity: 1;
+  overflow: visible;
+  transform: none;
+  transition: opacity .2s ease, transform .2s ease;
+  font-family: var(--hb-mono);
+  font-size: .56rem;
+  line-height: 1;
+  letter-spacing: .06em;
+  color: var(--sc-accent);
+  white-space: nowrap;
+}
+
+.hb-ch1-screens .hb-ch1-more[hidden] {
+  display: none;
+}
+
+.hb-ch1-screens .hb-ch1-more::before,
+.hb-ch1-screens .hb-ch1-more::after {
+  content: none;
+}
+
+@media (max-width: 900px) {
+  .hb-ch1-screens { min-height: 220px; }
+  .hb-case-screen {
+    left: 4%;
+    width: 89%;
+    top: 15%;
+    min-height: 136px;
+  }
+  .hb-case-screen dl { gap: 4px; }
+  .hb-case-screen dl div { padding: 6px; }
+}
+
+@media (max-width: 560px) {
+  .hb-ch1-screens { min-height: 205px; }
+  .hb-case-screen {
+    left: 1%;
+    width: 92%;
+    top: 17%;
+    min-height: 128px;
+    transform:
+      translate(calc(var(--case-i) * 5px), calc(var(--case-i) * -5px))
+      scale(.97);
+  }
+  .hb-case-screen[data-open] {
+    transform:
+      translate(calc(var(--case-i) * 5px), calc(var(--case-i) * -5px))
+      scale(1);
+  }
+  .hb-case-screen header { padding-inline: 8px; }
+  .hb-case-screen__body { padding: 8px; }
+  .hb-case-screen dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hb-case-screen dl div:last-child { grid-column: 1 / -1; }
+  .hb-case-screen__map { gap: 3px; padding-inline: 7px; }
+  .hb-case-screen__map > span { padding-inline: 3px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-case-screen,
+  .hb-ch1-screens .hb-ch1-more { transition: none !important; }
+}

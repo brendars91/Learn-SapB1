@@ -69,7 +69,8 @@ await page.evaluate(() => scrollBy(0, document.querySelector('.hb-ch1-incident')
 await page.waitForTimeout(120);
 assert.equal((await page.locator('[data-ch1-screen-count]').textContent()).trim(), '11');
 assert.equal(await page.locator('.hb-ch1-reveal').getAttribute('data-on'), '');
-assert.equal(await page.locator('.hb-ch1-screens span[data-open]').count(), 11);
+assert.equal(await page.locator('[data-ch1-case-screen][data-open]').count(), 5);
+assert.equal((await page.locator('[data-ch1-more]').textContent()).trim(), '+6 more');
 
 // 3 · Chapter 2 causal annotations
 const chapter2NoteTexts = (await page.locator('.hb-ch2-cost .hb-causal-note').allInnerTexts()).map(text => text.replace(/\s+/g, ' ').trim());

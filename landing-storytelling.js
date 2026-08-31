@@ -5,6 +5,11 @@
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const money = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  const chapter1CaseStyle = document.createElement('link');
+  chapter1CaseStyle.rel = 'stylesheet';
+  chapter1CaseStyle.href = 'chapter1-case-screens.css';
+  document.head.appendChild(chapter1CaseStyle);
+
   const folioEffects = Object.fromEntries([...document.querySelectorAll('[data-folio-effect]')].map(el => [el.dataset.folioEffect, el]));
   const mobileCurrent = document.querySelector('[data-folio-mobile-current]');
   const chapters = [...document.querySelectorAll('[data-hb-kap]')];
@@ -50,7 +55,8 @@
   }
 
   const cold = document.querySelector('[data-ch1-cold]');
-  const coldScreens = cold ? [...cold.querySelectorAll('.hb-ch1-screens span')] : [];
+  const coldScreens = cold ? [...cold.querySelectorAll('[data-ch1-case-screen]')] : [];
+  const coldMore = cold?.querySelector('[data-ch1-more]');
   const coldCount = cold?.querySelector('[data-ch1-screen-count]');
   const coldPlural = cold?.querySelector('[data-ch1-screen-plural]');
   const coldReveal = cold?.querySelector('.hb-ch1-reveal');
@@ -65,7 +71,15 @@
     const count = reduced ? 11 : clamp(Math.ceil(progress * 14) - 2, 1, 11);
     if (count === coldFrame) return;
     coldFrame = count;
-    coldScreens.forEach((screen, index) => screen.toggleAttribute('data-open', index < count));
+
+    const visibleCount = Math.min(count, coldScreens.length);
+    coldScreens.forEach((screen, index) => screen.toggleAttribute('data-open', index < visibleCount));
+
+    const extra = Math.max(0, count - coldScreens.length);
+    if (coldMore) {
+      coldMore.hidden = extra === 0;
+      coldMore.textContent = `+${extra} more`;
+    }
     if (coldCount) coldCount.textContent = String(count);
     if (coldPlural) coldPlural.textContent = count === 1 ? '' : 's';
     if (coldReveal) coldReveal.toggleAttribute('data-on', count === 11);

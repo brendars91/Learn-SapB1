@@ -16,10 +16,18 @@ test('landing exposes causal folio state hooks for stock, ledger and balance', (
   assert.match(html, /data-folio-effect="balance"/);
 });
 
-test('Chapter 1 contains an experiential eleven-screen cold open', () => {
+test('Chapter 1 contains an experiential eleven-screen search represented by five contextual case views', () => {
   const chapter = section('hb-ch1-incident');
   assert.match(chapter, /data-ch1-screen-count/);
-  assert.match(chapter, /<span><\/span><span><\/span><span><\/span>/);
+  assert.equal((chapter.match(/data-ch1-case-screen/g) || []).length, 5);
+  assert.match(chapter, /data-ch1-more/);
+  assert.match(chapter, /Business Partner Master Data/);
+  assert.match(chapter, /Relationship Map/);
+  assert.match(chapter, /Sales Order/);
+  assert.match(chapter, /Delivery/);
+  assert.match(chapter, /A\/R Invoice/);
+  assert.match(chapter, /C20000/);
+  assert.match(chapter, /1001-2026/);
   assert.match(chapter, /The system isn(?:&rsquo;|')t broken\./);
   assert.match(chapter, /The question is wrong\./);
 });
