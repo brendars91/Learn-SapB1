@@ -3,6 +3,7 @@
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const money = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const folioEffects = Object.fromEntries([...document.querySelectorAll('[data-folio-effect]')].map(el => [el.dataset.folioEffect, el]));
   const mobileCurrent = document.querySelector('[data-folio-mobile-current]');
@@ -40,10 +41,11 @@
         setFolioEffect('stock', '−12'); setFolioEffect('ledger', '+856.80'); setFolioEffect('balance', '0.00');
       }
     } else if (name === 'The Document Chain') {
-      // Keep the last known transaction state visible while the live document is edited.
-      setFolioEffect('stock', document.querySelector('[data-beleg-card="2"] .beleg__eff li:first-child')?.textContent.replace(/^Stock:\s*/, '') || '−12');
+      const stockText = document.querySelector('[data-beleg-card="2"] .beleg__eff li:first-child')?.textContent || 'Stock: −12';
+      const balanceText = document.querySelector('[data-beleg-card="4"] .beleg__eff li:last-child')?.textContent || 'Balance: 0.00';
+      setFolioEffect('stock', stockText.replace(/^(Stock|Bestand):\s*/, ''));
       setFolioEffect('ledger', document.querySelector('[data-f-debit]')?.textContent || '856.80');
-      setFolioEffect('balance', document.querySelector('[data-beleg-card="4"] .beleg__eff li:last-child')?.textContent.replace(/^Balance:\s*/, '') || '0.00');
+      setFolioEffect('balance', balanceText.replace(/^(Balance|Saldo):\s*/, ''));
     }
   }
 
@@ -89,8 +91,15 @@
   }
 
   const liveWindow = document.querySelector('[data-fenster]');
-  const liveInputs = [...document.querySelectorAll('[data-f-qty], [data-f-price], [data-f-vat]')];
-  const firstField = document.querySelector('[data-f-qty]')?.closest('.fenster__field');
+  const qty = document.querySelector('[data-f-qty]');
+  const price = document.querySelector('[data-f-price]');
+  const vat = document.querySelector('[data-f-vat]');
+  const liveInputs = [qty, price, vat].filter(Boolean);
+  const firstField = qty?.closest('.fenster__field');
+  const stockLine = document.querySelector('[data-beleg-card="2"] .beleg__eff li:first-child');
+  const invoiceBalanceLine = document.querySelector('[data-beleg-card="3"] .beleg__eff li:last-child');
+  const paymentBalanceLine = document.querySelector('[data-beleg-card="4"] .beleg__eff li:last-child');
+  const hint = document.querySelector('[data-f-hint]');
   let invited = false;
 
   function inviteLiveEdit() {
@@ -101,14 +110,21 @@
   }
 
   function propagateLiveEffects() {
-    if (!liveWindow) return;
+    if (!liveWindow || !qty || !price || !vat) return;
+    const q = clamp(Number(qty.value) || 1, 1, 99);
+    const unitPrice = clamp(Number(price.value) || 0, 0, 999);
+    const gross = q * unitPrice * (1 + Number(vat.value) / 100);
+    const grossText = money.format(gross);
+
+    if (stockLine) stockLine.textContent = `Stock: −${q}`;
+    if (invoiceBalanceLine) invoiceBalanceLine.textContent = `Balance: +${grossText}`;
+    if (paymentBalanceLine) paymentBalanceLine.textContent = 'Balance: 0.00';
+    if (hint) hint.textContent = `One change, three effects: ${q} units leave stock, the ledger moves ${grossText}, and the partner balance returns to zero after payment.`;
+
     liveWindow.setAttribute('data-edited', '');
-    const stock = document.querySelector('[data-beleg-card="2"] .beleg__eff li:first-child')?.textContent.replace(/^Stock:\s*/, '') || '—';
-    const ledger = document.querySelector('[data-f-debit]')?.textContent || '—';
-    const balance = document.querySelector('[data-beleg-card="4"] .beleg__eff li:last-child')?.textContent.replace(/^Balance:\s*/, '') || '—';
-    setFolioEffect('stock', stock);
-    setFolioEffect('ledger', ledger);
-    setFolioEffect('balance', balance);
+    setFolioEffect('stock', `−${q}`);
+    setFolioEffect('ledger', grossText);
+    setFolioEffect('balance', '0.00');
   }
   liveInputs.forEach(input => input.addEventListener('input', () => requestAnimationFrame(propagateLiveEffects)));
 
