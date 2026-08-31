@@ -43,14 +43,17 @@ await page.locator('.hb-peak').waitFor();
 async function setPeakProgress(progress) {
   await page.evaluate(p => {
     const peak = document.querySelector('.hb-peak');
-    const travel = Math.max(1, peak.offsetHeight - innerHeight);
-    scrollTo(0, peak.offsetTop + travel * p);
+    const rect = peak.getBoundingClientRect();
+    const top = rect.top + scrollY;
+    const travel = Math.max(1, rect.height - innerHeight);
+    scrollTo(0, top + travel * p);
   }, progress);
-  await page.waitForTimeout(180);
+  await page.waitForTimeout(220);
 }
 
 async function chapterState() {
   return page.evaluate(() => {
+    const peak = document.querySelector('.hb-peak');
     const cards = [...document.querySelectorAll('[data-beleg-card]')].map(card => {
       const style = getComputedStyle(card);
       const rect = card.getBoundingClientRect();
@@ -66,6 +69,7 @@ async function chapterState() {
     const windowRect = windowEl.getBoundingClientRect();
     const stageRect = document.querySelector('.hb-peak__stage').getBoundingClientRect();
     return {
+      progress: Number(getComputedStyle(peak).getPropertyValue('--sc-p')),
       cards,
       window: {
         hidden: windowEl.hidden,
@@ -84,6 +88,7 @@ async function chapterState() {
 // present while Invoice becomes the visual protagonist; Payment is still future.
 await setPeakProgress(0.62);
 let state = await chapterState();
+assert.ok(Math.abs(state.progress - 0.62) <= 0.03, `Chapter 4 probe missed requested progress: ${state.progress}`);
 for (let i = 0; i <= 3; i += 1) {
   assert.ok(state.cards[i].opacity >= 0.9, `Chapter 4 card ${i} should remain visible at Invoice step, got ${state.cards[i].opacity}`);
 }
@@ -100,6 +105,7 @@ await page.reload({ waitUntil: 'networkidle' });
 await page.locator('.hb-peak').waitFor();
 await setPeakProgress(0.62);
 state = await chapterState();
+assert.ok(Math.abs(state.progress - 0.62) <= 0.03, `Mobile Chapter 4 probe missed requested progress: ${state.progress}`);
 assert.ok(state.window.top >= state.window.stageTop - 1, `A/R Invoice window starts outside stage: ${state.window.top} < ${state.window.stageTop}`);
 assert.ok(state.window.bottom <= state.window.stageBottom + 1, `A/R Invoice window is clipped: ${state.window.bottom} > ${state.window.stageBottom}`);
 for (let i = 0; i <= 3; i += 1) {
@@ -108,6 +114,6 @@ for (let i = 0; i <= 3; i += 1) {
 assert.ok(state.cards[4].opacity <= 0.08, 'Mobile Payment should remain hidden before its turn');
 
 assert.deepEqual(errors, [], 'Chapter 4 browser console errors');
-console.log(JSON.stringify({ chapter4: 'cumulative-chain-and-readable-invoice', errors }, null, 2));
+console.log(JSON.stringify({ chapter4: 'cumulative-chain-and-readable-invoice', progress: state.progress, errors }, null, 2));
 await browser.close();
 await new Promise(resolve => server.close(resolve));
