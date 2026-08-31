@@ -223,7 +223,14 @@
     driveChain();
     driveDrawing();
   }
-  function schedule() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    // handbuch.js is loaded before ScrollCraft.mount(). On a scroll event its
+    // listener therefore runs first. Wait one RAF for ScrollCraft to publish
+    // the new --sc-p, then read that value on the following frame.
+    requestAnimationFrame(() => requestAnimationFrame(frame));
+  }
 
   addEventListener('scroll', schedule, { passive: true });
   addEventListener('resize', schedule);
