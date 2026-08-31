@@ -32,6 +32,10 @@ await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 
 const browser = await chromium.launch({ headless: true, executablePath: chromium.executablePath(), args: ['--no-sandbox'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+// This gate verifies semantic end states, not wall-clock animation timing.
+// Production already supports reduced motion, so opt into that path to keep
+// GitHub Actions deterministic even when RAF/CSS transitions are throttled.
+await page.emulateMedia({ reducedMotion: 'reduce' });
 const errors = [];
 page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
 page.on('pageerror', error => errors.push(error.message));
