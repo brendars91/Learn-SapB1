@@ -34,6 +34,8 @@ jobs:
         run: node test/chapter4-browser-smoke.mjs
       - name: Run landing storytelling browser gate
         run: node test/landing-storytelling-browser.mjs
+      - name: Run Chapter 3/4 visibility regression gate
+        run: node test/ch3-ch4-visibility-regression.mjs
       - name: Verify generated offline artifacts
         run: |
           test -s dist/SAP-Business-One-Mastery-Lab-Standalone.html
