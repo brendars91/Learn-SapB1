@@ -108,35 +108,14 @@ await scrollTo('.hb-ch2-cost', .35);
 await page.waitForFunction(() => document.querySelector('[data-folio-mobile-current]')?.textContent.includes('The Cost'));
 const mobileFolioState = await page.locator('[data-folio-mobile-current]').evaluate(el => {
   const style = getComputedStyle(el);
-  const parent = el.closest('.folio');
-  const parentStyle = parent ? getComputedStyle(parent) : null;
   const rect = el.getBoundingClientRect();
-  const parentRect = parent?.getBoundingClientRect();
-  const midpoint = innerHeight / 2;
-  const activeAtMidpoint = [...document.querySelectorAll('[data-hb-kap]')].find(chapter => {
-    const box = chapter.getBoundingClientRect();
-    return box.top <= midpoint && box.bottom > midpoint;
-  });
-  return {
-    textContent: el.textContent,
-    innerText: el.innerText,
-    display: style.display,
-    visibility: style.visibility,
-    opacity: style.opacity,
-    width: rect.width,
-    height: rect.height,
-    parentDisplay: parentStyle?.display,
-    parentVisibility: parentStyle?.visibility,
-    parentOpacity: parentStyle?.opacity,
-    parentWidth: parentRect?.width,
-    parentHeight: parentRect?.height,
-    scrollY,
-    activeAtMidpoint: activeAtMidpoint?.dataset.hbKap || null
-  };
+  return { textContent:el.textContent, innerText:el.innerText, display:style.display, visibility:style.visibility, opacity:style.opacity, width:rect.width, height:rect.height };
 });
-console.log('mobile-folio-state', JSON.stringify(mobileFolioState));
 assert.notEqual(mobileFolioState.display, 'none');
-assert.ok(mobileFolioState.innerText.includes('The Cost'));
+assert.equal(mobileFolioState.visibility, 'visible');
+assert.equal(mobileFolioState.opacity, '1');
+assert.ok(mobileFolioState.innerText.toLowerCase().includes('the cost'));
+assert.ok(mobileFolioState.width >= 72, `mobile folio label should stay legible, width=${mobileFolioState.width}`);
 
 // 10 · consultant rules + responsive safety
 assert.ok(await page.locator('.consultant-rule').count() >= 4);
