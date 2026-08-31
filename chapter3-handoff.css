@@ -33,10 +33,10 @@
   gap: clamp(var(--sc-2), 1.2vh, var(--sc-3));
 }
 
-/* Keep the first explanation present throughout the handoff. ScrollCraft's
-   original cue fades it back out after .72, which makes fast scrollers miss the
-   premise exactly when Invoice and Payment arrive. */
-.hb-ch3-blueprint .hb-wende__text > p:first-child {
+/* ScrollCraft still owns the paragraph's entrance. Once that entrance has
+   completed, handbuch.js adds this class so the premise remains readable for
+   Invoice and Payment instead of fading out again near the end of its cue. */
+.hb-ch3-blueprint .hb-wende__text > p:first-child.hb-ch3-copy--hold {
   opacity: 1 !important;
   transform: none !important;
 }

@@ -36,6 +36,8 @@ jobs:
         run: node test/landing-storytelling-browser.mjs
       - name: Run Chapter 3/4 visibility regression gate
         run: node test/ch3-ch4-visibility-regression.mjs
+      - name: Run Chapter 3/4 visual integrity gate
+        run: node test/ch3-ch4-visual-integrity.mjs
       - name: Verify generated offline artifacts
         run: |
           test -s dist/SAP-Business-One-Mastery-Lab-Standalone.html
