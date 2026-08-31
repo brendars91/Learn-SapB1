@@ -7,7 +7,7 @@
 
   const chapter1CaseStyle = document.createElement('link');
   chapter1CaseStyle.rel = 'stylesheet';
-  chapter1CaseStyle.href = 'chapter1-case-screens.css';
+  chapter1CaseStyle.href = 'chapter1-case-screens.css?v=20260831-mobile-polish-1';
   document.head.appendChild(chapter1CaseStyle);
 
   const folioEffects = Object.fromEntries([...document.querySelectorAll('[data-folio-effect]')].map(el => [el.dataset.folioEffect, el]));
