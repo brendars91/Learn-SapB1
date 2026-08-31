@@ -37,8 +37,15 @@ page.on('console', message => { if (message.type() === 'error') errors.push(mess
 page.on('pageerror', error => errors.push(error.message));
 
 const entrypoint = `http://127.0.0.1:${server.address().port}/index.html`;
+
+async function preparePage() {
+  await page.locator('.hb-peak').waitFor();
+  await page.waitForFunction(() => document.documentElement.classList.contains('sc-ready') && window.ScrollCraft?.instances?.length > 0);
+  await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
+}
+
 await page.goto(`${entrypoint}?chapter4-browser-gate`, { waitUntil: 'networkidle' });
-await page.locator('.hb-peak').waitFor();
+await preparePage();
 
 async function setPeakProgress(progress) {
   await page.evaluate(p => {
@@ -46,9 +53,13 @@ async function setPeakProgress(progress) {
     const rect = peak.getBoundingClientRect();
     const top = rect.top + scrollY;
     const travel = Math.max(1, rect.height - innerHeight);
-    scrollTo(0, top + travel * p);
+    scrollTo({ top: top + travel * p, left: 0, behavior: 'instant' });
   }, progress);
-  await page.waitForTimeout(220);
+  await page.waitForFunction(p => {
+    const peak = document.querySelector('.hb-peak');
+    const actual = Number(getComputedStyle(peak).getPropertyValue('--sc-p'));
+    return Math.abs(actual - p) <= 0.03;
+  }, progress);
 }
 
 async function chapterState() {
@@ -102,7 +113,7 @@ assert.ok(rgb.reduce((sum, value) => sum + value, 0) / 3 >= 200, `A/R Invoice wi
 // The window must also remain inside the clipped sticky stage on a phone-sized viewport.
 await page.setViewportSize({ width: 390, height: 844 });
 await page.reload({ waitUntil: 'networkidle' });
-await page.locator('.hb-peak').waitFor();
+await preparePage();
 await setPeakProgress(0.62);
 state = await chapterState();
 assert.ok(Math.abs(state.progress - 0.62) <= 0.03, `Mobile Chapter 4 probe missed requested progress: ${state.progress}`);
