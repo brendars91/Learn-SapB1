@@ -57,6 +57,15 @@ async function setProgress(page, selector, progress) {
     const actual = Number(getComputedStyle(section).getPropertyValue('--sc-p'));
     return Math.abs(actual - progress) <= 0.035;
   }, { selector, progress });
+
+  // ScrollCraft and handbuch.js run on separate rAF loops. A synthetic instant
+  // scroll can emit only one scroll event, so handbuch.js may read the previous
+  // --sc-p before ScrollCraft publishes the new one. Re-dispatch after progress
+  // is settled and wait for the same double-rAF contract used by handbuch.js.
+  await page.evaluate(() => new Promise(resolve => {
+    dispatchEvent(new Event('scroll'));
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  }));
 }
 
 const shortDesktop = await makePage({ width: 1280, height: 720 }, 'short-desktop');

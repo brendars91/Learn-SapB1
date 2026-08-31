@@ -156,6 +156,34 @@
   const chapter3Steps = [...document.querySelectorAll('[data-ch3-step]')];
   const chapter3Connectors = [...document.querySelectorAll('[data-ch3-connector]')];
   const chapter3Premise = document.querySelector('.hb-ch3-blueprint .hb-wende__text > p:first-child');
+  const chapter3Drawing = document.querySelector('.hb-ch3-blueprint .hb-zeichnung');
+
+  const mobilePathSpec = [
+    ['Sales Order', '162', 'Order accepted'],
+    ['Delivery', '5001', 'Stock −12'],
+    ['Invoice', '1001-2026', 'A/R +856.80'],
+    ['Payment', '2301', 'Balance 0.00'],
+  ];
+
+  let chapter3MobilePath = document.querySelector('[data-ch3-mobile-path]');
+  if (wendeAct && chapter3Drawing && !chapter3MobilePath) {
+    chapter3MobilePath = document.createElement('div');
+    chapter3MobilePath.className = 'hb-ch3-mobile-path';
+    chapter3MobilePath.dataset.ch3MobilePath = '';
+    chapter3MobilePath.setAttribute('aria-label', 'Process path: Sales Order, Delivery, Invoice, Payment');
+    chapter3MobilePath.innerHTML = mobilePathSpec.map(([name, number, effect], i) => `
+      <article class="hb-ch3-mobile-step" data-ch3-mobile-step="${i}">
+        <span class="hb-ch3-mobile-step__index">0${i + 1}</span>
+        <div class="hb-ch3-mobile-step__copy">
+          <strong>${name}</strong>
+          <small>${number}</small>
+        </div>
+        <span class="hb-ch3-mobile-step__effect">${effect}</span>
+        <em>Processed</em>
+      </article>`).join('');
+    chapter3Drawing.insertAdjacentElement('afterend', chapter3MobilePath);
+  }
+  const chapter3MobileSteps = [...document.querySelectorAll('[data-ch3-mobile-step]')];
 
   function driveDrawing() {
     if (!wendeAct || !chapter3Steps.length) return;
@@ -171,6 +199,13 @@
 
     chapter3Connectors.forEach((connector, i) => {
       connector.classList.toggle('hb-ch3-connector--on', i < activeIndex);
+    });
+
+    chapter3MobileSteps.forEach((step, i) => {
+      step.classList.remove('hb-ch3-mobile-step--future', 'hb-ch3-mobile-step--current', 'hb-ch3-mobile-step--past');
+      if (i < activeIndex) step.classList.add('hb-ch3-mobile-step--past');
+      else if (i === activeIndex) step.classList.add('hb-ch3-mobile-step--current');
+      else step.classList.add('hb-ch3-mobile-step--future');
     });
 
     // Preserve the original ScrollCraft entrance, then keep the premise once
