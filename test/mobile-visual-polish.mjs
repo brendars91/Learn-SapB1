@@ -68,6 +68,16 @@ for (const viewport of [
   await page.waitForFunction(() => document.documentElement.classList.contains('sc-ready'));
   await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
 
+  const responsiveStyles = await page.evaluate(() => [...document.styleSheets]
+    .map(sheet => sheet.href)
+    .filter(Boolean)
+    .filter(href => /chapter1-case-screens|chapter3-handoff|chapter4-cumulative/.test(href)));
+  for (const name of ['chapter1-case-screens.css', 'chapter3-handoff.css', 'chapter4-cumulative.css']) {
+    const href = responsiveStyles.find(item => item.includes(name));
+    assert.ok(href, `${viewport.label}: ${name} was not loaded`);
+    assert.match(href, /[?&]v=/, `${viewport.label}: ${name} needs a versioned URL so phones do not reuse stale responsive CSS: ${href}`);
+  }
+
   const shell = await page.evaluate(() => ({
     innerWidth,
     overflow: document.documentElement.scrollWidth - innerWidth,
@@ -158,7 +168,7 @@ for (const viewport of [
   assert.ok(ch5.fontPx >= 11, `${viewport.label}: Chapter 5 route text too small ${JSON.stringify(ch5)}`);
 
   assert.deepEqual(errors, [], `${viewport.label}: browser errors`);
-  reports.push({ viewport:viewport.label, shell, ch1, ch3, ch4, ch5 });
+  reports.push({ viewport:viewport.label, responsiveStyles, shell, ch1, ch3, ch4, ch5 });
   await context.close();
 }
 
