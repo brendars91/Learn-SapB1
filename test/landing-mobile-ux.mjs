@@ -84,6 +84,10 @@ for (const viewport of [
 
   // Chapter 3: phones get a vertical process path, not a desktop SVG shrunk down.
   await setPinnedProgress(page, '.hb-ch3-blueprint', .80);
+  // ScrollCraft publishes --sc-p before the landing enhancement's double-RAF
+  // frame applies the semantic classes. Wait for the actual UI state, not just
+  // the progress variable, so this gate measures what the user sees.
+  await page.waitForFunction(() => document.querySelector('[data-ch3-mobile-step="3"]')?.classList.contains('hb-ch3-mobile-step--current'));
   const ch3 = await page.evaluate(() => {
     const mobile = document.querySelector('[data-ch3-mobile-path]');
     const desktop = document.querySelector('.hb-ch3-blueprint .hb-zeichnung');
