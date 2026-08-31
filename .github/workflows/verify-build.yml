@@ -28,6 +28,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run browser smoke test
         run: npm run test:browser:local
+      - name: Run mobile visual polish gate
+        run: node test/mobile-visual-polish.mjs
       - name: Run landing mobile UX gate
         run: node test/landing-mobile-ux.mjs
       - name: Run Chapter 1 cold-open visual gate

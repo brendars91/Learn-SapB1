@@ -17,15 +17,16 @@
   const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Carga los ajustes visuales específicos sin tocar el runtime de scroll.
+  // Version these dynamically loaded styles so a phone cannot keep an older
+  // responsive composition after a Pages deploy while HTML/JS are already new.
   const chapter3Style = document.createElement('link');
   chapter3Style.rel = 'stylesheet';
-  chapter3Style.href = 'chapter3-handoff.css';
+  chapter3Style.href = 'chapter3-handoff.css?v=20260831-mobile-polish-1';
   document.head.appendChild(chapter3Style);
 
   const chapter4Style = document.createElement('link');
   chapter4Style.rel = 'stylesheet';
-  chapter4Style.href = 'chapter4-cumulative.css';
+  chapter4Style.href = 'chapter4-cumulative.css?v=20260831-mobile-polish-1';
   document.head.appendChild(chapter4Style);
 
   // ── 0 · Puerta al lab con continuidad de idioma ───────────────────────────

@@ -48,9 +48,6 @@
   filter: saturate(.8) contrast(.97);
 }
 
-/* The previous implementation styled every span below .hb-ch1-screens as a
-   pseudo-window. Reset that legacy rule inside the real mini interfaces so
-   their labels stay ordinary inline content. */
 .hb-ch1-screens .hb-case-screen span {
   position: static;
   inset: auto;
@@ -88,16 +85,8 @@
   letter-spacing: .04em;
 }
 
-.hb-case-screen header span {
-  color: var(--sc-ink);
-  font-weight: 700;
-}
-
-.hb-case-screen header b {
-  color: var(--sc-accent);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
+.hb-case-screen header span { color: var(--sc-ink); font-weight: 700; }
+.hb-case-screen header b { color: var(--sc-accent); font-weight: 700; font-variant-numeric: tabular-nums; }
 
 .hb-case-screen__body {
   display: grid;
@@ -182,23 +171,10 @@
   color: var(--sc-ink-soft);
 }
 
-.hb-case-screen__map b {
-  color: var(--sc-ink);
-  font-size: .95em;
-}
+.hb-case-screen__map b { color: var(--sc-ink); font-size: .95em; }
+.hb-case-screen__map i { font-family: var(--hb-mono); font-style: normal; color: var(--sc-accent); }
+.hb-case-screen--map .hb-case-screen__note { padding: 0 10px 10px; }
 
-.hb-case-screen__map i {
-  font-family: var(--hb-mono);
-  font-style: normal;
-  color: var(--sc-accent);
-}
-
-.hb-case-screen--map .hb-case-screen__note {
-  padding: 0 10px 10px;
-}
-
-/* Override the legacy generic .hb-ch1-screens span rule. This is now a compact
-   overflow indicator, never another pseudo-window. */
 .hb-ch1-screens .hb-ch1-more {
   position: absolute;
   z-index: 20;
@@ -225,25 +201,30 @@
   white-space: nowrap;
 }
 
-.hb-ch1-screens .hb-ch1-more[hidden] {
-  display: none;
-}
-
+.hb-ch1-screens .hb-ch1-more[hidden] { display: none; }
 .hb-ch1-screens .hb-ch1-more::before,
-.hb-ch1-screens .hb-ch1-more::after {
-  content: none;
-}
+.hb-ch1-screens .hb-ch1-more::after { content: none; }
 
+/* The bottom folio turns the whole page into the mobile shell at 900px. Keep
+   the case-study UI readable throughout that same range instead of falling
+   back to desktop micro-label sizes on 600–900px touch devices. */
 @media (max-width: 900px) {
-  .hb-ch1-screens { min-height: 220px; }
+  .hb-ch1-screens { min-height: 230px; }
   .hb-case-screen {
     left: 4%;
     width: 89%;
     top: 15%;
-    min-height: 136px;
+    min-height: 142px;
   }
+  .hb-case-screen header { min-height: 35px; font-size: .72rem; }
   .hb-case-screen dl { gap: 4px; }
   .hb-case-screen dl div { padding: 6px; }
+  .hb-case-screen dt { font-size: .66rem; }
+  .hb-case-screen dd,
+  .hb-case-screen small,
+  .hb-case-screen__note { font-size: .72rem; }
+  .hb-case-screen__map > span { font-size: .68rem; }
+  .hb-ch1-screens .hb-ch1-more { font-size: .66rem; }
 }
 
 @media (max-width: 560px) {
@@ -262,21 +243,17 @@
       translate(calc(var(--case-i) * 5px), calc(var(--case-i) * -5px))
       scale(1);
   }
-  .hb-case-screen header {
-    min-height: 36px;
-    padding-inline: 8px;
-    font-size: .7rem;
-  }
+  .hb-case-screen header { min-height: 36px; padding-inline: 8px; font-size: .72rem; }
   .hb-case-screen__body { padding: 8px; }
   .hb-case-screen dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hb-case-screen dl div:last-child { grid-column: 1 / -1; }
-  .hb-case-screen dt { font-size: .62rem; }
+  .hb-case-screen dt { font-size: .66rem; }
   .hb-case-screen dd,
   .hb-case-screen small,
-  .hb-case-screen__note { font-size: .7rem; }
+  .hb-case-screen__note { font-size: .72rem; }
   .hb-case-screen__map { gap: 3px; padding-inline: 7px; }
-  .hb-case-screen__map > span { padding-inline: 3px; font-size: .68rem; }
-  .hb-ch1-screens .hb-ch1-more { font-size: .65rem; }
+  .hb-case-screen__map > span { padding-inline: 3px; font-size: .7rem; }
+  .hb-ch1-screens .hb-ch1-more { font-size: .66rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
