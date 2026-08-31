@@ -14,8 +14,24 @@
 .hb-ch1-counter strong { font-size:clamp(2.8rem,6vw,5.6rem); line-height:.8; color:var(--sc-accent); font-weight:500; font-variant-numeric:tabular-nums; }
 .hb-ch1-counter span { font-size:.65rem; }
 .hb-ch1-screens { grid-area:screens; position:relative; min-height:220px; }
-.hb-ch1-screens span { position:absolute; width:72%; height:48%; left:14%; top:26%; border:1px solid var(--hb-rule-hard); background:var(--sc-surface); box-shadow:0 10px 28px rgb(23 20 15 / .08); opacity:0; transform:translate(calc(var(--screen-i,0) * 3px),calc(var(--screen-i,0) * -3px)) scale(.96); transition:opacity .24s ease, transform .36s ease; }
+.hb-ch1-screens span { position:absolute; width:72%; height:48%; left:14%; top:26%; border:1px solid color-mix(in srgb,var(--hb-rule-hard) 82%,transparent); background:
+  linear-gradient(180deg,color-mix(in srgb,var(--sc-ink) 7%,var(--sc-surface)) 0 24%,transparent 24% 100%),
+  linear-gradient(90deg,color-mix(in srgb,var(--sc-accent) 8%,transparent) 0 23%,transparent 23% 100%),
+  var(--sc-surface);
+  box-shadow:0 10px 28px rgb(23 20 15 / .08); opacity:0; overflow:hidden; transform:translate(calc(var(--screen-i,0) * 3px),calc(var(--screen-i,0) * -3px)) scale(.96); transition:opacity .24s ease, transform .36s ease; }
+.hb-ch1-screens span::before { content:"SAP Business One"; position:absolute; left:8%; top:8%; z-index:2; font-family:var(--hb-mono); font-size:clamp(.34rem,.55vw,.48rem); line-height:1; letter-spacing:.08em; text-transform:uppercase; color:color-mix(in srgb,var(--sc-ink) 74%,transparent); white-space:nowrap; }
+.hb-ch1-screens span::after { content:""; position:absolute; inset:31% 8% 12% 29%; background:
+  linear-gradient(var(--hb-rule),var(--hb-rule)) 0 0/52% 1px no-repeat,
+  linear-gradient(var(--hb-rule),var(--hb-rule)) 0 24%/86% 1px no-repeat,
+  linear-gradient(var(--hb-rule),var(--hb-rule)) 0 48%/70% 1px no-repeat,
+  linear-gradient(var(--hb-rule),var(--hb-rule)) 0 72%/92% 1px no-repeat,
+  linear-gradient(90deg,color-mix(in srgb,var(--sc-ink) 5%,transparent),color-mix(in srgb,var(--sc-ink) 5%,transparent)) 100% 0/24% 100% no-repeat;
+  opacity:.9; }
 .hb-ch1-screens span:nth-child(1){--screen-i:0}.hb-ch1-screens span:nth-child(2){--screen-i:1}.hb-ch1-screens span:nth-child(3){--screen-i:2}.hb-ch1-screens span:nth-child(4){--screen-i:3}.hb-ch1-screens span:nth-child(5){--screen-i:4}.hb-ch1-screens span:nth-child(6){--screen-i:5}.hb-ch1-screens span:nth-child(7){--screen-i:6}.hb-ch1-screens span:nth-child(8){--screen-i:7}.hb-ch1-screens span:nth-child(9){--screen-i:8}.hb-ch1-screens span:nth-child(10){--screen-i:9}.hb-ch1-screens span:nth-child(11){--screen-i:10}
+.hb-ch1-screens span:nth-child(2n)::before { content:"A/R Invoice"; }
+.hb-ch1-screens span:nth-child(3n)::before { content:"Sales Order"; }
+.hb-ch1-screens span:nth-child(4n)::before { content:"Delivery"; }
+.hb-ch1-screens span:nth-child(5n)::before { content:"Business Partner"; }
 .hb-ch1-screens span[data-open] { opacity:1; transform:translate(calc(var(--screen-i) * 4px),calc(var(--screen-i) * -4px)) scale(1); }
 .hb-ch1-reveal { grid-area:reveal; margin:var(--sc-2) 0 0; padding-top:var(--sc-3); border-top:1px solid var(--hb-rule-hard); display:flex; gap:1ch; flex-wrap:wrap; font-size:clamp(1.2rem,2.1vw,2rem); opacity:0; transform:translateY(8px); transition:opacity .45s ease, transform .45s ease; }
 .hb-ch1-reveal[data-on] { opacity:1; transform:none; }
