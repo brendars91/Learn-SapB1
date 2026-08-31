@@ -17,7 +17,12 @@
   const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Carga el ajuste visual específico del capítulo 4 sin tocar el runtime de scroll.
+  // Carga los ajustes visuales específicos sin tocar el runtime de scroll.
+  const chapter3Style = document.createElement('link');
+  chapter3Style.rel = 'stylesheet';
+  chapter3Style.href = 'chapter3-handoff.css';
+  document.head.append(chapter3Style);
+
   const chapter4Style = document.createElement('link');
   chapter4Style.rel = 'stylesheet';
   chapter4Style.href = 'chapter4-cumulative.css';
@@ -81,8 +86,6 @@
     }
   }
 
-  // El folio sigue al capítulo que ocupa el centro de la pantalla, y se
-  // re-tinta cuando el capítulo bajo él es el de tinta.
   function trackChapter() {
     const mid = innerHeight / 2;
     let current = chapters[0];
@@ -98,8 +101,6 @@
     }
     folio.classList.toggle('folio--ink', current.classList.contains('hb-chapter--ink'));
 
-    // Un capítulo se contabiliza cuando el lector lo ha leído de verdad:
-    // su mitad ya ha pasado por el centro de la pantalla.
     for (const chapter of chapters) {
       const box = chapter.getBoundingClientRect();
       if (box.top < mid - box.height * 0.35) post(chapter);
@@ -116,11 +117,6 @@
     if (!peak || !cards.length) return;
     const p = clamp01(Number(getComputedStyle(peak).getPropertyValue('--sc-p')) || 0);
     const step = 1 / cards.length;
-
-    // El capítulo cuenta una historia acumulativa: el documento actual entra y
-    // sobresale, los anteriores quedan depositados y los futuros aún no existen.
-    // El +0.5 centra cada cambio en su tramo y evita que un flick rápido salte
-    // visualmente un documento antes de que el lector llegue a su zona.
     const activeIndex = Math.min(cards.length - 1, Math.floor((p + step * 0.5) / step));
 
     cards.forEach((card, i) => {
@@ -144,9 +140,6 @@
       }
     });
 
-    // La ventana se introduce junto con Invoice y, como los documentos ya
-    // contabilizados, permanece visible después. El pequeño ramp evita un corte
-    // brusco pero nunca vuelve a oscurecerla al avanzar hacia Payment.
     const invoiceStart = (3 - 0.5) * step;
     const f = p < invoiceStart ? 0 : reduced ? 1 : clamp01((p - invoiceStart) / 0.08);
     if (fenster) {
@@ -155,24 +148,30 @@
     }
   }
 
-  // La lámina técnica del capítulo 3 se dibuja con el progreso del acto.
-  const wende = document.querySelector('[data-sc-act="pin"] .hb-zeichnung');
-  const wendeAct = wende ? wende.closest('[data-sc-act]') : null;
-  const strokes = [...document.querySelectorAll('.hb-draw')];
-  strokes.forEach(el => {
-    const len = el.getTotalLength ? el.getTotalLength() : 1200;
-    el.style.setProperty('--len', len.toFixed(1));
-  });
+  // ── 3 · Chapter 3: process handoff ───────────────────────────────────────
+
+  const wendeAct = document.querySelector('.hb-ch3-blueprint');
+  const chapter3Steps = [...document.querySelectorAll('[data-ch3-step]')];
+  const chapter3Connectors = [...document.querySelectorAll('[data-ch3-connector]')];
 
   function driveDrawing() {
-    if (!wendeAct) return;
-    const p = Number(getComputedStyle(wendeAct).getPropertyValue('--sc-p')) || 0;
-    // Ralentizar el dibujo: hacerlo más gradual y secuencial
-    const d = reduced ? 1 : clamp01((p - 0.02) / 0.8);
-    wendeAct.style.setProperty('--hb-draw', d.toFixed(3));
+    if (!wendeAct || !chapter3Steps.length) return;
+    const p = clamp01(Number(getComputedStyle(wendeAct).getPropertyValue('--sc-p')) || 0);
+    const activeIndex = Math.min(chapter3Steps.length - 1, Math.floor(p * chapter3Steps.length));
+
+    chapter3Steps.forEach((step, i) => {
+      step.classList.remove('hb-ch3-step--future', 'hb-ch3-step--current', 'hb-ch3-step--past');
+      if (i < activeIndex) step.classList.add('hb-ch3-step--past');
+      else if (i === activeIndex) step.classList.add('hb-ch3-step--current');
+      else step.classList.add('hb-ch3-step--future');
+    });
+
+    chapter3Connectors.forEach((connector, i) => {
+      connector.classList.toggle('hb-ch3-connector--on', i < activeIndex);
+    });
   }
 
-  // ── 3 · La ventana que calcula ───────────────────────────────────────────
+  // ── 4 · La ventana que calcula ───────────────────────────────────────────
 
   const qty = document.querySelector('[data-f-qty]');
   const price = document.querySelector('[data-f-price]');
@@ -198,7 +197,6 @@
     outVat.textContent = eur.format(tax);
     outDebit.textContent = eur.format(gross);
 
-    // El mismo hecho recorre la cadena: stock, asiento y saldo a la vez.
     if (stockLine) stockLine.textContent = `Bestand: −${q}`;
     if (saldoLine) saldoLine.textContent = `Saldo: +${eur.format(gross)}`;
     if (zahlungLine) zahlungLine.textContent = 'Saldo: 0,00';
@@ -226,9 +224,6 @@
   function schedule() {
     if (queued) return;
     queued = true;
-    // handbuch.js is loaded before ScrollCraft.mount(). On a scroll event its
-    // listener therefore runs first. Wait one RAF for ScrollCraft to publish
-    // the new --sc-p, then read that value on the following frame.
     requestAnimationFrame(() => requestAnimationFrame(frame));
   }
 
