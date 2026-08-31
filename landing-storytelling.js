@@ -139,7 +139,7 @@
   function schedule() {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(frame);
+    requestAnimationFrame(() => requestAnimationFrame(frame));
   }
 
   addEventListener('scroll', schedule, { passive: true });
