@@ -21,12 +21,12 @@
   const chapter3Style = document.createElement('link');
   chapter3Style.rel = 'stylesheet';
   chapter3Style.href = 'chapter3-handoff.css';
-  document.head.append(chapter3Style);
+  document.head.appendChild(chapter3Style);
 
   const chapter4Style = document.createElement('link');
   chapter4Style.rel = 'stylesheet';
   chapter4Style.href = 'chapter4-cumulative.css';
-  document.head.append(chapter4Style);
+  document.head.appendChild(chapter4Style);
 
   // ── 0 · Puerta al lab con continuidad de idioma ───────────────────────────
   // La landing es trilingüe por URL (?lang=es|en|de, por defecto en). Ambos
@@ -155,6 +155,7 @@
   const wendeAct = document.querySelector('.hb-ch3-blueprint');
   const chapter3Steps = [...document.querySelectorAll('[data-ch3-step]')];
   const chapter3Connectors = [...document.querySelectorAll('[data-ch3-connector]')];
+  const chapter3Premise = document.querySelector('.hb-ch3-blueprint .hb-wende__text > p:first-child');
 
   function driveDrawing() {
     if (!wendeAct || !chapter3Steps.length) return;
@@ -171,6 +172,11 @@
     chapter3Connectors.forEach((connector, i) => {
       connector.classList.toggle('hb-ch3-connector--on', i < activeIndex);
     });
+
+    // Preserve the original ScrollCraft entrance, then keep the premise once
+    // it has fully arrived. This avoids both regressions: no early visibility
+    // and no fade-out while Invoice/Payment become active.
+    if (chapter3Premise) chapter3Premise.classList.toggle('hb-ch3-copy--hold', p >= 0.38);
   }
 
   // ── 4 · La ventana que calcula ───────────────────────────────────────────
