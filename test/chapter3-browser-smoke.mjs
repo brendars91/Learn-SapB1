@@ -44,6 +44,7 @@ const entrypoint = `http://127.0.0.1:${server.address().port}/index.html`;
 await page.goto(`${entrypoint}?chapter3-browser-gate`, { waitUntil: 'networkidle' });
 await page.locator('.hb-ch3-blueprint').waitFor();
 await page.waitForFunction(() => document.documentElement.classList.contains('sc-ready') && window.ScrollCraft?.instances?.length > 0);
+await page.waitForFunction(() => [...document.styleSheets].some(sheet => sheet.href?.includes('chapter3-handoff.css')));
 await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
 
 async function setProgress(progress) {
@@ -61,24 +62,24 @@ async function setProgress(progress) {
   }, progress);
 }
 
-async function waitForSettledState(activeIndex) {
+async function waitForSemanticState(activeIndex) {
   await page.waitForFunction(index => {
     const steps = [...document.querySelectorAll('[data-ch3-step]')];
     const connectors = [...document.querySelectorAll('[data-ch3-connector]')];
     const stepStatesOk = steps.every((step, i) => {
-      const opacity = Number(getComputedStyle(step).opacity);
-      if (i < index) return step.classList.contains('hb-ch3-step--past') && opacity >= 0.9;
-      if (i === index) return step.classList.contains('hb-ch3-step--current') && opacity >= 0.9;
-      return step.classList.contains('hb-ch3-step--future') && opacity <= 0.08;
+      if (i < index) return step.classList.contains('hb-ch3-step--past');
+      if (i === index) return step.classList.contains('hb-ch3-step--current');
+      return step.classList.contains('hb-ch3-step--future');
     });
-    const connectorStatesOk = connectors.every((connector, i) => {
-      const opacity = Number(getComputedStyle(connector).opacity);
-      return i < index
-        ? connector.classList.contains('hb-ch3-connector--on') && opacity >= 0.9
-        : !connector.classList.contains('hb-ch3-connector--on') && opacity <= 0.08;
-    });
+    const connectorStatesOk = connectors.every((connector, i) =>
+      i < index
+        ? connector.classList.contains('hb-ch3-connector--on')
+        : !connector.classList.contains('hb-ch3-connector--on'));
     return stepStatesOk && connectorStatesOk;
   }, activeIndex);
+  // The gate runs with reduced motion, so once semantic state is committed the
+  // visual state is immediate. One paint is enough before measuring opacity.
+  await page.evaluate(() => new Promise(requestAnimationFrame));
 }
 
 async function state() {
@@ -95,32 +96,35 @@ async function state() {
 }
 
 await setProgress(0.12);
-await waitForSettledState(0);
+await waitForSemanticState(0);
 let s = await state();
 assert.ok(s.steps[0].classes.includes('hb-ch3-step--current'), 'Sales Order should be current first');
+assert.ok(s.steps[0].opacity >= 0.9, 'current Sales Order should be visibly present');
 assert.ok(s.steps.slice(1).every(step => step.classes.includes('hb-ch3-step--future') && step.opacity <= 0.08), 'future documents should stay hidden before their turn');
 assert.ok(s.connectors.every(connector => connector.opacity <= 0.08), 'handoff connectors should be hidden before completion');
 
 await setProgress(0.40);
-await waitForSettledState(1);
+await waitForSemanticState(1);
 s = await state();
 assert.ok(s.steps[0].classes.includes('hb-ch3-step--past'), 'Sales Order should remain as a completed step');
 assert.ok(s.steps[1].classes.includes('hb-ch3-step--current'), 'Delivery should become current second');
+assert.ok(s.steps[0].opacity >= 0.9 && s.steps[1].opacity >= 0.9, 'Sales Order and Delivery should be visibly present');
 assert.ok(s.connectors[0].classes.includes('hb-ch3-connector--on') && s.connectors[0].opacity >= 0.9, 'Sales Order should hand off visibly to Delivery');
 assert.ok(s.steps[2].opacity <= 0.08 && s.steps[3].opacity <= 0.08, 'Invoice and Payment should still be hidden');
 
 await setProgress(0.68);
-await waitForSettledState(2);
+await waitForSemanticState(2);
 s = await state();
 assert.ok(s.steps[2].classes.includes('hb-ch3-step--current'), 'Invoice should become current third');
-assert.ok(s.steps[0].opacity >= 0.9 && s.steps[1].opacity >= 0.9, 'completed steps should remain visible');
+assert.ok(s.steps[0].opacity >= 0.9 && s.steps[1].opacity >= 0.9 && s.steps[2].opacity >= 0.9, 'reached documents should remain visible');
 assert.ok(s.connectors[0].opacity >= 0.9 && s.connectors[1].opacity >= 0.9, 'completed handoffs should remain visible');
 
 await setProgress(0.92);
-await waitForSettledState(3);
+await waitForSemanticState(3);
 s = await state();
 assert.ok(s.steps[3].classes.includes('hb-ch3-step--current'), 'Payment should be the final current step');
 assert.ok(s.steps.slice(0, 3).every(step => step.classes.includes('hb-ch3-step--past') && step.opacity >= 0.9), 'all previous documents should remain completed and visible');
+assert.ok(s.steps[3].opacity >= 0.9, 'Payment should be visibly present');
 assert.ok(s.connectors.every(connector => connector.classes.includes('hb-ch3-connector--on') && connector.opacity >= 0.9), 'the complete handoff path should remain visible');
 
 assert.deepEqual(errors, [], 'Chapter 3 browser console errors');
