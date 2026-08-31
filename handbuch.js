@@ -17,6 +17,12 @@
   const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Carga el ajuste visual específico del capítulo 4 sin tocar el runtime de scroll.
+  const chapter4Style = document.createElement('link');
+  chapter4Style.rel = 'stylesheet';
+  chapter4Style.href = 'chapter4-cumulative.css';
+  document.head.append(chapter4Style);
+
   // ── 0 · Puerta al lab con continuidad de idioma ───────────────────────────
   // La landing es trilingüe por URL (?lang=es|en|de, por defecto en). Ambos
   // enlaces al lab heredan ese idioma para que no haya salto de género.
@@ -107,43 +113,46 @@
   const fenster = document.querySelector('[data-fenster]');
 
   function driveChain() {
-    if (!peak) return;
-    const p = Number(getComputedStyle(peak).getPropertyValue('--sc-p')) || 0;
+    if (!peak || !cards.length) return;
+    const p = clamp01(Number(getComputedStyle(peak).getPropertyValue('--sc-p')) || 0);
+    const step = 1 / cards.length;
 
-    // Escala continua: cada documento crece/encoge según su proximidad al "centro" del scroll.
-    // step: separación ideal entre documentos en el rango [0,1].
-    const step = 0.2;
-    const window = 0.25;  // ventana de influencia (más amplia que antes para transiciones suaves)
+    // El capítulo cuenta una historia acumulativa: el documento actual entra y
+    // sobresale, los anteriores quedan depositados y los futuros aún no existen.
+    // El +0.5 centra cada cambio en su tramo y evita que un flick rápido salte
+    // visualmente un documento antes de que el lector llegue a su zona.
+    const activeIndex = Math.min(cards.length - 1, Math.floor((p + step * 0.5) / step));
 
     cards.forEach((card, i) => {
-      const center = i * step;
-      // Proximidad: qué tan lejos está `p` de `center`. Cuanto más cerca, más grande.
-      const distance = Math.abs(p - center);
-      // Scale: 0.2 (pequeño) a 1.0 (protagonista). Usa una curva suave.
-      const scale = reduced ? (distance < window / 2 ? 1 : 0.2) : Math.max(0.2, 1 - (distance / window));
-      const isProtagonistNow = scale > 0.95;
-
+      const wasCurrent = card.classList.contains('beleg--current');
       card.classList.remove('beleg--future', 'beleg--current', 'beleg--past', 'beleg--now');
-      card.style.setProperty('--hb-t', scale.toFixed(3));
-      card.style.setProperty('--hb-scale', scale.toFixed(3));
-      if (isProtagonistNow) card.classList.add('beleg--now');
 
-      // Pulse cuando llega a escala máxima
-      const isProtagonist = scale > 0.95;
-      if (isProtagonist && !card.dataset.landed) {
-        card.dataset.landed = '';
+      if (i < activeIndex) {
+        card.classList.add('beleg--past');
+        card.style.setProperty('--hb-scale', '1');
+      } else if (i === activeIndex) {
+        card.classList.add('beleg--current', 'beleg--now');
+        card.style.setProperty('--hb-scale', reduced ? '1' : '1.07');
+      } else {
+        card.classList.add('beleg--future');
+        card.style.setProperty('--hb-scale', '0.86');
+      }
+
+      if (i === activeIndex && !wasCurrent) {
         card.setAttribute('data-pulse', '');
         setTimeout(() => card.removeAttribute('data-pulse'), 620);
       }
-      if (!isProtagonist) delete card.dataset.landed;
     });
 
-    // Fenster sincronizada con Invoice (i=3): visible según su escala.
-    const invoiceScale = Number(cards[3]?.style.getPropertyValue('--hb-scale')) || 0;
-    const f = reduced ? (invoiceScale > 0.7 ? 1 : 0) : invoiceScale;
-
-    fenster.hidden = f < 0.1;
-    fenster.style.setProperty('--hb-fenster', f.toFixed(3));
+    // La ventana se introduce junto con Invoice y, como los documentos ya
+    // contabilizados, permanece visible después. El pequeño ramp evita un corte
+    // brusco pero nunca vuelve a oscurecerla al avanzar hacia Payment.
+    const invoiceStart = (3 - 0.5) * step;
+    const f = p < invoiceStart ? 0 : reduced ? 1 : clamp01((p - invoiceStart) / 0.08);
+    if (fenster) {
+      fenster.hidden = f <= 0;
+      fenster.style.setProperty('--hb-fenster', f.toFixed(3));
+    }
   }
 
   // La lámina técnica del capítulo 3 se dibuja con el progreso del acto.
@@ -214,7 +223,14 @@
     driveChain();
     driveDrawing();
   }
-  function schedule() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    // handbuch.js is loaded before ScrollCraft.mount(). On a scroll event its
+    // listener therefore runs first. Wait one RAF for ScrollCraft to publish
+    // the new --sc-p, then read that value on the following frame.
+    requestAnimationFrame(() => requestAnimationFrame(frame));
+  }
 
   addEventListener('scroll', schedule, { passive: true });
   addEventListener('resize', schedule);
