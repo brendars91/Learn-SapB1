@@ -28,6 +28,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run browser smoke test
         run: npm run test:browser:local
+      - name: Run Chapter 1 cold-open visual gate
+        run: node test/ch1-cold-open-browser.mjs
       - name: Run Chapter 3 browser UX gate
         run: node test/chapter3-browser-smoke.mjs
       - name: Run Chapter 4 browser UX gate
