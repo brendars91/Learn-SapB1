@@ -72,11 +72,8 @@ assert.equal(await page.locator('.hb-ch1-reveal').getAttribute('data-on'), '');
 assert.equal(await page.locator('.hb-ch1-screens span[data-open]').count(), 11);
 
 // 3 · Chapter 2 causal annotations
-assert.equal(await page.locator('.hb-ch2-cost .hb-causal-note').count(), 2);
-const chapter2NoteTexts = await page.locator('.hb-ch2-cost .hb-causal-note').allInnerTexts();
-console.log('chapter2-causal-notes', JSON.stringify(chapter2NoteTexts));
-assert.ok((await page.locator('.hb-ch2-cost').innerText()).includes('Draft → no posting'));
-assert.ok((await page.locator('.hb-ch2-cost').innerText()).includes('A/R Invoice → ledger'));
+const chapter2NoteTexts = (await page.locator('.hb-ch2-cost .hb-causal-note').allInnerTexts()).map(text => text.replace(/\s+/g, ' ').trim());
+assert.deepEqual(chapter2NoteTexts, ['Draft → no posting', 'A/R Invoice → ledger']);
 
 // 4 · Chapter 3 transient impact trace
 await setPinnedProgress('.hb-ch3-blueprint', .42);
