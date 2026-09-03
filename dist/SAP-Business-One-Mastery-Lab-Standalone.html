@@ -98,9 +98,14 @@ textarea { color: var(--ink); }
 .sbl-stack > *, .sbl-main > * { min-width: 0; max-width: 100%; }
 .sbl-topline,
 .sbl-nav,
-.sbl-toolbar,
-.sbl-actions,
-.sbl-process { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); }
+.sbl-toolbar, .sbl-actions, .sbl-process { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); }
+.btn-danger { border-color: color-mix(in srgb, var(--ink) 35%, #a33); color: #8a2a2a; }
+.btn-danger:hover { border-color: #8a2a2a; background: color-mix(in srgb, var(--paper) 92%, #8a2a2a); }
+.sbl-toolbar { justify-content: space-between; }
+.sbl-toolbar-group { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); }
+.sbl-file { position: relative; overflow: hidden; cursor: pointer; }
+.sbl-file input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.sbl-file:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sbl-effects-grid { display: grid; gap: var(--s2); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin-block-start: var(--s2); }
 .sbl-effect { display: flex; flex-direction: column; gap: var(--s1); border: 1px solid var(--rule); background: var(--paper-deep); padding: var(--s2); }
 .sbl-effect .text-small { color: var(--ink-faint); }
@@ -357,11 +362,46 @@ a.btn {
 .sbl-heat-4 .sbl-heat-lab { color: var(--accent-ink); }
 
 /* escritorio vivo — la home responde al progreso persistido */
-.sbl-desk {
-  display: grid; gap: var(--s3); margin-block: var(--s6); padding: var(--s4);
+.sbl-desk {  display: grid; gap: var(--s3); margin-block: var(--s6); padding: var(--s4);
   border: 1px solid var(--accent); border-radius: var(--r); background: var(--paper-deep);
   text-align: left;
 }
+
+/* asiento de apertura — estado cero como primera anotación del libro */
+.sbl-opening {
+  display: grid; gap: var(--s2); margin-block: var(--s6); padding: var(--s4);
+  border: 1px solid var(--accent); border-radius: var(--r); background: var(--paper-deep);
+  text-align: left; margin-inline: auto; max-width: 46ch;
+}
+.sbl-opening__who { font-family: var(--mono); font-size: var(--step--1); letter-spacing: 0.05em; color: var(--ink-soft); margin: 0; }
+.sbl-opening__line { margin: 0; }
+.sbl-opening__actions { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s2); }
+
+/* tira de expediente activo — career como capa transversal de la home */
+.cr-strip { display: grid; gap: var(--s2); margin-block: var(--s4); padding: var(--s4); text-align: left; }
+.cr-strip__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s3); }
+.cr-strip__head strong { font-family: var(--mono); font-size: var(--step--1); letter-spacing: 0.04em; }
+.cr-strip__subject { margin: 0; font-style: italic; }
+.cr-strip__kpis { display: flex; flex-wrap: wrap; gap: var(--s4); }
+.cr-strip__kpi { display: inline-flex; gap: var(--s1); align-items: baseline; font-size: var(--step--1); }
+
+/* cadena forense del expediente — eslabones con estado */
+.sbl-chain { margin-block: var(--s4); padding: var(--s3); border-left: 3px solid var(--accent); background: var(--paper-deep); }
+.sbl-chain__links { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
+.sbl-chain__link { display: grid; grid-template-columns: minmax(9.5em, auto) 1fr auto; gap: var(--s2); align-items: baseline; padding-block: var(--s1); border-bottom: 1px solid color-mix(in srgb, var(--ink-soft) 22%, transparent); }
+.sbl-chain__link:last-child { border-bottom: 0; }
+.sbl-chain__tag { font-family: var(--mono); font-size: var(--step--2); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+.sbl-chain__text { font-size: var(--step--1); }
+.sbl-chain__state { font-size: var(--step-0); }
+.sbl-chain__link.is-closed .sbl-chain__tag { color: var(--accent); }
+.sbl-chain__link.is-open .sbl-chain__state { color: var(--ink-soft); }
+@media (max-width: 560px) {
+  .sbl-chain__link { grid-template-columns: 1fr auto; }
+  .sbl-chain__tag { grid-column: 1 / -1; }
+  .sbl-chain__text { grid-column: 1; }
+  .sbl-chain__state { grid-column: 2; grid-row: 2; }
+}
+
 .sbl-desk-row, .sbl-desk-recommendation {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s4); min-width: 0;
 }
@@ -5083,7 +5123,7 @@ const I18N = {
     bossTitle: 'Retos finales', locked: 'Primero demuestra los prerrequisitos', answer: 'Responder', close: 'Cerrar',
     sourceOfficial: 'Fuente oficial', verifiedAt: 'Verificado', applicability: 'Aplicabilidad', openSource: 'Abrir fuente',
     syntheticNotice: 'Entorno educativo: todos los datos son ficticios y están marcados SYN.', localOnly: 'El progreso permanece en este navegador.',
-    importError: 'Archivo rechazado por esquema o privacidad.', importOk: 'Progreso sintético importado.', exportOk: 'Progreso exportado.', resetConfirm: 'El progreso local se ha reiniciado.',
+    importError: 'Archivo rechazado por esquema o privacidad.', importOk: 'Progreso sintético importado.', exportOk: 'Progreso exportado.', resetConfirm: 'El progreso local se ha reiniciado.', resetAsk: '¿Reiniciar TODO el progreso? Esta acción no se puede deshacer.',
     noNetwork: 'Modo offline', selectSkill: 'Selecciona una competencia del mapa.', dimensionKnowledge: 'Conocimiento', dimensionApplication: 'Aplicación', dimensionVerification: 'Verificación', dimensionRisk: 'Riesgo',
     promptFieldRole: 'Rol', promptFieldGoal: 'Objetivo', promptFieldContext: 'Contexto', promptFieldEvidence: 'Evidencia', promptFieldUncertainty: 'Incertidumbre', promptFieldOutput: 'Formato de salida', promptFieldHumanGate: 'Revisión humana', promptFieldSyntheticContext: 'Caso sintético',
     mcTitle: 'Masterclass', mcConfig: 'Configuración exacta', mcE2E: 'Proceso end-to-end', mcBestPractices: 'Buenas prácticas senior',
@@ -5101,6 +5141,8 @@ const I18N = {
     cslSubtitle: 'SQL real de SAP B1, dashboards de gestión y vibecoding aplicado. Todo con tablas reales: OINV, JDT1, OITW, ITT1…',
     crCurrentRole: 'Cargo actual', crNextTicket: 'SIGUIENTE TICKET', crWorkTicket: 'Atender este ticket', crTicketLog: 'Registro de tickets',
     crResolved: 'resuelto', crNoTickets: 'Aún no hay tickets resueltos.', crNextRole: 'siguiente', crAt: 'a las',
+    crActiveCase: 'EXPEDIENTE ACTIVO', crKpiCompany: 'KPIs de SYN-Nordlicht', crDeskRole: 'Cargo',
+    chainFact: 'HECHO', chainEvidence: 'EVIDENCIA', chainHypothesis: 'HIPÓTESIS DESCARTADA', chainAction: 'ACCIÓN SEGURA', chainVerify: 'VERIFICACIÓN', chainSource: 'FUENTE', chainTitle: 'Cadena forense del expediente', chainOpen: 'Abrir expediente',
     b1Add: 'Añadir (Ctrl+A)', b1Find: 'Buscar (Ctrl+F)', b1First: 'Primer registro', b1Prev: 'Anterior', b1Next: 'Siguiente', b1Last: 'Último registro',
     b1Cancel: 'Cancelar (Ctrl+C)', b1Print: 'Imprimir', b1File: 'Archivo', b1Edit: 'Editar', b1View: 'Ver', b1Data: 'Datos', b1GoTo: 'Ir a', b1Tools: 'Herramientas', b1Help: 'Ayuda',
     b1WindowLabel: 'ventana SAP Business One', techTrackLabel: 'Ruta técnica + IA',
@@ -5134,7 +5176,7 @@ const I18N = {
     bossTitle: 'Boss battles', locked: 'Demonstrate the prerequisites first', answer: 'Answer', close: 'Close',
     sourceOfficial: 'Official source', verifiedAt: 'Verified', applicability: 'Applicability', openSource: 'Open source',
     syntheticNotice: 'Training environment: all data is fictional and marked SYN.', localOnly: 'Progress remains in this browser.',
-    importError: 'File rejected by schema or privacy policy.', importOk: 'Synthetic progress imported.', exportOk: 'Progress exported.', resetConfirm: 'Local progress has been reset.',
+    importError: 'File rejected by schema or privacy policy.', importOk: 'Synthetic progress imported.', exportOk: 'Progress exported.', resetConfirm: 'Local progress has been reset.', resetAsk: 'Reset ALL progress? This cannot be undone.',
     noNetwork: 'Offline mode', selectSkill: 'Select a skill on the map.', dimensionKnowledge: 'Knowledge', dimensionApplication: 'Application', dimensionVerification: 'Verification', dimensionRisk: 'Risk',
     promptFieldRole: 'Role', promptFieldGoal: 'Goal', promptFieldContext: 'Context', promptFieldEvidence: 'Evidence', promptFieldUncertainty: 'Uncertainty', promptFieldOutput: 'Output format', promptFieldHumanGate: 'Human review', promptFieldSyntheticContext: 'Synthetic case',
     mcTitle: 'Masterclass', mcConfig: 'Exact configuration', mcE2E: 'End-to-end process', mcBestPractices: 'Senior best practices',
@@ -5152,6 +5194,8 @@ const I18N = {
     cslSubtitle: 'Real SAP B1 SQL, management dashboards and applied vibecoding. All on real tables: OINV, JDT1, OITW, ITT1…',
     crCurrentRole: 'Current role', crNextTicket: 'NEXT TICKET', crWorkTicket: 'Work this ticket', crTicketLog: 'Ticket log',
     crResolved: 'resolved', crNoTickets: 'No tickets resolved yet.', crNextRole: 'next', crAt: 'at',
+    crActiveCase: 'ACTIVE CASE', crKpiCompany: 'SYN-Nordlicht KPIs', crDeskRole: 'Role',
+    chainFact: 'FACT', chainEvidence: 'EVIDENCE', chainHypothesis: 'RULED-OUT HYPOTHESIS', chainAction: 'SAFE ACTION', chainVerify: 'VERIFICATION', chainSource: 'SOURCE', chainTitle: 'Case forensic chain', chainOpen: 'Open case file',
     b1Add: 'Add (Ctrl+A)', b1Find: 'Find (Ctrl+F)', b1First: 'First record', b1Prev: 'Previous', b1Next: 'Next', b1Last: 'Last record',
     b1Cancel: 'Cancel (Ctrl+C)', b1Print: 'Print', b1File: 'File', b1Edit: 'Edit', b1View: 'View', b1Data: 'Data', b1GoTo: 'Go to', b1Tools: 'Tools', b1Help: 'Help',
     b1WindowLabel: 'SAP Business One window', techTrackLabel: 'Technical + AI track',
@@ -5185,7 +5229,7 @@ const I18N = {
     bossTitle: 'Boss-Aufgaben', locked: 'Zuerst die Voraussetzungen nachweisen', answer: 'Antworten', close: 'Schließen',
     sourceOfficial: 'Offizielle Quelle', verifiedAt: 'Geprüft', applicability: 'Gültigkeit', openSource: 'Quelle öffnen',
     syntheticNotice: 'Lernumgebung: Alle Daten sind fiktiv und mit SYN markiert.', localOnly: 'Der Fortschritt bleibt in diesem Browser.',
-    importError: 'Datei wegen Schema oder Datenschutz abgelehnt.', importOk: 'Synthetischer Fortschritt importiert.', exportOk: 'Fortschritt exportiert.', resetConfirm: 'Lokaler Fortschritt wurde gelöscht.',
+    importError: 'Datei wegen Schema oder Datenschutz abgelehnt.', importOk: 'Synthetischer Fortschritt importiert.', exportOk: 'Fortschritt exportiert.', resetConfirm: 'Lokaler Fortschritt wurde gelöscht.', resetAsk: 'Gesamten Fortschritt zurücksetzen? Kann nicht rückgängig gemacht werden.',
     noNetwork: 'Offline-Modus', selectSkill: 'Wähle eine Kompetenz auf der Karte.', dimensionKnowledge: 'Wissen', dimensionApplication: 'Anwendung', dimensionVerification: 'Prüfung', dimensionRisk: 'Risiko',
     promptFieldRole: 'Rolle', promptFieldGoal: 'Ziel', promptFieldContext: 'Kontext', promptFieldEvidence: 'Nachweise', promptFieldUncertainty: 'Unsicherheit', promptFieldOutput: 'Ausgabeformat', promptFieldHumanGate: 'Menschliche Prüfung', promptFieldSyntheticContext: 'Synthetischer Fall',
     mcTitle: 'Masterclass', mcConfig: 'Exakte Konfiguration', mcE2E: 'End-to-End-Prozess', mcBestPractices: 'Senior-Praxisregeln',
@@ -5203,6 +5247,8 @@ const I18N = {
     cslSubtitle: 'Echtes SAP-B1-SQL, Management-Dashboards und angewandtes Vibecoding. Alles mit echten Tabellen: OINV, JDT1, OITW, ITT1…',
     crCurrentRole: 'Aktuelle Rolle', crNextTicket: 'NÄCHSTES TICKET', crWorkTicket: 'Ticket bearbeiten', crTicketLog: 'Ticket-Verlauf',
     crResolved: 'gelöst', crNoTickets: 'Noch keine Tickets gelöst.', crNextRole: 'nächste', crAt: 'bei',
+    crActiveCase: 'AKTIVER VORGANG', crKpiCompany: 'SYN-Nordlicht-KPIs', crDeskRole: 'Rolle',
+    chainFact: 'FAKT', chainEvidence: 'BELEG', chainHypothesis: 'AUSGESCHLOSSENE HYPOTHESE', chainAction: 'SICHERE MASSNAHME', chainVerify: 'PRÜFUNG', chainSource: 'QUELLE', chainTitle: 'Forensische Kette des Vorgangs', chainOpen: 'Vorgang öffnen',
     b1Add: 'Hinzufügen (Strg+A)', b1Find: 'Suchen (Strg+F)', b1First: 'Erster Datensatz', b1Prev: 'Vorheriger', b1Next: 'Nächster', b1Last: 'Letzter Datensatz',
     b1Cancel: 'Abbrechen (Strg+C)', b1Print: 'Drucken', b1File: 'Datei', b1Edit: 'Bearbeiten', b1View: 'Ansicht', b1Data: 'Daten', b1GoTo: 'Gehe zu', b1Tools: 'Werkzeuge', b1Help: 'Hilfe',
     b1WindowLabel: 'SAP-Business-One-Fenster', techTrackLabel: 'Technik- und KI-Pfad',
@@ -10079,6 +10125,47 @@ function kpiSnapshot(masteredCount, totalSkills = 72) {
   });
 }
 
+// ── Expediente Vivo ────────────────────────────────────────────────────────
+// La cadena forense convierte la war story del skill en la narrativa del
+// expediente: HECHO → EVIDENCIA → HIPÓTESIS DESCARTADA → ACCIÓN SEGURA →
+// VERIFICACIÓN → FUENTE. Cada eslabón admite estado (abierto/cerrado).
+const join = (v, L) => (Array.isArray(v) ? v.map(x => trNode(x, L)).join(' ') : trNode(v, L));
+
+function forensicChain(skill, mc, locale = 'es', levelsMeta) {
+  const war = mc?.war;
+  if (!war) return null;
+  const ticket = getTicket(skill, mc, locale, levelsMeta);
+  const link = (id, labelKey, text, closed) => ({ id, labelKey, text, closed });
+  return {
+    ticketId: ticket.id,
+    from: ticket.from,
+    subject: ticket.subject,
+    links: [
+      link('fact', 'chainFact', join(war.q, locale), true),
+      link('evidence', 'chainEvidence', join(war.sympt, locale), true),
+      link('hypothesis', 'chainHypothesis', join(war.root, locale), true),
+      link('action', 'chainAction', join(war.fix, locale), true),
+      link('verify', 'chainVerify', join(war.fix, locale), false),
+      link('source', 'chainSource', `${ticket.id} · ${join(war.q, locale)}`, false)
+    ]
+  };
+}
+
+// Expediente activo: el ticket recomendado, con cadena y KPIs al día.
+function activeCaseFile(skills, progress, mcIndex, locale = 'es', levelsMeta, recommendFn) {
+  const next = (recommendFn && recommendFn(skills, progress, new Date())) || skills[0];
+  const mc = mcIndex[next.id];
+  if (!mc?.war) return null;
+  const mastered = skills.filter(s => progress[s.id]?.mastered).length;
+  return {
+    skill: next,
+    role: careerProgress(mastered, locale).role,
+    mastered,
+    kpis: kpiSnapshot(mastered),
+    chain: forensicChain(next, mc, locale, levelsMeta)
+  };
+}
+
 
 // content.mjs v2 — Agregador del curriculum completo + decisiones interactivas v2.
 
@@ -11161,9 +11248,12 @@ function renderHeatmap(state) {
     const mastered = levelSkills.filter(s => state.progress[s.id]?.mastered).length;
     const pct = Math.round((mastered / levelSkills.length) * 100);
     const heat = pct === 0 ? ' sbl-heat-0' : pct < 34 ? ' sbl-heat-1' : pct < 67 ? ' sbl-heat-2' : pct < 100 ? ' sbl-heat-3' : ' sbl-heat-4';
-    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${local(level.title, state.locale)}: ${pct}%" aria-label="${local(level.title, state.locale)} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${local(level.title, state.locale).slice(0, 14)}</span></button>`;
+    const label = local(level.title, state.locale);
+    const shortLabel = label.length > 18 ? label.slice(0, 16).trimEnd() + '…' : label;
+    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${label}: ${pct}%" aria-label="${label} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${shortLabel}</span></button>`;
   }).join('');
-  return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><div class="sbl-heatmap">${cells}</div></section>`;
+  const heatmapIntro = state.locale === 'de' ? 'Vier Gruppen, ein Blick: wie weit jedes Niveau gediehen ist. Tippe auf eine Zelle, um sie im Kompetenz-Karte zu öffnen.' : state.locale === 'en' ? 'Four groups, one glance: how far each level has come. Tap a cell to open it in the skill map.' : 'Cuatro grupos, una mirada: cuánto ha avanzado cada nivel. Toca una celda para abrirla en el mapa de competencias.';
+  return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><p class="text-small">${heatmapIntro}</p><div class="sbl-heatmap">${cells}</div></section>`;
 }
 
 // ─── Espina del Ledger: nueve capítulos de una misma ruta ────────────────────
@@ -11179,7 +11269,7 @@ function renderLedgerSpine(state) {
     const statusText = pct === 100 ? t(state, 'masteredStatus') : explored > 0 ? t(state, 'learningStatus') : t(state, 'newStatus');
     return `<button type="button" class="sbl-spine-node ${status}" data-action="spine-level" data-value="${level.id}" aria-label="${local(level.title, state.locale)} ${pct}%"><span class="sbl-spine-index">${String(level.id).padStart(2, '0')}</span><span class="sbl-spine-copy"><strong>${local(level.title, state.locale)}</strong><small>${statusText} · ${pct}%</small></span><span class="sbl-spine-mark" aria-hidden="true">${pct === 100 ? '✓' : explored > 0 ? '◐' : '○'}</span></button>`;
   }).join('');
-  return `<section class="sbl-spine" aria-labelledby="spine-title"><div class="sbl-spine-head"><span class="sbl-kicker">L0—L8</span><h2 id="spine-title">${title}</h2><p>${intro}</p></div><div class="sbl-spine-track"><svg class="sbl-spine-svg" viewBox="0 0 32 800" preserveAspectRatio="none" aria-hidden="true"><line x1="16" y1="0" x2="16" y2="800" vector-effect="non-scaling-stroke"/></svg><div class="sbl-spine-nodes">${nodes}</div></div></section>`;
+  return `<section class="sbl-spine" aria-labelledby="spine-title"><div class="sbl-spine-head"><span class="sbl-kicker">L0 → L8</span><h2 id="spine-title">${title}</h2><p>${intro}</p></div><div class="sbl-spine-track"><svg class="sbl-spine-svg" viewBox="0 0 32 800" preserveAspectRatio="none" aria-hidden="true"><line x1="16" y1="0" x2="16" y2="800" vector-effect="non-scaling-stroke"/></svg><div class="sbl-spine-nodes">${nodes}</div></div></section>`;
 }
 
 function renderChrome(state) {
@@ -11277,12 +11367,29 @@ function renderHome(state) {
   const trackPct = list => Math.round(list.filter(s => state.progress[s.id]?.mastered).length / Math.max(1, list.length) * 100);
   const funcPct = trackPct(byTrack('functional'));
   const techPct = trackPct(byTrack('dual').concat(byTrack('technical')));
+  const virgin = stats.explored === 0;
+  const openingCopy = {
+    es: { stamp: 'ASIENTO DE APERTURA', who: 'SYN-Nordlicht Demo GmbH · Demostración', line1: 'Cargo: recién llegado. Competencias dominadas: 0 de 72.', line2: 'Expediente activo: NW-001 — la factura del cliente C20000 no aparece. El cliente quiere pagar hoy.', cta: 'Atender NW-001', map: 'Ver el mapa completo' },
+    en: { stamp: 'OPENING ENTRY', who: 'SYN-Nordlicht Demo GmbH · Demonstration', line1: 'Position: newcomer. Skills mastered: 0 of 72.', line2: 'Active case: NW-001 — customer C20000\u2019s invoice is nowhere to be found. The customer wants to pay today.', cta: 'Attend NW-001', map: 'See the full map' },
+    de: { stamp: 'ERÖFFNUNGSBUCHUNG', who: 'SYN-Nordlicht Demo GmbH · Demonstration', line1: 'Position: Neuling. Beherrschte Kompetenzen: 0 von 72.', line2: 'Aktiver Vorgang: NW-001 — die Rechnung des Kunden C20000 ist nirgends auffindbar. Der Kunde will heute zahlen.', cta: 'NW-001 bearbeiten', map: 'Gesamte Karte ansehen' }
+  }[state.locale];
   return `<div class="sbl-stack">
     <section class="sbl-cover">
       <span class="sbl-kicker">${t(state, 'kicker')}</span>
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>
+      ${virgin ? `
+      <section class="sbl-opening card" aria-label="${openingCopy.stamp}">
+        <span class="sbl-kicker">${openingCopy.stamp}</span>
+        <p class="sbl-opening__who">${openingCopy.who}</p>
+        <p class="sbl-opening__line">${openingCopy.line1}</p>
+        <p class="sbl-opening__line"><strong>${openingCopy.line2}</strong></p>
+        <div class="sbl-opening__actions">
+          <button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${openingCopy.cta}</button>
+          <button type="button" class="btn" data-action="nav" data-view="map">${openingCopy.map}</button>
+        </div>
+      </section>` : `
       <section class="sbl-desk" aria-labelledby="desk-title">
         <div class="sbl-desk-row"><div><span class="sbl-kicker">${deskCopy.title}</span><h2 id="desk-title">${deskCopy.next}</h2></div><span class="sbl-streak-seal" aria-label="${deskCopy.streak}: ${streak} ${deskCopy.days}">${deskCopy.streak} · ${streak}d</span></div>
         <div class="sbl-desk-recommendation"><div><strong>${local(nextSkill.title, state.locale)}</strong><p class="sbl-desk-why">${escapeHtml(reason)}</p></div><button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${nextSkill.id}">${deskCopy.continue}</button></div>
@@ -11293,7 +11400,8 @@ function renderHome(state) {
         <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
         <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Funktionale Spur' : state.locale === 'en' ? 'Functional track' : 'Ruta funcional'}</span><span class="viz-stat-value">${funcPct}%</span><span class="text-small">L0-L5</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'techTrackLabel')}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
-      </div>
+      </div>`}
+      ${!virgin ? renderCareerStrip(state) : ''}
     </section>
     ${renderLedgerSpine(state)}
     ${renderHeatmap(state)}
@@ -11335,6 +11443,15 @@ function renderMasterclass(state, skill) {
   const e2e = (mc.e2e || []).map(step => `<li>${escapeHtml(loc(step))}</li>`).join('');
   const bp = (mc.bp || []).map(b => `<li>${escapeHtml(loc(b))}</li>`).join('');
   const war = mc.war;
+  const chain = forensicChain(skill, mc, L, LEVELS);
+  const chainHtml = chain ? `<div class="sbl-chain" aria-label="${t(state, 'chainTitle')}">
+    <h4>${t(state, 'chainTitle')}</h4>
+    <ol class="sbl-chain__links">${chain.links.map(l => `<li class="sbl-chain__link${l.closed ? ' is-closed' : ' is-open'}">
+      <span class="sbl-chain__tag">${t(state, l.labelKey)}</span>
+      <span class="sbl-chain__text">${escapeHtml(l.text)}</span>
+      <span class="sbl-chain__state" aria-hidden="true">${l.closed ? '✓' : '…'}</span>
+    </li>`).join('')}</ol>
+  </div>` : '';
   const warHtml = war ? `<div class="sbl-war" data-correct="false">
     <h4>⚠️ ${escapeHtml(loc(war.q))}</h4>
     <p class="war-line"><strong>${t(state, 'warSymptom')}</strong> ${(war.sympt || []).map(x => escapeHtml(loc(x))).join(' ')}</p>
@@ -11349,6 +11466,7 @@ function renderMasterclass(state, skill) {
       <div class="mc-block"><h4>🔗 ${t(state, 'mcE2E')}</h4><ol>${e2e}</ol></div>
     </div>
     ${warHtml}
+    ${chainHtml}
     <div class="mc-block mc-bp"><h4>🏆 ${t(state, 'mcBestPractices')}</h4><ul>${bp}</ul></div>
   </section>`;
 }
@@ -11603,6 +11721,25 @@ function renderConsole(state) {
   </section>`;
 }
 
+function renderCareerStrip(state) {
+  const L = state.locale;
+  const file = activeCaseFile(SKILLS, state.progress, MASTERCLASS, L, LEVELS, (sk, pr, now) => recommendNext(sk, pr, now, { track: state.track, recommendedLevel: state.recommendedLevel }));
+  if (!file) return '';
+  const kpiHtml = file.kpis.map(k => `<span class="cr-strip__kpi"><span class="text-muted">${escapeHtml(trNode(k.label, L))}</span> <strong>${k.value}${k.unit}</strong></span>`).join('');
+  return `<aside class="cr-strip card" aria-label="${t(state, 'crActiveCase')}">
+    <div class="cr-strip__head">
+      <span class="sbl-kicker">${t(state, 'crActiveCase')}</span>
+      <strong>${file.chain.ticketId} · ${escapeHtml(file.chain.from)}</strong>
+    </div>
+    <p class="cr-strip__subject">${escapeHtml(file.chain.subject)}</p>
+    <div class="cr-strip__kpis">${kpiHtml}</div>
+    <div class="sbl-actions">
+      <button type="button" class="btn btn-primary" data-action="select-skill" data-skill="${file.skill.id}">${t(state, 'chainOpen')}</button>
+      <button type="button" class="btn" data-action="nav" data-view="career">${escapeHtml(file.role)}</button>
+    </div>
+  </aside>`;
+}
+
 function renderCareer(state) {
   const L = state.locale;
   const loc = v => trNode(v, L);
@@ -11676,17 +11813,24 @@ function renderMasteryMoment(state) {
 
 function renderAppMarkup(state, options = {}) {
   const rendered = options.now ? { ...state, __renderNow: new Date(options.now) } : state;
-  return `${renderChrome(rendered)}<main class="sbl-main">${toastText(rendered)}${renderView(rendered)}<div class="sbl-toolbar"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(rendered, 'export')}</button><label class="form-label sbl-file">${t(rendered, 'import')}<input class="form-control" type="file" accept="application/json" data-action="import-progress"></label><button type="button" class="btn btn-ghost" data-action="reset-progress">${t(rendered, 'reset')}</button></div></main>${renderMasteryMoment(rendered)}</div>`;
+  return `${renderChrome(rendered)}<main class="sbl-main">${toastText(rendered)}${renderView(rendered)}<div class="sbl-toolbar"><div class="sbl-toolbar-group"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(rendered, 'export')}</button><label class="btn btn-ghost sbl-file" tabindex="0">${t(rendered, 'import')}<input type="file" accept="application/json" data-action="import-progress" aria-label="${t(rendered, 'import')}"></label></div><button type="button" class="btn btn-danger" data-action="reset-progress" data-confirm="${t(rendered, 'resetAsk')}">${t(rendered, 'reset')}</button></div></main>${renderMasteryMoment(rendered)}</div>`;
 }
 
 function loadStored() {
+  // Continuidad landing→lab: ?lang= explícito gana una vez; después persiste
+  // la elección del propio lab en localStorage.
+  let forced = null;
+  try {
+    const urlLang = new URLSearchParams(globalThis.location?.search || '').get('lang');
+    forced = ['es', 'en', 'de'].includes(urlLang) ? urlLang : null;
+  } catch { /* entorno sin URLSearchParams (VM de tests): sin idioma forzado */ }
   try {
     const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if (!value) return createInitialState();
+    if (!value) return createInitialState(forced ? { locale: forced } : {});
     const validation = validateProgressImport(value);
-    if (!validation.valid) return createInitialState();
+    if (!validation.valid) return createInitialState(forced ? { locale: forced } : {});
     return createInitialState({
-      locale: value.locale, track: value.track, progress: value.progress,
+      locale: forced || value.locale, track: value.track, progress: value.progress,
       diagnosticCompleted: value.settings?.diagnosticCompleted,
       diagnosticScore: value.settings?.diagnosticScore,
       recommendedLevel: value.settings?.recommendedLevel,
@@ -11777,7 +11921,10 @@ function mountSapB1Lab(root) {
     } else if (action === 'export-progress') {
       downloadProgress(state); state = { ...state, toast: 'export-ok' }; render();
     } else if (action === 'reset-progress') {
-      localStorage.removeItem(STORAGE_KEY); dispatch({ type: 'RESET' });
+      const label = control.getAttribute('data-confirm') || 'Reset all progress?';
+      if (globalThis.confirm && globalThis.confirm(label)) {
+        localStorage.removeItem(STORAGE_KEY); dispatch({ type: 'RESET' });
+      }
     }
   });
 

@@ -56,13 +56,19 @@
   </svg>
   <div class="hb-grid" data-sc-in data-sc-stagger="90">
     <p class="hb-imprint">SYN-Nordlicht Demo GmbH · Internal Training Document · Edition 10.0</p>
-    <h1 class="hb-title__h1">Handbook<br><span class="hb-title__sub">of the Document Chain</span></h1>
-    <p class="hb-title__es">Learn SAP Business One by following documents,<br>not by memorising screens.</p>
+    <h1 class="hb-title__h1"><span class="hb-title__line">Handbook</span><span class="hb-title__line hb-title__line--soft">of the</span><span class="hb-title__line">Document</span><span class="hb-title__line">Chain</span></h1>
+    <p class="hb-title__es">Learn SAP Business One by following <em>documents</em>,<br>not by memorising <em>screens</em>.</p>
     <dl class="hb-colofon">
-      <div><dt>Levels</dt><dd>9</dd></div><div><dt>Skills</dt><dd>72</dd></div><div><dt>Languages</dt><dd>ES · EN · DE</dd></div><div><dt>Sources</dt><dd>7 official</dd></div>
+      <div><dt>Levels</dt><dd data-count="9">9</dd></div>
+      <div><dt>Skills</dt><dd data-count="72">72</dd></div>
+      <div><dt>Languages</dt><dd>ES · EN · DE</dd></div>
+      <div><dt>Sources</dt><dd>7 official</dd></div>
     </dl>
     <p class="hb-title__note">All data in this manual are synthetic and marked <code>SYN</code>.</p>
   </div>
+  <p class="hb-title__stempel" aria-hidden="true">SYN<br>Edition 10</p>
+  <span class="hb-title__ghost" aria-hidden="true">10</span>
+  <p class="hb-scrollcue" aria-hidden="true">Read</p>
   <svg class="hb-masse" viewBox="0 0 240 60" aria-hidden="true" focusable="false">
     <line x1="4" y1="30" x2="236" y2="30"/><line x1="4" y1="22" x2="4" y2="38"/><line x1="236" y1="22" x2="236" y2="38"/><text x="120" y="24" text-anchor="middle">9 LEVELS</text>
   </svg>
@@ -133,6 +139,36 @@
   <header class="hb-kaphead"><span class="hb-kaphead__num">Chapter 2</span><h2 class="hb-kaphead__h2">What it costs to ask the wrong question.</h2></header>
   <div class="hb-costgrid" data-sc-in data-sc-stagger="70">
     <p class="hb-lede hb-costgrid__lede">The invoice appears. It was cancelled and replaced by another, in another series. The cost isn't the search: it's that nobody knew where to look.</p>
+    <figure class="hb-costfig" aria-labelledby="hb-fig-cost">
+      <svg viewBox="0 0 640 220" role="img" aria-label="Left: a draft frozen in limbo, unposted. Right: the same document posted, alive in the chain.">
+        <defs>
+          <marker id="hb-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+        </defs>
+        <g class="hb-costfig__draft">
+          <rect x="28" y="26" width="220" height="150" rx="2"/>
+          <line x1="48" y1="56" x2="228" y2="56"/>
+          <line x1="48" y1="82" x2="228" y2="82" class="hb-costfig__faint"/>
+          <line x1="48" y1="102" x2="228" y2="102" class="hb-costfig__faint"/>
+          <line x1="48" y1="122" x2="160" y2="122" class="hb-costfig__faint"/>
+          <text x="138" y="200">Draft · frozen</text>
+          <text x="138" y="46" class="hb-costfig__tag">0.00 in the ledger</text>
+        </g>
+        <g class="hb-costfig__flow">
+          <path d="M268 100 C 292 100, 300 100, 324 100" class="hb-costfig__arrow"/>
+          <text x="296" y="88">Add</text>
+        </g>
+        <g class="hb-costfig__posted">
+          <rect x="348" y="26" width="220" height="150" rx="2"/>
+          <line x1="368" y1="56" x2="548" y2="56"/>
+          <line x1="368" y1="82" x2="548" y2="82" class="hb-costfig__faint"/>
+          <line x1="368" y1="102" x2="548" y2="102" class="hb-costfig__faint"/>
+          <line x1="368" y1="122" x2="470" y2="122" class="hb-costfig__faint"/>
+          <text x="458" y="200">Invoice · in the chain</text>
+          <text x="458" y="46" class="hb-costfig__tag hb-costfig__tag--accent">856.80 in the ledger</text>
+        </g>
+      </svg>
+      <figcaption id="hb-fig-cost">Fig. 2.1 · The same fact, two states: a draft touches nothing; a posted document writes stock, ledger and balance.</figcaption>
+    </figure>
     <ul class="hb-costlist">
       <li><b>0.00</b><span>is what the aged receivables show for a draft of 500.00 that's been sitting there for three weeks. A draft doesn't post to the ledger and doesn't move stock: it's a frozen promise.</span><small class="hb-causal-note"><strong>Draft</strong><i>→ no posting</i></small></li>
       <li><b>856.80</b><span>is what the customer owes per the general ledger, spread across three lines that were created automatically when the invoice was added. None were typed by hand.</span><small class="hb-causal-note"><strong>A/R Invoice</strong><i>→ ledger</i></small></li>

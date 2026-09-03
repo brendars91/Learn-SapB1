@@ -256,6 +256,35 @@
 
   [qty, price, vat].forEach(el => el && el.addEventListener('input', recalc));
 
+  // ── 4 · Count-up de las métricas del hero ─────────────────────────────────
+  // Los números que justifican la autoridad (9 niveles, 72 skills) se ganan su
+  // momento: cuentan hasta su valor la primera vez que entran en viewport.
+  // Con reduced-motion se muestran directamente en su valor final.
+  {
+    const counters = [...document.querySelectorAll('[data-count]')];
+    if (counters.length) {
+      const run = el => {
+        if (el.dataset.done) return;
+        el.dataset.done = '';
+        const target = Number(el.dataset.count) || 0;
+        if (reduced || target <= 0) { el.textContent = String(target); return; }
+        const t0 = performance.now();
+        const dur = 900;
+        const tick = now => {
+          const t = Math.min(1, (now - t0) / dur);
+          const eased = 1 - Math.pow(1 - t, 3);
+          el.textContent = String(Math.round(target * eased));
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      };
+      const io = new IntersectionObserver(entries => {
+        for (const entry of entries) if (entry.isIntersecting) { run(entry.target); io.unobserve(entry.target); }
+      }, { threshold: 0.6 });
+      counters.forEach(c => io.observe(c));
+    }
+  }
+
   // ── Bucle ────────────────────────────────────────────────────────────────
 
   let queued = false;
