@@ -266,6 +266,12 @@
 <script src="scrollcraft.js"></script>
 <script src="handbuch.js"></script>
 <script src="landing-storytelling.js"></script>
-<script>ScrollCraft.mount(document.body);</script>
+<script>
+  const handbookScroll = ScrollCraft.mount(document.body);
+  /* Generated mobile paths and responsive fonts can change the height of
+     chapters after the first synchronous measurement. Re-measure once the
+     page has fully settled so --sc-p follows the real document geometry. */
+  addEventListener('load', () => requestAnimationFrame(() => handbookScroll.layout()), { once: true });
+</script>
 </body>
 </html>
