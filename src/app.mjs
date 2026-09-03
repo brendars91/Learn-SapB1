@@ -341,9 +341,12 @@ function renderHeatmap(state) {
     const mastered = levelSkills.filter(s => state.progress[s.id]?.mastered).length;
     const pct = Math.round((mastered / levelSkills.length) * 100);
     const heat = pct === 0 ? ' sbl-heat-0' : pct < 34 ? ' sbl-heat-1' : pct < 67 ? ' sbl-heat-2' : pct < 100 ? ' sbl-heat-3' : ' sbl-heat-4';
-    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${local(level.title, state.locale)}: ${pct}%" aria-label="${local(level.title, state.locale)} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${local(level.title, state.locale).slice(0, 14)}</span></button>`;
+    const label = local(level.title, state.locale);
+    const shortLabel = label.length > 18 ? label.slice(0, 16).trimEnd() + '…' : label;
+    return `<button type="button" class="sbl-heat-cell${heat}" data-action="set-level-filter" data-value="${level.id}" title="${label}: ${pct}%" aria-label="${label} ${pct}%"><span class="sbl-heat-num">${pct}</span><span class="sbl-heat-lab text-small">${shortLabel}</span></button>`;
   }).join('');
-  return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><div class="sbl-heatmap">${cells}</div></section>`;
+  const heatmapIntro = state.locale === 'de' ? 'Vier Gruppen, ein Blick: wie weit jedes Niveau gediehen ist. Tippe auf eine Zelle, um sie im Kompetenz-Karte zu öffnen.' : state.locale === 'en' ? 'Four groups, one glance: how far each level has come. Tap a cell to open it in the skill map.' : 'Cuatro grupos, una mirada: cuánto ha avanzado cada nivel. Toca una celda para abrirla en el mapa de competencias.';
+  return `<section class="sbl-stack" aria-labelledby="heat-title"><h2 id="heat-title">${t(state, 'heatmapLabel')}</h2><p class="text-small">${heatmapIntro}</p><div class="sbl-heatmap">${cells}</div></section>`;
 }
 
 // ─── Espina del Ledger: nueve capítulos de una misma ruta ────────────────────
@@ -359,7 +362,7 @@ function renderLedgerSpine(state) {
     const statusText = pct === 100 ? t(state, 'masteredStatus') : explored > 0 ? t(state, 'learningStatus') : t(state, 'newStatus');
     return `<button type="button" class="sbl-spine-node ${status}" data-action="spine-level" data-value="${level.id}" aria-label="${local(level.title, state.locale)} ${pct}%"><span class="sbl-spine-index">${String(level.id).padStart(2, '0')}</span><span class="sbl-spine-copy"><strong>${local(level.title, state.locale)}</strong><small>${statusText} · ${pct}%</small></span><span class="sbl-spine-mark" aria-hidden="true">${pct === 100 ? '✓' : explored > 0 ? '◐' : '○'}</span></button>`;
   }).join('');
-  return `<section class="sbl-spine" aria-labelledby="spine-title"><div class="sbl-spine-head"><span class="sbl-kicker">L0—L8</span><h2 id="spine-title">${title}</h2><p>${intro}</p></div><div class="sbl-spine-track"><svg class="sbl-spine-svg" viewBox="0 0 32 800" preserveAspectRatio="none" aria-hidden="true"><line x1="16" y1="0" x2="16" y2="800" vector-effect="non-scaling-stroke"/></svg><div class="sbl-spine-nodes">${nodes}</div></div></section>`;
+  return `<section class="sbl-spine" aria-labelledby="spine-title"><div class="sbl-spine-head"><span class="sbl-kicker">L0 → L8</span><h2 id="spine-title">${title}</h2><p>${intro}</p></div><div class="sbl-spine-track"><svg class="sbl-spine-svg" viewBox="0 0 32 800" preserveAspectRatio="none" aria-hidden="true"><line x1="16" y1="0" x2="16" y2="800" vector-effect="non-scaling-stroke"/></svg><div class="sbl-spine-nodes">${nodes}</div></div></section>`;
 }
 
 function renderChrome(state) {
@@ -903,7 +906,7 @@ function renderMasteryMoment(state) {
 
 export function renderAppMarkup(state, options = {}) {
   const rendered = options.now ? { ...state, __renderNow: new Date(options.now) } : state;
-  return `${renderChrome(rendered)}<main class="sbl-main">${toastText(rendered)}${renderView(rendered)}<div class="sbl-toolbar"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(rendered, 'export')}</button><label class="form-label sbl-file">${t(rendered, 'import')}<input class="form-control" type="file" accept="application/json" data-action="import-progress"></label><button type="button" class="btn btn-ghost" data-action="reset-progress">${t(rendered, 'reset')}</button></div></main>${renderMasteryMoment(rendered)}</div>`;
+  return `${renderChrome(rendered)}<main class="sbl-main">${toastText(rendered)}${renderView(rendered)}<div class="sbl-toolbar"><div class="sbl-toolbar-group"><button type="button" class="btn btn-ghost" data-action="export-progress">${t(rendered, 'export')}</button><label class="btn btn-ghost sbl-file" tabindex="0">${t(rendered, 'import')}<input type="file" accept="application/json" data-action="import-progress" aria-label="${t(rendered, 'import')}"></label></div><button type="button" class="btn btn-danger" data-action="reset-progress" data-confirm="${t(rendered, 'resetAsk')}">${t(rendered, 'reset')}</button></div></main>${renderMasteryMoment(rendered)}</div>`;
 }
 
 function loadStored() {
@@ -1011,7 +1014,10 @@ export function mountSapB1Lab(root) {
     } else if (action === 'export-progress') {
       downloadProgress(state); state = { ...state, toast: 'export-ok' }; render();
     } else if (action === 'reset-progress') {
-      localStorage.removeItem(STORAGE_KEY); dispatch({ type: 'RESET' });
+      const label = control.getAttribute('data-confirm') || 'Reset all progress?';
+      if (globalThis.confirm && globalThis.confirm(label)) {
+        localStorage.removeItem(STORAGE_KEY); dispatch({ type: 'RESET' });
+      }
     }
   });
 
