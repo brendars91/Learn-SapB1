@@ -774,7 +774,9 @@
   mix-blend-mode: multiply;
   z-index: 0;
 }
-.hb-chapter--paper > *, .hb-chapter--ink > * { position: relative; z-index: 1; }
+/* No forzar `position` en los hijos: los stages de ScrollCraft dependen de
+   position:sticky. El pseudo-elemento es pointer-events:none y queda como
+   veladura; no participa en el layout ni en la interacción. */
 
 /* Lomo del libro: canal de encuadernación junto al margen. */
 .folio::before {
