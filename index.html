@@ -282,7 +282,14 @@
   /* Generated mobile paths and responsive fonts can change the height of
      chapters after the first synchronous measurement. Re-measure once the
      page has fully settled so --sc-p follows the real document geometry. */
-  addEventListener('load', () => requestAnimationFrame(() => handbookScroll.layout()), { once: true });
+  addEventListener('load', () => requestAnimationFrame(() => requestAnimationFrame(() => handbookScroll.layout())), { once: true });
+  addEventListener('pageshow', () => {
+    requestAnimationFrame(() => handbookScroll.read());
+    /* Browsers may restore scrollY after pageshow. A second semantic read makes
+       reloaded pinned acts reflect that restored position even when scrollTo()
+       later targets the same pixel and therefore emits no scroll event. */
+    setTimeout(() => handbookScroll.read(), 120);
+  });
 </script>
 </body>
 </html>
