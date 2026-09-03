@@ -8,15 +8,12 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23ece4d4'/><rect x='7' y='9' width='18' height='2' fill='%2317140f'/><rect x='7' y='15' width='18' height='2' fill='%2317140f'/><rect x='7' y='21' width='11' height='2' fill='%23b3341f'/></svg>">
 <link rel="stylesheet" href="scrollcraft.css">
 <link rel="stylesheet" href="handbuch.css">
+<link rel="stylesheet" href="landing-storytelling.css">
 </head>
 <body class="hb">
 
 <span data-sc-progress></span>
 
-<!-- ══ GESTO PROPIO ══════════════════════════════════════════════════════
-     The manual folio and the visit ledger, in the same margin.
-     No es una barra de progreso: es la cadena documental, y cada capítulo
-     que pasa contabiliza su asiento. Al llegar al colofón, cuadra. -->
 <aside class="folio" aria-label="Folio and the day's general ledger">
   <div class="folio__head">
     <span class="folio__kap" data-folio-kap>Title Page</span>
@@ -30,6 +27,13 @@
     <li class="belegkette__item" data-beleg="3"><span class="belegkette__dot"></span><span class="belegkette__name">Invoice</span></li>
     <li class="belegkette__item" data-beleg="4"><span class="belegkette__dot"></span><span class="belegkette__name">Payment</span></li>
   </ol>
+
+  <div class="folio-effects" aria-live="polite" aria-label="Current business effects">
+    <span class="folio-effect" data-folio-effect="stock"><b>Stock</b><i>—</i></span>
+    <span class="folio-effect" data-folio-effect="ledger"><b>Ledger</b><i>—</i></span>
+    <span class="folio-effect" data-folio-effect="balance"><b>Balance</b><i>—</i></span>
+  </div>
+  <div class="folio-mobile-current" data-folio-mobile-current aria-live="polite">Title Page</div>
 
   <div class="hauptbuch" aria-live="polite">
     <div class="hauptbuch__rule"><span>Debit</span><span>Credit</span></div>
@@ -46,16 +50,10 @@
 
 <main id="top">
 
-<!-- ══ PORTADA PREMIUM ══ Título tipográfico sobre papel con elementos decorativos -->
 <section class="hb-chapter hb-chapter--paper hb-title" data-sc-act="flow" data-hb-kap="Title Page" data-hb-num="—">
-  <!-- Elementos decorativos SVG para sensación premium -->
   <svg class="hb-title-deco" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-    <circle cx="60" cy="60" r="55"/>
-    <circle cx="60" cy="60" r="40"/>
-    <circle cx="60" cy="60" r="25"/>
-    <circle cx="60" cy="60" r="12"/>
+    <circle cx="60" cy="60" r="55"/><circle cx="60" cy="60" r="40"/><circle cx="60" cy="60" r="25"/><circle cx="60" cy="60" r="12"/>
   </svg>
-  
   <div class="hb-grid" data-sc-in data-sc-stagger="90">
     <p class="hb-imprint">SYN-Nordlicht Demo GmbH · Internal Training Document · Edition 10.0</p>
     <h1 class="hb-title__h1"><span class="hb-title__line">Handbook</span><span class="hb-title__line hb-title__line--soft">of the</span><span class="hb-title__line">Document</span><span class="hb-title__line">Chain</span></h1>
@@ -72,41 +70,73 @@
   <span class="hb-title__ghost" aria-hidden="true">10</span>
   <p class="hb-scrollcue" aria-hidden="true">Read</p>
   <svg class="hb-masse" viewBox="0 0 240 60" aria-hidden="true" focusable="false">
-    <line x1="4" y1="30" x2="236" y2="30"/>
-    <line x1="4" y1="22" x2="4" y2="38"/><line x1="236" y1="22" x2="236" y2="38"/>
-    <text x="120" y="24" text-anchor="middle">9 LEVELS</text>
+    <line x1="4" y1="30" x2="236" y2="30"/><line x1="4" y1="22" x2="4" y2="38"/><line x1="236" y1="22" x2="236" y2="38"/><text x="120" y="24" text-anchor="middle">9 LEVELS</text>
   </svg>
 </section>
 
-<!-- ══ KAPITEL 1 ══ Reconocimiento. Prosa densa + el ticket real. -->
 <section class="hb-chapter hb-chapter--paper hb-ch1-incident" data-sc-act="flow" data-hb-kap="The Incident" data-hb-num="1" data-hb-ledger="Quotation|Quotation A-2026-0114|—|—">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 1</span>
     <h2 class="hb-kaphead__h2">08:14. An invoice has disappeared.</h2>
   </header>
+  <div class="hb-ch1-cold" data-ch1-cold aria-label="A consultant opens more and more screens while searching for a missing invoice">
+    <div class="hb-ch1-cold__clock">08:14</div>
+    <blockquote>“The invoice for C20000 is gone.”</blockquote>
+    <div class="hb-ch1-screens" aria-hidden="true">
+      <article class="hb-case-screen hb-case-screen--bp" data-ch1-case-screen>
+        <header><span>Business Partner Master Data</span><b>C20000</b></header>
+        <div class="hb-case-screen__body">
+          <dl><div><dt>Code</dt><dd>C20000</dd></div><div><dt>Name</dt><dd>SYN Office Client</dd></div><div><dt>Balance</dt><dd>856.80</dd></div></dl>
+          <small>Start with the customer, not with a random document screen.</small>
+        </div>
+      </article>
+      <article class="hb-case-screen hb-case-screen--map" data-ch1-case-screen>
+        <header><span>Relationship Map</span><b>C20000</b></header>
+        <div class="hb-case-screen__map"><span>Sales Order<br><b>162</b></span><i>→</i><span>Delivery<br><b>5001</b></span><i>→</i><span>A/R Invoice<br><b>?</b></span></div>
+        <small class="hb-case-screen__note">Follow the relationship, not the menu.</small>
+      </article>
+      <article class="hb-case-screen hb-case-screen--order" data-ch1-case-screen>
+        <header><span>Sales Order</span><b>162</b></header>
+        <div class="hb-case-screen__body">
+          <dl><div><dt>Customer</dt><dd>C20000</dd></div><div><dt>Status</dt><dd>Closed</dd></div><div><dt>Target</dt><dd>Delivery 5001</dd></div></dl>
+          <small>One step closer: this order points to the delivery.</small>
+        </div>
+      </article>
+      <article class="hb-case-screen hb-case-screen--delivery" data-ch1-case-screen>
+        <header><span>Delivery</span><b>5001</b></header>
+        <div class="hb-case-screen__body">
+          <dl><div><dt>Base</dt><dd>Sales Order 162</dd></div><div><dt>Customer</dt><dd>C20000</dd></div><div><dt>Target</dt><dd>A/R Invoice</dd></div></dl>
+          <small>The delivery exposes the next document in the chain.</small>
+        </div>
+      </article>
+      <article class="hb-case-screen hb-case-screen--invoice" data-ch1-case-screen>
+        <header><span>A/R Invoice</span><b>1001-2026</b></header>
+        <div class="hb-case-screen__body">
+          <dl><div><dt>Customer</dt><dd>C20000</dd></div><div><dt>Total</dt><dd>856.80</dd></div><div><dt>Status</dt><dd>Cancelled → replaced</dd></div></dl>
+          <small>Found: the invoice existed, but the chain explains what happened.</small>
+        </div>
+      </article>
+      <span class="hb-ch1-more" data-ch1-more hidden>+1 more</span>
+    </div>
+    <p class="hb-ch1-counter"><strong data-ch1-screen-count>1</strong> <span>screen<span data-ch1-screen-plural></span> open</span></p>
+    <p class="hb-ch1-reveal"><b>The system isn&rsquo;t broken.</b><em>The question is wrong.</em></p>
+  </div>
   <div class="hb-spread">
     <div class="hb-spread__text" data-sc-in data-sc-stagger="60">
       <p class="hb-lede">A client calls. They say their invoice is missing. The consultant opens SAP Business One and stares at a screen with thirty fields, four tabs and no answer.</p>
-      <p>The system isn&rsquo;t broken. The question is wrong. &ldquo;Where is the invoice?&rdquo; is not answered by looking at a screen: it&rsquo;s answered by following a document back to the one that created it, and back to the one that created that.</p>
+      <p>&ldquo;Where is the invoice?&rdquo; is not answered by looking at a screen: it&rsquo;s answered by following a document back to the one that created it, and back to the one that created that.</p>
       <p>Those who don&rsquo;t know that open eleven windows. Those who do open one and press a button.</p>
+      <aside class="consultant-rule"><span>CONSULTANT&rsquo;S RULE 01</span><p>Never search for a document before asking what created it.</p></aside>
     </div>
     <figure class="hb-spread__media" data-sc-reveal="up" data-sc-reveal-at="0.1 0.5">
-      <div class="hb-ticket">
-        <div class="hb-ticket__head"><span>NW-001</span><span>Sales</span></div>
-        <p class="hb-ticket__body">&ldquo;The invoice for C20000 is gone. The customer wants to pay today.&rdquo;</p>
-        <div class="hb-ticket__foot"><span>Priority 1</span><span>08:14</span></div>
-      </div>
+      <div class="hb-ticket"><div class="hb-ticket__head"><span>NW-001</span><span>Sales</span></div><p class="hb-ticket__body">&ldquo;The invoice for C20000 is gone. The customer wants to pay today.&rdquo;</p><div class="hb-ticket__foot"><span>Priority 1</span><span>08:14</span></div></div>
       <figcaption>Fig. 1.1 · The ticket as it arrives: no document number, no date, with urgency.</figcaption>
     </figure>
   </div>
 </section>
 
-<!-- ══ KAPITEL 2 ══ Tensión. Cifras reales del ejemplo trabajado. -->
 <section class="hb-chapter hb-chapter--paper hb-cost hb-ch2-cost" data-sc-act="flow" data-hb-kap="The Cost" data-hb-num="2" data-hb-ledger="Sales Order|Sales Order 162|—|—">
-  <header class="hb-kaphead">
-    <span class="hb-kaphead__num">Chapter 2</span>
-    <h2 class="hb-kaphead__h2">What it costs to ask the wrong question.</h2>
-  </header>
+  <header class="hb-kaphead"><span class="hb-kaphead__num">Chapter 2</span><h2 class="hb-kaphead__h2">What it costs to ask the wrong question.</h2></header>
   <div class="hb-costgrid" data-sc-in data-sc-stagger="70">
     <p class="hb-lede hb-costgrid__lede">The invoice appears. It was cancelled and replaced by another, in another series. The cost isn't the search: it's that nobody knew where to look.</p>
     <figure class="hb-costfig" aria-labelledby="hb-fig-cost">
@@ -140,197 +170,93 @@
       <figcaption id="hb-fig-cost">Fig. 2.1 · The same fact, two states: a draft touches nothing; a posted document writes stock, ledger and balance.</figcaption>
     </figure>
     <ul class="hb-costlist">
-      <li>
-        <b>0.00</b>
-        <span>is what the aged receivables show for a draft of 500.00 that's been sitting there for three weeks. A draft doesn't post to the ledger and doesn't move stock: it's a frozen promise.</span>
-      </li>
-      <li>
-        <b>856.80</b>
-        <span>is what the customer owes per the general ledger, spread across three lines that were created automatically when the invoice was added. None were typed by hand.</span>
-      </li>
+      <li><b>0.00</b><span>is what the aged receivables show for a draft of 500.00 that's been sitting there for three weeks. A draft doesn't post to the ledger and doesn't move stock: it's a frozen promise.</span><small class="hb-causal-note"><strong>Draft</strong><i>→ no posting</i></small></li>
+      <li><b>856.80</b><span>is what the customer owes per the general ledger, spread across three lines that were created automatically when the invoice was added. None were typed by hand.</span><small class="hb-causal-note"><strong>A/R Invoice</strong><i>→ ledger</i></small></li>
     </ul>
     <p class="hb-cost__sting">Meanwhile the customer waits, the payment doesn't come in and the same question returns on Thursday. With a different document.</p>
     <p class="hb-costnote">Figures from the lab itself: the draft from <code>SYN-SK-L0-08</code> and invoice <code>1001-2026</code>.</p>
+    <aside class="consultant-rule"><span>CONSULTANT&rsquo;S RULE 02</span><p>A document is defined as much by what it changes as by what it contains.</p></aside>
   </div>
 </section>
 
-<!-- ══ KAPITEL 3 ══ El giro. La lámina que se dibuja sola. -->
-<section class="hb-chapter hb-chapter--paper hb-ch3-blueprint" data-sc-act="pin" data-sc-span="2.2" data-hb-kap="The Turn" data-hb-num="3" data-hb-ledger="Delivery|Delivery 5001|—|—">
+<section class="hb-chapter hb-chapter--paper hb-ch3-blueprint" data-sc-act="pin" data-sc-span="2.6" data-hb-kap="The Turn" data-hb-num="3" data-hb-ledger="Delivery|Delivery 5001|—|—">
   <div data-sc-stage class="hb-wende">
-    <header class="hb-kaphead hb-kaphead--inset">
-      <span class="hb-kaphead__num">Chapter 3</span>
-      <h2 class="hb-kaphead__h2" data-sc-cue="0 0.9 0">No screen. A path.</h2>
-    </header>
-    <svg class="hb-zeichnung" viewBox="0 0 900 300" aria-label="Diagram: each document inherits from the previous one and produces three effects" role="img">
-      <g class="hb-zeichnung__grid" aria-hidden="true">
-        <path d="M0 260 H900"/><path d="M0 40 H900"/>
-      </g>
-      <g class="hb-zeichnung__draw">
-        <path class="hb-draw" d="M60 150 H840"/>
-        <rect class="hb-draw" x="60" y="120" width="120" height="60"/>
-        <rect class="hb-draw" x="250" y="120" width="120" height="60"/>
-        <rect class="hb-draw" x="440" y="120" width="120" height="60"/>
-        <rect class="hb-draw" x="630" y="120" width="120" height="60"/>
-        <path class="hb-draw" d="M310 180 V235 H700"/>
-        <path class="hb-draw" d="M500 180 V235"/>
-        <path class="hb-draw" d="M690 180 V235"/>
-      </g>
-      <g class="hb-zeichnung__labels">
-        <text x="120" y="155">Sales Order</text>
-        <text x="310" y="155">Delivery</text>
-        <text x="500" y="155">Invoice</text>
-        <text x="690" y="155">Payment</text>
-        <text class="hb-zeichnung__eff" x="310" y="255">Stock</text>
-        <text class="hb-zeichnung__eff" x="500" y="255">Ledger</text>
-        <text class="hb-zeichnung__eff" x="690" y="255">Balance</text>
-        <text class="hb-zeichnung__abb" x="840" y="30">Fig. 3.1</text>
-      </g>
+    <header class="hb-kaphead hb-kaphead--inset"><span class="hb-kaphead__num">Chapter 3</span><h2 class="hb-kaphead__h2" data-sc-cue="0 0.9 0">No screen. A path.</h2></header>
+    <svg class="hb-zeichnung" viewBox="0 0 900 330" aria-label="Process path: Sales Order hands off to Delivery, then Invoice, then Payment" role="img">
+      <g class="hb-zeichnung__grid" aria-hidden="true"><path d="M0 290 H900"/><path d="M0 40 H900"/></g>
+      <g class="hb-ch3-connector" data-ch3-connector="0"><path d="M180 150 H238"/><path d="M230 143 L238 150 L230 157"/></g>
+      <g class="hb-ch3-connector" data-ch3-connector="1"><path d="M370 150 H428"/><path d="M420 143 L428 150 L420 157"/></g>
+      <g class="hb-ch3-connector" data-ch3-connector="2"><path d="M560 150 H618"/><path d="M610 143 L618 150 L610 157"/></g>
+      <g class="hb-ch3-step" data-ch3-step="0" transform-origin="120px 150px"><rect class="hb-ch3-step__box" x="60" y="118" width="120" height="64" rx="2"/><text class="hb-ch3-step__name" x="120" y="154">Sales Order</text><g class="hb-ch3-stamp" transform="translate(78 190)"><rect width="84" height="24" rx="2"/><text x="42" y="16">Processed</text></g></g>
+      <g class="hb-ch3-step" data-ch3-step="1" transform-origin="310px 150px"><rect class="hb-ch3-step__box" x="250" y="118" width="120" height="64" rx="2"/><text class="hb-ch3-step__name" x="310" y="154">Delivery</text><g class="hb-ch3-stamp" transform="translate(268 190)"><rect width="84" height="24" rx="2"/><text x="42" y="16">Processed</text></g><text class="hb-zeichnung__eff" x="310" y="252">Stock</text><text class="hb-ch3-impact" data-ch3-impact="1" x="310" y="278">Stock −12</text></g>
+      <g class="hb-ch3-step" data-ch3-step="2" transform-origin="500px 150px"><rect class="hb-ch3-step__box" x="440" y="118" width="120" height="64" rx="2"/><text class="hb-ch3-step__name" x="500" y="154">Invoice</text><g class="hb-ch3-stamp" transform="translate(458 190)"><rect width="84" height="24" rx="2"/><text x="42" y="16">Processed</text></g><text class="hb-zeichnung__eff" x="500" y="252">Ledger</text><text class="hb-ch3-impact" data-ch3-impact="2" x="500" y="278">A/R +856.80</text></g>
+      <g class="hb-ch3-step" data-ch3-step="3" transform-origin="690px 150px"><rect class="hb-ch3-step__box" x="630" y="118" width="120" height="64" rx="2"/><text class="hb-ch3-step__name" x="690" y="154">Payment</text><g class="hb-ch3-stamp" transform="translate(648 190)"><rect width="84" height="24" rx="2"/><text x="42" y="16">Processed</text></g><text class="hb-zeichnung__eff" x="690" y="252">Balance</text><text class="hb-ch3-impact" data-ch3-impact="3" x="690" y="278">Balance 0.00</text></g>
+      <text class="hb-zeichnung__abb" x="840" y="30">Fig. 3.1</text>
     </svg>
-    <div class="hb-wende__text">
-      <p data-sc-cue="0.28 0.72">Every document is born from another and leaves three footprints: it moves stock, writes a ledger entry, shifts the partner balance.</p>
-      <p data-sc-cue="0.62 1">Whoever knows those three footprints never memorises the screen. They read it.</p>
-    </div>
+    <div class="hb-wende__text"><p data-sc-cue="0.20 0.72">Each document completes its job, then hands the process to the next one. Nothing is crossed out; the chain keeps its history.</p><p data-sc-cue="0.58 1">Follow the handoff and the footprints become predictable: stock, ledger, balance.</p><aside class="consultant-rule"><span>CONSULTANT&rsquo;S RULE 03</span><p>When you know the handoff, the next system effect becomes predictable.</p></aside></div>
   </div>
 </section>
 
-<!-- ══ SILENCIO PREMIUM ══ La respiración antes del pico. Autorizado en BRIEF.md. -->
 <section class="hb-atem hb-chapter--paper" data-sc-act="flow" data-hb-kap="A Pause" data-hb-num="—">
-  <svg class="hb-atem__masse" viewBox="0 0 200 40" aria-hidden="true" focusable="false">
-    <line x1="2" y1="20" x2="198" y2="20"/><line x1="2" y1="12" x2="2" y2="28"/><line x1="198" y1="12" x2="198" y2="28"/>
-  </svg>
-  <p class="hb-atem__line" data-sc-in>Now look at a real document.</p>
-  <p class="hb-atem__sub">The chain begins here</p>
+  <svg class="hb-atem__masse" viewBox="0 0 200 40" aria-hidden="true" focusable="false"><line x1="2" y1="20" x2="198" y2="20"/><line x1="2" y1="12" x2="2" y2="28"/><line x1="198" y1="12" x2="198" y2="28"/></svg>
+  <p class="hb-atem__eyebrow">Enough theory. Follow the transaction.</p>
+  <p class="hb-atem__line" data-sc-in>Now follow one transaction.</p>
 </section>
 
-<!-- ══ KAPITEL 4 · PICO ══ Corte duro a tinta. La cadena en 3D y la ventana viva. -->
 <section class="hb-chapter hb-chapter--ink hb-peak" data-sc-act="pin" data-sc-span="3.6" data-hb-kap="The Document Chain" data-hb-num="4" data-hb-ledger="Invoice|Invoice 1001-2026|856.80|856.80">
   <div data-sc-stage class="hb-peak__stage">
-    <header class="hb-kaphead hb-kaphead--ink">
-      <span class="hb-kaphead__num">Chapter 4</span>
-      <h2 class="hb-kaphead__h2" data-sc-cue="0 1 0 0">The chain builds itself as you read.</h2>
-    </header>
-
+    <header class="hb-kaphead hb-kaphead--ink"><span class="hb-kaphead__num">Chapter 4</span><h2 class="hb-kaphead__h2" data-sc-cue="0 1 0 0">The chain builds itself as you read.</h2></header>
     <div class="hb-peak__mid">
-    <!-- The chain: five real documents in 3D, assembled by the scroll -->
-    <div class="kette" data-kette aria-label="Cadena documental en tres dimensiones">
-      <article class="beleg" data-beleg-card="0" style="--i:0">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Quotation</span>
-          <span class="beleg__nr">A-2026-0114</span>
-          <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: —</li><li>Balance: —</li></ul>
+      <div class="kette" data-kette aria-label="Document chain in three dimensions">
+        <article class="beleg" data-beleg-card="0" style="--i:0"><div class="beleg__paper"><span class="beleg__kind">Quotation</span><span class="beleg__nr">A-2026-0114</span><ul class="beleg__eff"><li>Stock: —</li><li>Ledger: —</li><li>Balance: —</li></ul></div></article>
+        <article class="beleg" data-beleg-card="1" style="--i:1"><div class="beleg__paper"><span class="beleg__kind">Sales Order</span><span class="beleg__nr">162</span><ul class="beleg__eff"><li>Stock: reserved</li><li>Ledger: —</li><li>Balance: —</li></ul></div></article>
+        <article class="beleg" data-beleg-card="2" style="--i:2"><div class="beleg__paper"><span class="beleg__kind">Delivery</span><span class="beleg__nr">5001</span><ul class="beleg__eff"><li>Stock: −12</li><li>Ledger: COGS</li><li>Balance: —</li></ul></div></article>
+        <article class="beleg beleg--focus" data-beleg-card="3" style="--i:3"><div class="beleg__paper"><span class="beleg__kind">Invoice</span><span class="beleg__nr">1001-2026</span><ul class="beleg__eff"><li>Stock: —</li><li>Ledger: AR / Revenue / VAT</li><li>Balance: +856.80</li></ul></div></article>
+        <article class="beleg" data-beleg-card="4" style="--i:4"><div class="beleg__paper"><span class="beleg__kind">Payment</span><span class="beleg__nr">2301</span><ul class="beleg__eff"><li>Stock: —</li><li>Ledger: Bank / Receivables</li><li>Balance: 0.00</li></ul></div></article>
+      </div>
+      <div class="fenster" data-fenster hidden>
+        <div class="fenster__proof" data-fenster-proof><span>LIVE DOCUMENT</span><strong>EDIT A VALUE</strong></div>
+        <div class="fenster__bar"><span class="fenster__title">A/R Invoice 1001-2026</span><span class="fenster__ctrl">_ ▢ ✕</span></div>
+        <div class="fenster__body">
+          <label class="fenster__field"><span>Quantity</span><input type="number" min="1" max="99" step="1" value="12" data-f-qty inputmode="numeric"></label>
+          <label class="fenster__field"><span>Unit price</span><input type="number" min="1" max="999" step="0.01" value="60.00" data-f-price inputmode="decimal"></label>
+          <label class="fenster__field"><span>VAT</span><select data-f-vat><option value="19" selected>19 %</option><option value="7">7 %</option><option value="0">0 %</option></select></label>
+          <table class="fenster__buchung"><caption>Ledger entry · generated on Add</caption><tbody><tr><th scope="row">Receivables 120000</th><td data-f-debit>856.80</td><td></td></tr><tr><th scope="row">Revenue 400000</th><td></td><td data-f-rev>720.00</td></tr><tr><th scope="row">VAT 177600</th><td></td><td data-f-vatamt>136.80</td></tr></tbody></table>
+          <p class="fenster__hint" data-f-hint>Change the quantity and watch the ledger entry, the stock and the balance move together.</p>
         </div>
-      </article>
-      <article class="beleg" data-beleg-card="1" style="--i:1">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Sales Order</span>
-          <span class="beleg__nr">162</span>
-          <ul class="beleg__eff"><li>Stock: reserved</li><li>Ledger: —</li><li>Balance: —</li></ul>
-        </div>
-      </article>
-      <article class="beleg" data-beleg-card="2" style="--i:2">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Delivery</span>
-          <span class="beleg__nr">5001</span>
-          <ul class="beleg__eff"><li>Stock: −12</li><li>Ledger: COGS</li><li>Balance: —</li></ul>
-        </div>
-      </article>
-      <article class="beleg beleg--focus" data-beleg-card="3" style="--i:3">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Invoice</span>
-          <span class="beleg__nr">1001-2026</span>
-          <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: AR / Revenue / VAT</li><li>Balance: +856.80</li></ul>
-        </div>
-      </article>
-      <article class="beleg" data-beleg-card="4" style="--i:4">
-        <div class="beleg__paper">
-          <span class="beleg__kind">Payment</span>
-          <span class="beleg__nr">2301</span>
-          <ul class="beleg__eff"><li>Stock: —</li><li>Ledger: Bank / Receivables</li><li>Balance: 0.00</li></ul>
-        </div>
-      </article>
-    </div>
-
-    <!-- La ventana viva: markup real que calcula de verdad -->
-    <div class="fenster" data-fenster hidden>
-      <div class="fenster__bar"><span class="fenster__title">A/R Invoice 1001-2026</span><span class="fenster__ctrl">_ ▢ ✕</span></div>
-      <div class="fenster__body">
-        <label class="fenster__field">
-          <span>Quantity</span>
-          <input type="number" min="1" max="99" step="1" value="12" data-f-qty inputmode="numeric">
-        </label>
-        <label class="fenster__field">
-          <span>Unit price</span>
-          <input type="number" min="1" max="999" step="0.01" value="60.00" data-f-price inputmode="decimal">
-        </label>
-        <label class="fenster__field">
-          <span>VAT</span>
-          <select data-f-vat>
-            <option value="19" selected>19 %</option>
-            <option value="7">7 %</option>
-            <option value="0">0 %</option>
-          </select>
-        </label>
-        <table class="fenster__buchung">
-          <caption>Ledger entry · generated on Add</caption>
-          <tbody>
-            <tr><th scope="row">Receivables 120000</th><td data-f-debit>856.80</td><td></td></tr>
-            <tr><th scope="row">Revenue 400000</th><td></td><td data-f-rev>720.00</td></tr>
-            <tr><th scope="row">VAT 177600</th><td></td><td data-f-vatamt>136.80</td></tr>
-          </tbody>
-        </table>
-        <p class="fenster__hint" data-f-hint>Change the quantity and watch the ledger entry, the stock and the balance move together.</p>
       </div>
     </div>
-
-    </div>
-
     <p class="hb-peak__caption" data-sc-cue="0.48 1 0.1 0.02">Fig. 4.1 · One commercial event, five documents, three effects. The window is real: it calculates as you type.</p>
+    <aside class="consultant-rule consultant-rule--ink"><span>CONSULTANT&rsquo;S RULE 04</span><p>Trace the transaction, then verify the three footprints: stock, ledger, balance.</p></aside>
   </div>
 </section>
 
-<!-- ══ KAPITEL 5 ══ El laboratorio. Vuelta al papel: corte duro. -->
 <section class="hb-chapter hb-chapter--paper hb-level-journey hb-ch5-lab" data-sc-act="flow" data-hb-kap="The Lab" data-hb-num="5" data-hb-ledger="Payment|Payment 2301|856.80|856.80">
   <div class="hb-labor">
-    <header class="hb-kaphead hb-kaphead--inset">
-      <span class="hb-kaphead__num">Chapter 5</span>
-      <h2 class="hb-kaphead__h2">Nine levels. At your own pace.</h2>
-    </header>
-    <p class="hb-level-intro">Not a carousel to chase. A deliberate path in three chapters: understand the system, operate it, then extend it.</p>
-    <div class="hb-stufen">
-      <section class="hb-level-phase" aria-labelledby="phase-foundations">
-        <header><span>01</span><h3 id="phase-foundations">Understand</h3><p>Build the model before touching the controls.</p></header>
-        <div>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L0</span><div><h3>Mental Model</h3><p>How a document travels through all eight modules.</p></div></article>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L1</span><div><h3>Master Data</h3><p>Business partners, items, series, dates — what decides everything else.</p></div></article>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L2</span><div><h3>Core Logistics</h3><p>Order, delivery, invoice, payment. The full chain.</p></div></article>
-        </div>
-      </section>
-      <section class="hb-level-phase" aria-labelledby="phase-operate">
-        <header><span>02</span><h3 id="phase-operate">Operate</h3><p>Control complexity and make the books explain the flow.</p></header>
-        <div>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L3</span><div><h3>Advanced Flows</h3><p>Batches, serial numbers, bins, production, MRP.</p></div></article>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L4</span><div><h3>Finance</h3><p>Journal entries, reconciliation, assets, cost accounting.</p></div></article>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L5</span><div><h3>Implementation</h3><p>Discovery, blueprint, migration, UAT, go-live.</p></div></article>
-        </div>
-      </section>
-      <section class="hb-level-phase" aria-labelledby="phase-extend">
-        <header><span>03</span><h3 id="phase-extend">Extend</h3><p>Turn reliable operations into reporting, integrations and safe AI.</p></header>
-        <div>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L6</span><div><h3>Web & Reporting</h3><p>Crystal Reports, queries, alerts, dashboards.</p></div></article>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L7</span><div><h3>Engineering</h3><p>Tables, DI API, Service Layer, integration.</p></div></article>
-          <article class="stufe" data-sc-in><span class="stufe__nr">L8</span><div><h3>AI & Vibecoding</h3><p>Context contracts, RAG with evidence, human gate.</p></div></article>
-        </div>
-      </section>
+    <header class="hb-kaphead hb-kaphead--inset"><span class="hb-kaphead__num">Chapter 5</span><h2 class="hb-kaphead__h2">Nine levels. One competency path.</h2></header>
+    <p class="hb-level-intro">Not nine isolated courses. One deliberate route: understand the system, operate it, then extend it.</p>
+    <div class="hb-competency-route" data-competency-route aria-label="Competency path from L0 to L8">
+      <section class="hb-route-phase"><header><span>01</span><h3>UNDERSTAND</h3><p>Build the model before touching the controls.</p></header><div class="hb-route-levels"><article><b>L0</b><span>Mental Model</span></article><article><b>L1</b><span>Master Data</span></article><article><b>L2</b><span>Core Logistics</span></article></div></section>
+      <section class="hb-route-phase"><header><span>02</span><h3>OPERATE</h3><p>Control complexity and make the books explain the flow.</p></header><div class="hb-route-levels"><article><b>L3</b><span>Advanced Flows</span></article><article><b>L4</b><span>Finance</span></article><article><b>L5</b><span>Implementation</span></article></div></section>
+      <section class="hb-route-phase"><header><span>03</span><h3>EXTEND</h3><p>Turn reliable operations into reporting, integration and safe AI.</p></header><div class="hb-route-levels"><article><b>L6</b><span>Web & Reporting</span></article><article><b>L7</b><span>Engineering</span></article><article><b>L8</b><span>AI & Vibecoding</span></article></div></section>
     </div>
   </div>
 </section>
 
-<!-- ══ COLOPHON ══ The ledger balances. CTA as a line of running text. -->
+<section class="hb-chapter hb-chapter--paper hb-outcomes" data-sc-act="flow" data-hb-kap="Capability" data-hb-num="—">
+  <div class="hb-outcomes__inner" data-sc-in>
+    <p class="hb-outcomes__eyebrow">WHAT YOU LEAVE WITH</p>
+    <h2>By the end, you won&rsquo;t memorise SAP Business One.<br>You&rsquo;ll know how to reason through it.</h2>
+    <ul><li>Trace a missing invoice</li><li>Predict stock/accounting effects</li><li>Diagnose a broken document chain</li></ul>
+  </div>
+</section>
+
 <section class="hb-chapter hb-chapter--paper hb-kolophon" data-sc-act="flow" data-hb-kap="Colophon" data-hb-num="—">
   <div class="hb-kolophon__inner" data-sc-in data-sc-stagger="80">
     <p class="hb-kolophon__rule">Debit and Credit</p>
     <p class="hb-kolophon__balance" data-balance>Your ledger is waiting for its last entry.</p>
-    <p class="hb-kolophon__text">This manual is the front cover of a lab with nine levels and seventy-two skills, in Spanish, English and German, with seven dated official SAP sources. It runs with no account, no server and no connection. Whenever you are ready, <a class="hb-cta" href="/Learn-SapB1/lab/">open the lab</a> and start at level zero.</p>
+    <p class="hb-kolophon__text">This manual is the front cover of a lab with nine levels and seventy-two skills, in Spanish, English and German, with seven dated official SAP sources. It runs with no account, no server and no connection.</p>
+    <p class="hb-final-cta">Ready to work the case? <a class="hb-cta" href="/Learn-SapB1/lab/">Enter the laboratory <span aria-hidden="true">→</span></a></p>
     <p class="hb-kolophon__imprint">SYN-Nordlicht Demo GmbH · Synthetic data marked SYN · Learn-SapB1</p>
   </div>
 </section>
@@ -339,6 +265,7 @@
 
 <script src="scrollcraft.js"></script>
 <script src="handbuch.js"></script>
+<script src="landing-storytelling.js"></script>
 <script>ScrollCraft.mount(document.body);</script>
 </body>
 </html>

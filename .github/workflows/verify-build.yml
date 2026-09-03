@@ -28,6 +28,22 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Run browser smoke test
         run: npm run test:browser:local
+      - name: Run mobile visual polish gate
+        run: node test/mobile-visual-polish.mjs
+      - name: Run landing mobile UX gate
+        run: node test/landing-mobile-ux.mjs
+      - name: Run Chapter 1 cold-open visual gate
+        run: node test/ch1-cold-open-browser.mjs
+      - name: Run Chapter 3 browser UX gate
+        run: node test/chapter3-browser-smoke.mjs
+      - name: Run Chapter 4 browser UX gate
+        run: node test/chapter4-browser-smoke.mjs
+      - name: Run landing storytelling browser gate
+        run: node test/landing-storytelling-browser.mjs
+      - name: Run Chapter 3/4 visibility regression gate
+        run: node test/ch3-ch4-visibility-regression.mjs
+      - name: Run Chapter 3/4 visual integrity gate
+        run: node test/ch3-ch4-visual-integrity.mjs
       - name: Verify generated offline artifacts
         run: |
           test -s dist/SAP-Business-One-Mastery-Lab-Standalone.html

@@ -17,6 +17,18 @@
   const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Version these dynamically loaded styles so a phone cannot keep an older
+  // responsive composition after a Pages deploy while HTML/JS are already new.
+  const chapter3Style = document.createElement('link');
+  chapter3Style.rel = 'stylesheet';
+  chapter3Style.href = 'chapter3-handoff.css?v=20260831-mobile-polish-1';
+  document.head.appendChild(chapter3Style);
+
+  const chapter4Style = document.createElement('link');
+  chapter4Style.rel = 'stylesheet';
+  chapter4Style.href = 'chapter4-cumulative.css?v=20260831-mobile-polish-1';
+  document.head.appendChild(chapter4Style);
+
   // ── 0 · Puerta al lab con continuidad de idioma ───────────────────────────
   // La landing es trilingüe por URL (?lang=es|en|de, por defecto en). Ambos
   // enlaces al lab heredan ese idioma para que no haya salto de género.
@@ -75,8 +87,6 @@
     }
   }
 
-  // El folio sigue al capítulo que ocupa el centro de la pantalla, y se
-  // re-tinta cuando el capítulo bajo él es el de tinta.
   function trackChapter() {
     const mid = innerHeight / 2;
     let current = chapters[0];
@@ -92,8 +102,6 @@
     }
     folio.classList.toggle('folio--ink', current.classList.contains('hb-chapter--ink'));
 
-    // Un capítulo se contabiliza cuando el lector lo ha leído de verdad:
-    // su mitad ya ha pasado por el centro de la pantalla.
     for (const chapter of chapters) {
       const box = chapter.getBoundingClientRect();
       if (box.top < mid - box.height * 0.35) post(chapter);
@@ -107,63 +115,107 @@
   const fenster = document.querySelector('[data-fenster]');
 
   function driveChain() {
-    if (!peak) return;
-    const p = Number(getComputedStyle(peak).getPropertyValue('--sc-p')) || 0;
-
-    // Escala continua: cada documento crece/encoge según su proximidad al "centro" del scroll.
-    // step: separación ideal entre documentos en el rango [0,1].
-    const step = 0.2;
-    const window = 0.25;  // ventana de influencia (más amplia que antes para transiciones suaves)
+    if (!peak || !cards.length) return;
+    const p = clamp01(Number(getComputedStyle(peak).getPropertyValue('--sc-p')) || 0);
+    const step = 1 / cards.length;
+    const activeIndex = Math.min(cards.length - 1, Math.floor((p + step * 0.5) / step));
 
     cards.forEach((card, i) => {
-      const center = i * step;
-      // Proximidad: qué tan lejos está `p` de `center`. Cuanto más cerca, más grande.
-      const distance = Math.abs(p - center);
-      // Scale: 0.2 (pequeño) a 1.0 (protagonista). Usa una curva suave.
-      const scale = reduced ? (distance < window / 2 ? 1 : 0.2) : Math.max(0.2, 1 - (distance / window));
-      const isProtagonistNow = scale > 0.95;
-
+      const wasCurrent = card.classList.contains('beleg--current');
       card.classList.remove('beleg--future', 'beleg--current', 'beleg--past', 'beleg--now');
-      card.style.setProperty('--hb-t', scale.toFixed(3));
-      card.style.setProperty('--hb-scale', scale.toFixed(3));
-      if (isProtagonistNow) card.classList.add('beleg--now');
 
-      // Pulse cuando llega a escala máxima
-      const isProtagonist = scale > 0.95;
-      if (isProtagonist && !card.dataset.landed) {
-        card.dataset.landed = '';
+      if (i < activeIndex) {
+        card.classList.add('beleg--past');
+        card.style.setProperty('--hb-scale', '1');
+      } else if (i === activeIndex) {
+        card.classList.add('beleg--current', 'beleg--now');
+        card.style.setProperty('--hb-scale', reduced ? '1' : '1.07');
+      } else {
+        card.classList.add('beleg--future');
+        card.style.setProperty('--hb-scale', '0.86');
+      }
+
+      if (i === activeIndex && !wasCurrent) {
         card.setAttribute('data-pulse', '');
         setTimeout(() => card.removeAttribute('data-pulse'), 620);
       }
-      if (!isProtagonist) delete card.dataset.landed;
     });
 
-    // Fenster sincronizada con Invoice (i=3): visible según su escala.
-    const invoiceScale = Number(cards[3]?.style.getPropertyValue('--hb-scale')) || 0;
-    const f = reduced ? (invoiceScale > 0.7 ? 1 : 0) : invoiceScale;
-
-    fenster.hidden = f < 0.1;
-    fenster.style.setProperty('--hb-fenster', f.toFixed(3));
+    const invoiceStart = (3 - 0.5) * step;
+    const f = p < invoiceStart ? 0 : reduced ? 1 : clamp01((p - invoiceStart) / 0.08);
+    const invoiceOpen = f > 0;
+    peak.classList.toggle('hb-peak--invoice-open', invoiceOpen);
+    if (fenster) {
+      fenster.hidden = !invoiceOpen;
+      fenster.style.setProperty('--hb-fenster', f.toFixed(3));
+    }
   }
 
-  // La lámina técnica del capítulo 3 se dibuja con el progreso del acto.
-  const wende = document.querySelector('[data-sc-act="pin"] .hb-zeichnung');
-  const wendeAct = wende ? wende.closest('[data-sc-act]') : null;
-  const strokes = [...document.querySelectorAll('.hb-draw')];
-  strokes.forEach(el => {
-    const len = el.getTotalLength ? el.getTotalLength() : 1200;
-    el.style.setProperty('--len', len.toFixed(1));
-  });
+  // ── 3 · Chapter 3: process handoff ───────────────────────────────────────
+
+  const wendeAct = document.querySelector('.hb-ch3-blueprint');
+  const chapter3Steps = [...document.querySelectorAll('[data-ch3-step]')];
+  const chapter3Connectors = [...document.querySelectorAll('[data-ch3-connector]')];
+  const chapter3Premise = document.querySelector('.hb-ch3-blueprint .hb-wende__text > p:first-child');
+  const chapter3Drawing = document.querySelector('.hb-ch3-blueprint .hb-zeichnung');
+
+  const mobilePathSpec = [
+    ['Sales Order', '162', 'Order accepted'],
+    ['Delivery', '5001', 'Stock −12'],
+    ['Invoice', '1001-2026', 'A/R +856.80'],
+    ['Payment', '2301', 'Balance 0.00'],
+  ];
+
+  let chapter3MobilePath = document.querySelector('[data-ch3-mobile-path]');
+  if (wendeAct && chapter3Drawing && !chapter3MobilePath) {
+    chapter3MobilePath = document.createElement('div');
+    chapter3MobilePath.className = 'hb-ch3-mobile-path';
+    chapter3MobilePath.dataset.ch3MobilePath = '';
+    chapter3MobilePath.setAttribute('aria-label', 'Process path: Sales Order, Delivery, Invoice, Payment');
+    chapter3MobilePath.innerHTML = mobilePathSpec.map(([name, number, effect], i) => `
+      <article class="hb-ch3-mobile-step" data-ch3-mobile-step="${i}">
+        <span class="hb-ch3-mobile-step__index">0${i + 1}</span>
+        <div class="hb-ch3-mobile-step__copy">
+          <strong>${name}</strong>
+          <small>${number}</small>
+        </div>
+        <span class="hb-ch3-mobile-step__effect">${effect}</span>
+        <em>Processed</em>
+      </article>`).join('');
+    chapter3Drawing.insertAdjacentElement('afterend', chapter3MobilePath);
+  }
+  const chapter3MobileSteps = [...document.querySelectorAll('[data-ch3-mobile-step]')];
 
   function driveDrawing() {
-    if (!wendeAct) return;
-    const p = Number(getComputedStyle(wendeAct).getPropertyValue('--sc-p')) || 0;
-    // Ralentizar el dibujo: hacerlo más gradual y secuencial
-    const d = reduced ? 1 : clamp01((p - 0.02) / 0.8);
-    wendeAct.style.setProperty('--hb-draw', d.toFixed(3));
+    if (!wendeAct || !chapter3Steps.length) return;
+    const p = clamp01(Number(getComputedStyle(wendeAct).getPropertyValue('--sc-p')) || 0);
+    const activeIndex = Math.min(chapter3Steps.length - 1, Math.floor(p * chapter3Steps.length));
+
+    chapter3Steps.forEach((step, i) => {
+      step.classList.remove('hb-ch3-step--future', 'hb-ch3-step--current', 'hb-ch3-step--past');
+      if (i < activeIndex) step.classList.add('hb-ch3-step--past');
+      else if (i === activeIndex) step.classList.add('hb-ch3-step--current');
+      else step.classList.add('hb-ch3-step--future');
+    });
+
+    chapter3Connectors.forEach((connector, i) => {
+      connector.classList.toggle('hb-ch3-connector--on', i < activeIndex);
+    });
+
+    chapter3MobileSteps.forEach((step, i) => {
+      step.classList.remove('hb-ch3-mobile-step--future', 'hb-ch3-mobile-step--current', 'hb-ch3-mobile-step--past');
+      if (i < activeIndex) step.classList.add('hb-ch3-mobile-step--past');
+      else if (i === activeIndex) step.classList.add('hb-ch3-mobile-step--current');
+      else step.classList.add('hb-ch3-mobile-step--future');
+    });
+
+    // Preserve the original ScrollCraft entrance, then keep the premise once
+    // it has fully arrived. This avoids both regressions: no early visibility
+    // and no fade-out while Invoice/Payment become active.
+    if (chapter3Premise) chapter3Premise.classList.toggle('hb-ch3-copy--hold', p >= 0.38);
   }
 
-  // ── 3 · La ventana que calcula ───────────────────────────────────────────
+  // ── 4 · La ventana que calcula ───────────────────────────────────────────
 
   const qty = document.querySelector('[data-f-qty]');
   const price = document.querySelector('[data-f-price]');
@@ -189,7 +241,6 @@
     outVat.textContent = eur.format(tax);
     outDebit.textContent = eur.format(gross);
 
-    // El mismo hecho recorre la cadena: stock, asiento y saldo a la vez.
     if (stockLine) stockLine.textContent = `Bestand: −${q}`;
     if (saldoLine) saldoLine.textContent = `Saldo: +${eur.format(gross)}`;
     if (zahlungLine) zahlungLine.textContent = 'Saldo: 0,00';
@@ -243,7 +294,11 @@
     driveChain();
     driveDrawing();
   }
-  function schedule() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => requestAnimationFrame(frame));
+  }
 
   addEventListener('scroll', schedule, { passive: true });
   addEventListener('resize', schedule);
