@@ -37,7 +37,7 @@ export function createInitialState(saved = {}) {
     activityAnswers: {}, activitySequence: [], activityFeedback: null, activityHints: 0,
     consoleTab: 'queries', consoleQuery: null, consoleOpen: null,
     levelFilter: saved.levelFilter ?? 'all',
-    trackFilter: saved.trackFilter || 'all',
+    trackFilter: saved.trackFilter || 'all', skillSearch: '',
     assessmentResult: null, masteryMoment: null, skillDetailOpen: true,
     caseIndex: Number(saved.caseIndex) || 0,
     incidentIndex: Number(saved.incidentIndex) || 0,
@@ -125,6 +125,7 @@ export function reduceState(state, action) {
     case 'CLOSE_CONSOLE_QUERY': return { ...state, consoleQuery: null, toast: '' };
     case 'TOGGLE_CONSOLE_CARD': return { ...state, consoleOpen: state.consoleOpen === action.id ? null : action.id, toast: '' };
     case 'SET_TRACK_FILTER': return { ...state, trackFilter: action.value, toast: '' };
+    case 'SET_SKILL_SEARCH': return { ...state, skillSearch: String(action.value || '').slice(0, 80), skillDetailOpen: false, toast: '' };
     case 'ANSWER_DIAGNOSTIC':
       if (state.diagnosticFeedback) return state;
       return { ...state, diagnosticScore: state.diagnosticScore + (action.correct ? 1 : 0), diagnosticFeedback: { correct: action.correct } };
@@ -689,7 +690,14 @@ function renderSkillDetail(state, skill) {
 
 function renderMap(state) {
   const selected = SKILLS.find(skill => skill.id === state.selectedSkillId) || SKILLS[0];
-  const filtered = SKILLS.filter(skill => (state.levelFilter === 'all' || String(skill.level) === String(state.levelFilter)) && (state.trackFilter === 'all' || skill.track === state.trackFilter || skill.track === 'dual'));
+  const query = state.skillSearch.trim().toLocaleLowerCase(state.locale);
+  const filtered = SKILLS.filter(skill => {
+    const inFilters = (state.levelFilter === 'all' || String(skill.level) === String(state.levelFilter)) && (state.trackFilter === 'all' || skill.track === state.trackFilter || skill.track === 'dual');
+    if (!inFilters || !query) return inFilters;
+    const level = LEVELS.find(item => item.id === skill.level);
+    const haystack = [skill.id, local(skill.title, state.locale), level ? local(level.title, state.locale) : '', skill.track].join(' ').toLocaleLowerCase(state.locale);
+    return haystack.includes(query);
+  });
   const dueIds = deriveDueReviews(state.progress, renderNow(state));
   const dueSkills = dueIds.map(id => SKILLS.find(skill => skill.id === id)).filter(Boolean);
   const reviewCopy = {
@@ -700,11 +708,15 @@ function renderMap(state) {
   const reviewBanner = dueSkills.length ? `<aside class="sbl-review-banner" aria-labelledby="review-banner-title"><div><span class="sbl-kicker">${reviewCopy.badge}</span><h2 id="review-banner-title">${reviewCopy.title}</h2><p>${reviewCopy.body}</p></div><div class="sbl-review-banner-list">${dueSkills.slice(0, 5).map(skill => `<button type="button" class="sbl-review-chip" data-action="select-skill" data-skill="${skill.id}">${local(skill.title, state.locale)}</button>`).join('')}</div></aside>` : '';
   return `<div class="sbl-stack">
     ${reviewBanner}
+    <div class="sbl-skill-search">
+      <label class="form-label" for="skill-search">${state.locale === 'de' ? 'Was möchtest du heute lernen?' : state.locale === 'en' ? 'What do you want to learn today?' : '¿Qué quieres aprender hoy?'}</label>
+      <div class="sbl-skill-search__row"><input id="skill-search" class="form-control" type="search" maxlength="80" autocomplete="off" value="${escapeHtml(state.skillSearch)}" placeholder="${state.locale === 'de' ? 'Finanzen, Service Layer, Lager…' : state.locale === 'en' ? 'Finance, Service Layer, warehouse…' : 'Finanzas, Service Layer, almacén…'}" data-action="skill-search"><span class="sbl-skill-search__count" aria-live="polite">${filtered.length} / ${SKILLS.length}</span></div>
+    </div>
     <div class="viz-controls">
       <label class="form-label">${t(state, 'level')}<select class="form-select" data-action="level-filter"><option value="all">${t(state, 'allLevels')}</option>${LEVELS.map(level => `<option value="${level.id}"${String(state.levelFilter) === String(level.id) ? ' selected' : ''}>${level.id} · ${local(level.title, state.locale)}</option>`).join('')}</select></label>
       <label class="form-label">${t(state, 'track')}<select class="form-select" data-action="track-filter"><option value="all">${t(state, 'allTracks')}</option><option value="functional"${state.trackFilter === 'functional' ? ' selected' : ''}>${t(state, 'trackFunctional')}</option><option value="technical"${state.trackFilter === 'technical' ? ' selected' : ''}>${t(state, 'trackTechnical')}</option><option value="dual"${state.trackFilter === 'dual' ? ' selected' : ''}>${t(state, 'trackDual')}</option></select></label>
     </div>
-    <div class="sbl-levels">${LEVELS.filter(level => filtered.some(skill => skill.level === level.id)).map(level => {
+    <div class="sbl-levels">${filtered.length ? LEVELS.filter(level => filtered.some(skill => skill.level === level.id)).map(level => {
       const levelSkills = filtered.filter(skill => skill.level === level.id);
       const mastered = levelSkills.filter(skill => state.progress[skill.id]?.mastered).length;
       const pct = Math.round(mastered / Math.max(1, levelSkills.length) * 100);
@@ -718,7 +730,7 @@ function renderMap(state) {
           return `<button type="button" class="btn viz-tile sbl-node is-${statusKey}${selectedClass}" data-action="select-skill" data-skill="${skill.id}" aria-pressed="${skill.id === selected.id}" aria-label="${local(skill.title, state.locale)} — ${status}"><span class="sbl-node-title">${local(skill.title, state.locale)}</span><span class="sbl-node-meta"><span class="sbl-node-status" aria-hidden="true">${icon}</span><span class="text-small">${status}</span></span></button>`;
         }).join('')}</div>
       </section>`;
-    }).join('')}</div>
+    }).join('') : `<div class="sbl-empty"><strong>${state.locale === 'de' ? 'Keine Kompetenz gefunden.' : state.locale === 'en' ? 'No skill found.' : 'No encontramos esa competencia.'}</strong><p>${state.locale === 'de' ? 'Versuche ein Modul, einen Prozess oder eine technische Komponente.' : state.locale === 'en' ? 'Try a module, process, or technical component.' : 'Prueba con un módulo, proceso o componente técnico.'}</p></div>`}</div>
     ${state.skillDetailOpen ? renderSkillDetail(state, selected) : ''}
   </div>`;
 }
@@ -1047,6 +1059,16 @@ export function mountSapB1Lab(root) {
         } catch { state = { ...state, toast: 'import-error' }; render(); }
       });
       reader.readAsText(control.files[0]);
+    }
+  });
+
+  root.addEventListener('input', event => {
+    if (event.target?.dataset?.action === 'skill-search') {
+      dispatch({ type: 'SET_SKILL_SEARCH', value: event.target.value });
+      requestAnimationFrame(() => {
+        const field = root.querySelector('[data-action="skill-search"]');
+        if (field) { field.focus(); field.setSelectionRange(field.value.length, field.value.length); }
+      });
     }
   });
 

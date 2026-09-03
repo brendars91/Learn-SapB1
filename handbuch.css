@@ -763,6 +763,29 @@
 
 /* ══ Refundación visual v2: profundidad, grano, sello, ilustración ══ */
 
+/* Social proof como aparato editorial, no barra SaaS. */
+.hb-proof {
+  position: relative;
+  margin-left: var(--hb-folio);
+  padding: clamp(2.4rem, 5vw, 5rem) clamp(1.25rem, 6vw, 7rem);
+  background: var(--sc-ink);
+  color: var(--sc-surface);
+  border-block: 1px solid rgb(255 255 255 / .14);
+}
+.hb-proof__label { margin: 0 0 var(--sc-4); font-family: var(--hb-mono); font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: color-mix(in srgb, var(--sc-surface) 60%, transparent); }
+.hb-proof__label span { opacity: .6; }
+.hb-proof__grid { display: grid; grid-template-columns: .9fr .9fr .9fr 1.35fr; align-items: end; margin: 0; }
+.hb-proof__grid div { padding: var(--sc-3) clamp(var(--sc-2), 2.5vw, var(--sc-5)); border-left: 1px solid rgb(255 255 255 / .16); }
+.hb-proof__grid div:first-child { border-left: 0; padding-left: 0; }
+.hb-proof__grid dt { font-family: var(--sc-font-display); font-size: clamp(2.8rem, 5vw, 5.5rem); font-weight: 800; line-height: .85; color: var(--sc-accent); letter-spacing: -.05em; }
+.hb-proof__grid div:last-child { border-left-color: var(--sc-accent); }
+.hb-proof__grid div:last-child dt { font-size: clamp(5rem, 9vw, 10rem); line-height: .62; }
+.hb-proof__grid div:last-child::after { content: ""; display: block; width: min(100%, 12rem); height: 1px; margin-top: var(--sc-3); background: var(--sc-accent); }
+.hb-proof__grid dd { margin: var(--sc-2) 0 0; font-family: var(--sc-font-display); font-size: clamp(.9rem, 1.2vw, 1.12rem); line-height: 1.25; }
+.hb-proof__grid dd span { font-family: var(--hb-mono); font-size: .58rem; letter-spacing: .04em; color: color-mix(in srgb, var(--sc-surface) 56%, transparent); }
+@media (max-width: 900px) { .hb-proof { margin-left: 0; padding-bottom: calc(61px + 2rem); } }
+@media (max-width: 620px) { .hb-proof__grid { grid-template-columns: 1fr 1fr; gap: var(--sc-5) 0; } .hb-proof__grid div:nth-child(3) { border-left: 0; padding-left: 0; } .hb-proof__grid div:last-child dt { font-size: clamp(4rem, 22vw, 7rem); } }
+
 /* Grano de papel: textura física sutil sobre toda la superficie crema. */
 .hb-chapter--paper::after,
 .hb-chapter--ink::after {
