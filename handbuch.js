@@ -16,6 +16,10 @@
   const eur = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Pinned chapters derive semantic progress from scroll position. Prevent a
+     reload after a breakpoint change from restoring a stale desktop scrollY
+     before the responsive layout is measured. */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
   // Version these dynamically loaded styles so a phone cannot keep an older
   // responsive composition after a Pages deploy while HTML/JS are already new.

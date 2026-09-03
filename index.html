@@ -74,6 +74,17 @@
   </svg>
 </section>
 
+<!-- Evidence before persuasion: every number below is enforced by the repo. -->
+<section class="hb-proof" aria-label="Learning laboratory credentials" data-sc-in data-sc-stagger="70">
+  <p class="hb-proof__label">The Record <span>/ before you start</span></p>
+  <dl class="hb-proof__grid">
+    <div><dt>72</dt><dd>unique competencies<br><span>no repeated templates</span></dd></div>
+    <div><dt>3</dt><dd>complete languages<br><span>ES · EN · DE</span></dd></div>
+    <div><dt>7</dt><dd>dated SAP sources<br><span>official domains only</span></dd></div>
+    <div><dt>0</dt><dd>accounts or servers<br><span>progress stays here</span></dd></div>
+  </dl>
+</section>
+
 <section class="hb-chapter hb-chapter--paper hb-ch1-incident" data-sc-act="flow" data-hb-kap="The Incident" data-hb-num="1" data-hb-ledger="Quotation|Quotation A-2026-0114|—|—">
   <header class="hb-kaphead">
     <span class="hb-kaphead__num">Chapter 1</span>
@@ -271,7 +282,14 @@
   /* Generated mobile paths and responsive fonts can change the height of
      chapters after the first synchronous measurement. Re-measure once the
      page has fully settled so --sc-p follows the real document geometry. */
-  addEventListener('load', () => requestAnimationFrame(() => handbookScroll.layout()), { once: true });
+  addEventListener('load', () => requestAnimationFrame(() => requestAnimationFrame(() => handbookScroll.layout())), { once: true });
+  addEventListener('pageshow', () => {
+    requestAnimationFrame(() => handbookScroll.read());
+    /* Browsers may restore scrollY after pageshow. A second semantic read makes
+       reloaded pinned acts reflect that restored position even when scrollTo()
+       later targets the same pixel and therefore emits no scroll event. */
+    setTimeout(() => handbookScroll.read(), 120);
+  });
 </script>
 </body>
 </html>
