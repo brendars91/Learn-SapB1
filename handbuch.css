@@ -758,4 +758,160 @@
 @media (prefers-reduced-motion: reduce) {
   .beleg, .fenster { transition: none; }
   .hauptbuch__lines li { animation: none; }
+  .hb-title__line, .hb-title__stempel { animation: none !important; opacity: 1; transform: none; }
 }
+
+/* ══ Refundación visual v2: profundidad, grano, sello, ilustración ══ */
+
+/* Grano de papel: textura física sutil sobre toda la superficie crema. */
+.hb-chapter--paper::after,
+.hb-chapter--ink::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.06 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  z-index: 0;
+}
+.hb-chapter--paper > *, .hb-chapter--ink > * { position: relative; z-index: 1; }
+
+/* Lomo del libro: canal de encuadernación junto al margen. */
+.folio::before {
+  content: "";
+  position: absolute; top: 0; bottom: 0; right: 0; width: 14px;
+  background:
+    linear-gradient(90deg, transparent 0%, rgb(23 20 15 / 0.07) 35%, rgb(23 20 15 / 0.16) 50%, rgb(23 20 15 / 0.05) 72%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Título: entrada escalonada por líneas, respiración tipográfica. */
+.hb-title__line { display: block; opacity: 0; transform: translateY(0.35em); animation: hb-line-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.hb-title__line--soft { font-weight: 400; }
+.hb-title__line:nth-child(1) { animation-delay: 0.05s; }
+.hb-title__line:nth-child(2) { animation-delay: 0.18s; }
+.hb-title__line:nth-child(3) { animation-delay: 0.31s; }
+.hb-title__line:nth-child(4) { animation-delay: 0.44s; }
+@keyframes hb-line-in { to { opacity: 1; transform: none; } }
+
+/* Subtítulo: la propuesta de valor por fin tiene presencia. */
+.hb-title__es {
+  font-size: clamp(1.2rem, 1rem + 1vw, 1.6rem);
+  line-height: 1.45;
+  color: var(--sc-ink);
+  max-width: 34ch;
+}
+.hb-title__es em { font-style: italic; color: var(--sc-accent); }
+
+/* Sello de edición: estampado sobre el borde del bloque tipográfico —
+   la colisión con el título es lo que activa el vacío. */
+.hb-title__stempel {
+  position: absolute;
+  top: clamp(8rem, 34vh, 15rem);
+  right: clamp(8rem, 30vw, 30rem);
+  width: max-content;
+  font-family: var(--hb-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.7;
+  color: var(--sc-accent);
+  border: 2px solid var(--sc-accent);
+  border-radius: 50%;
+  padding: 1.1em 1.3em;
+  transform: rotate(9deg);
+  opacity: 0.82;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 2;
+}
+@media (max-width: 900px) {
+  .hb-title__stempel { top: auto; bottom: clamp(0.5rem, 4vh, 2rem); right: 0.75rem; transform: rotate(8deg) scale(0.85); }
+  .hb-title__ghost { display: none; }
+  .hb-scrollcue { left: 1rem; transform: none; align-items: flex-start; }
+  .hb-scrollcue::after { height: 30px; }
+}
+
+/* Número de edición fantasma: contrapeso en el cuadrante derecho-inferior. */
+.hb-title__ghost {
+  position: absolute;
+  right: clamp(1rem, 3vw, 3rem);
+  bottom: clamp(2rem, 10vh, 5rem);
+  font-family: var(--sc-font-display);
+  font-weight: 900;
+  font-size: clamp(11rem, 24vw, 22rem);
+  line-height: 0.72;
+  color: var(--sc-accent);
+  opacity: 0.12;
+  letter-spacing: -0.06em;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* Ancla direccional: el hero necesita un destino hacia abajo. */
+.hb-scrollcue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(0.75rem, 3vh, 1.75rem);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--hb-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+  pointer-events: none;
+}
+.hb-scrollcue::after {
+  content: "";
+  width: 1px;
+  height: clamp(28px, 6vh, 56px);
+  background: linear-gradient(180deg, var(--sc-ink-soft), transparent);
+  animation: hb-cue-drop 2.2s ease-in-out infinite;
+}
+@keyframes hb-cue-drop {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+@media (prefers-reduced-motion: reduce) { .hb-scrollcue::after { animation: none; } }
+
+/* Métricas: los números hablan, los labels susurran. */
+.hb-colofon dd { font-size: clamp(1.5rem, 1.2rem + 1.6vw, 2.6rem); font-family: var(--sc-font-display); font-weight: 800; letter-spacing: -0.02em; color: var(--sc-ink); font-variant-numeric: tabular-nums; }
+.hb-colofon dt { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sc-ink-soft); }
+
+/* Figura del Capítulo 2: draft congelado vs. documento contabilizado. */
+.hb-costfig { margin: var(--sc-5) 0 var(--sc-3); border: 1px solid var(--hb-rule); padding: var(--sc-4); background: color-mix(in srgb, var(--sc-surface) 55%, transparent); }
+.hb-costfig svg { display: block; width: 100%; height: auto; color: var(--sc-ink); }
+.hb-costfig__draft rect { fill: none; stroke: color-mix(in srgb, var(--sc-ink) 34%, transparent); stroke-dasharray: 5 4; stroke-width: 1.5; }
+.hb-costfig__posted rect { fill: none; stroke: var(--sc-accent); stroke-width: 2; }
+.hb-costfig__draft line, .hb-costfig__posted line { stroke: color-mix(in srgb, var(--sc-ink) 22%, transparent); stroke-width: 1; }
+.hb-costfig__faint { opacity: 0.55; }
+.hb-costfig__arrow { fill: none; stroke: var(--sc-accent); stroke-width: 2; marker-end: url(#hb-arrow); }
+.hb-costfig__flow text { font-family: var(--hb-mono); font-size: 11px; fill: var(--sc-accent); letter-spacing: 0.1em; text-transform: uppercase; }
+.hb-costfig__draft text, .hb-costfig__posted text { font-family: var(--hb-mono); font-size: 11px; fill: var(--sc-ink-soft); text-anchor: middle; letter-spacing: 0.05em; }
+.hb-costfig__tag { fill: var(--sc-ink-soft) !important; }
+.hb-costfig__tag--accent { fill: var(--sc-accent) !important; font-weight: 700; }
+.hb-costfig figcaption { font-family: var(--hb-mono); font-size: 0.62rem; letter-spacing: 0.06em; color: var(--sc-ink-soft); margin-top: var(--sc-3); }
+
+/* Cadena 3D: hilo de ensamblaje + sombra de suelo. */
+.kette { perspective: 1400px; }
+.kette::before {
+  content: "";
+  position: absolute; left: 6%; right: 6%; bottom: 8%;
+  height: 26px;
+  background: radial-gradient(50% 100% at 50% 50%, rgb(0 0 0 / 0.22), transparent 72%);
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Stufen (Capítulo 5): elevación táctil al pasar. */
+.stufe { transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease; }
+.stufe:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -12px rgb(23 20 15 / 0.35); }
