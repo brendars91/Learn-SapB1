@@ -131,7 +131,7 @@ for (const viewport of [
   assert.ok(ch3.mobileTop - ch3.headingBottom <= viewport.height * .14, `${viewport.label}: Chapter 3 wastes too much vertical space before the path ${JSON.stringify(ch3)}`);
   assert.ok(ch3.paymentTop >= 0 && ch3.paymentBottom <= ch3.folioTop - 8, `${viewport.label}: Payment is clipped/covered ${JSON.stringify(ch3)}`);
 
-  await setProgress(page, '.hb-peak', .62);
+  await setProgress(page, '.hb-peak', 1.0);
   await page.waitForFunction(() => !document.querySelector('[data-fenster]').hidden);
   const ch4 = await page.evaluate(() => {
     const invoice = document.querySelector('[data-fenster]').getBoundingClientRect();
