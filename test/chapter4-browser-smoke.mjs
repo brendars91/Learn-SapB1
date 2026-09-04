@@ -141,7 +141,12 @@ assert.equal(state.window.hidden, true, 'A/R Invoice window must not cover Payme
 
 // The live A/R Invoice window is the final zoom-in, after the five-card chain.
 await setPeakProgress(1.0);
+await page.waitForFunction(() => {
+  const windowEl = document.querySelector('[data-fenster]');
+  return windowEl && !windowEl.hidden && Number(getComputedStyle(windowEl).opacity) >= 0.95;
+});
 state = await chapterState();
+
 assert.equal(state.window.hidden, false, 'A/R Invoice window should appear after Payment');
 assert.ok(state.window.opacity >= 0.95, `A/R Invoice window should be fully readable, got opacity ${state.window.opacity}`);
 const rgb = state.window.background.match(/\d+(?:\.\d+)?/g)?.slice(0, 3).map(Number) || [0, 0, 0];
@@ -152,6 +157,10 @@ await page.setViewportSize({ width: 390, height: 844 });
 await page.reload({ waitUntil: 'networkidle' });
 await preparePage();
 await setPeakProgress(1.0);
+await page.waitForFunction(() => {
+  const windowEl = document.querySelector('[data-fenster]');
+  return windowEl && !windowEl.hidden && Number(getComputedStyle(windowEl).opacity) >= 0.95;
+});
 state = await chapterState();
 assert.ok(Math.abs(state.progress - 1.0) <= 0.03, `Mobile Chapter 4 probe missed requested progress: ${state.progress}`);
 assert.ok(state.window.top >= state.window.stageTop - 1, `A/R Invoice window starts outside stage: ${state.window.top} < ${state.window.stageTop}`);
