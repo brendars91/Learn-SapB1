@@ -82,7 +82,7 @@ await page.waitForFunction(() => document.querySelector('[data-ch3-impact="1"]')
 assert.ok((await page.locator('[data-ch3-impact="1"]').textContent()).includes('Stock −12'));
 
 // 5 · Chapter 4 live proof and propagation
-await setPinnedProgress('.hb-peak', .72);
+await setPinnedProgress('.hb-peak', 1.0);
 await page.waitForFunction(() => !document.querySelector('[data-fenster]').hidden);
 assert.ok((await page.locator('[data-fenster-proof]').innerText()).includes('LIVE DOCUMENT'));
 await page.locator('[data-f-qty]').fill('15');

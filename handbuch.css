@@ -766,7 +766,7 @@
 /* Social proof como aparato editorial, no barra SaaS. */
 .hb-proof {
   position: relative;
-  margin-left: var(--hb-folio);
+  margin-left: var(--hb-folio-w);
   padding: clamp(2.4rem, 5vw, 5rem) clamp(1.25rem, 6vw, 7rem);
   background: var(--sc-ink);
   color: var(--sc-surface);

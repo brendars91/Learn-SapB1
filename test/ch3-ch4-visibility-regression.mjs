@@ -60,7 +60,7 @@ async function setProgress(page, selector, progress) {
 }
 
 async function measureInvoice(page, label) {
-  await setProgress(page, '.hb-peak', 0.62);
+  await setProgress(page, '.hb-peak', 1.0);
   await page.waitForFunction(() => !document.querySelector('[data-fenster]').hidden && Number(getComputedStyle(document.querySelector('[data-fenster]')).opacity) >= .95);
   const invoice = await page.locator('[data-fenster]').evaluate(el => ({
     clientHeight: el.clientHeight,

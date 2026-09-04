@@ -111,7 +111,7 @@ for (const viewport of [
   assert.ok(ch3.paymentTop >= 0 && ch3.paymentBottom <= ch3.viewport - 54, `${viewport.label}: Payment should remain in usable viewport ${JSON.stringify(ch3)}`);
 
   // Chapter 4: no nested vertical scroll; live controls stay touchable.
-  await setPinnedProgress(page, '.hb-peak', .62);
+  await setPinnedProgress(page, '.hb-peak', 1.0);
   await page.waitForFunction(() => !document.querySelector('[data-fenster]').hidden);
   const ch4 = await page.evaluate(() => {
     const chain = document.querySelector('.hb-peak .kette');

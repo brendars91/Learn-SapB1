@@ -88,7 +88,7 @@ const chapter3 = await shortDesktop.evaluate(() => {
 assert.ok(chapter3.rule.top >= 0 && chapter3.rule.bottom <= chapter3.viewport, `Chapter 3 consultant rule must remain visible: ${JSON.stringify(chapter3)}`);
 assert.ok(chapter3.paragraphs.every(p => p.opacity >= .95), `Both Chapter 3 paragraphs must remain readable at Payment: ${JSON.stringify(chapter3.paragraphs)}`);
 
-await setProgress(shortDesktop, '.hb-peak', 0.62);
+await setProgress(shortDesktop, '.hb-peak', 1.0);
 await shortDesktop.waitForFunction(() => !document.querySelector('[data-fenster]').hidden && Number(getComputedStyle(document.querySelector('[data-fenster]')).opacity) >= .95);
 await shortDesktop.waitForFunction(() => {
   const reached = [...document.querySelectorAll('[data-beleg-card]')].slice(0, 4);
