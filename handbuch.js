@@ -145,8 +145,10 @@
       }
     });
 
-    const invoiceStart = (3 - 0.5) * step;
-    const f = p < invoiceStart ? 0 : reduced ? 1 : clamp01((p - invoiceStart) / 0.08);
+    // The live A/R Invoice window opens only after Payment (the last card) has
+    // had its own beat: Invoice → Payment → then the window zooms in.
+    const invoiceStart = 0.9;
+    const f = p < invoiceStart ? 0 : reduced ? 1 : clamp01((p - invoiceStart) / 0.06);
     const invoiceOpen = f > 0;
     peak.classList.toggle('hb-peak--invoice-open', invoiceOpen);
     if (fenster) {

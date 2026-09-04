@@ -120,8 +120,8 @@ async function chapterState() {
   });
 }
 
-// Invoice is the fourth step: Quotation, Sales Order and Delivery must remain
-// present while Invoice becomes the visual protagonist; Payment is still future.
+// Invoice is the fourth step: Quotation, Sales Order and Delivery remain
+// present while Invoice becomes protagonist. Payment and the live window wait.
 await setPeakProgress(0.62);
 let state = await chapterState();
 assert.ok(Math.abs(state.progress - 0.62) <= 0.03, `Chapter 4 probe missed requested progress: ${state.progress}`);
@@ -130,24 +130,45 @@ for (let i = 0; i <= 3; i += 1) {
 }
 assert.ok(state.cards[4].opacity <= 0.08, `Payment should remain hidden before its turn, got ${state.cards[4].opacity}`);
 assert.ok(state.cards[3].width > state.cards[2].width * 1.025, 'Invoice should visibly stand out from already-landed documents');
-assert.equal(state.window.hidden, false, 'A/R Invoice window should be present when Invoice is introduced');
+assert.equal(state.window.hidden, true, 'A/R Invoice window must wait until after Payment');
+
+// Payment gets an independent final-card beat before the A/R Invoice window.
+await setPeakProgress(0.72);
+state = await chapterState();
+assert.ok(state.cards[4].opacity >= 0.9, 'Payment should be visible during its own beat');
+assert.ok(state.cards[4].classes.includes('beleg--current'), 'Payment should be the current document before the live window opens');
+assert.equal(state.window.hidden, true, 'A/R Invoice window must not cover Payment during its beat');
+
+// The live A/R Invoice window is the final zoom-in, after the five-card chain.
+await setPeakProgress(1.0);
+await page.waitForFunction(() => {
+  const windowEl = document.querySelector('[data-fenster]');
+  return windowEl && !windowEl.hidden && Number(getComputedStyle(windowEl).opacity) >= 0.95;
+});
+state = await chapterState();
+
+assert.equal(state.window.hidden, false, 'A/R Invoice window should appear after Payment');
 assert.ok(state.window.opacity >= 0.95, `A/R Invoice window should be fully readable, got opacity ${state.window.opacity}`);
 const rgb = state.window.background.match(/\d+(?:\.\d+)?/g)?.slice(0, 3).map(Number) || [0, 0, 0];
 assert.ok(rgb.reduce((sum, value) => sum + value, 0) / 3 >= 200, `A/R Invoice window should use a light surface, got ${state.window.background}`);
 
-// The window must also remain inside the clipped sticky stage on a phone-sized viewport.
+// The final window must remain inside the clipped sticky stage on a phone-sized viewport.
 await page.setViewportSize({ width: 390, height: 844 });
 await page.reload({ waitUntil: 'networkidle' });
 await preparePage();
-await setPeakProgress(0.62);
+await setPeakProgress(1.0);
+await page.waitForFunction(() => {
+  const windowEl = document.querySelector('[data-fenster]');
+  return windowEl && !windowEl.hidden && Number(getComputedStyle(windowEl).opacity) >= 0.95;
+});
 state = await chapterState();
-assert.ok(Math.abs(state.progress - 0.62) <= 0.03, `Mobile Chapter 4 probe missed requested progress: ${state.progress}`);
+assert.ok(Math.abs(state.progress - 1.0) <= 0.03, `Mobile Chapter 4 probe missed requested progress: ${state.progress}`);
 assert.ok(state.window.top >= state.window.stageTop - 1, `A/R Invoice window starts outside stage: ${state.window.top} < ${state.window.stageTop}`);
 assert.ok(state.window.bottom <= state.window.stageBottom + 1, `A/R Invoice window is clipped: ${state.window.bottom} > ${state.window.stageBottom}`);
-for (let i = 0; i <= 3; i += 1) {
-  assert.ok(state.cards[i].opacity >= 0.9, `Mobile Chapter 4 card ${i} should remain visible at Invoice step`);
+for (let i = 0; i <= 4; i += 1) {
+  assert.ok(state.cards[i].opacity >= 0.9, `Mobile Chapter 4 card ${i} should remain visible at the final window step`);
 }
-assert.ok(state.cards[4].opacity <= 0.08, 'Mobile Payment should remain hidden before its turn');
+assert.ok(state.cards[4].classes.includes('beleg--current'), 'Mobile Payment should remain the current final card behind the live window');
 
 assert.deepEqual(errors, [], 'Chapter 4 browser console errors');
 console.log(JSON.stringify({ chapter4: 'cumulative-chain-and-readable-invoice', progress: state.progress, errors }, null, 2));
