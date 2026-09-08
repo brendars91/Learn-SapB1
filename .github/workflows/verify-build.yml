@@ -22,12 +22,22 @@ jobs:
         run: npm run build
       - name: Run tests
         run: npm test
+      - name: Install dependencies
+        run: npm ci
       - name: Install browser test runtime
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
       - name: Run browser smoke test
         run: npm run test:browser:local
+      - name: Run activities interaction E2E
+        run: node test/browser-activities-e2e.mjs
+      - name: Run golden-path end-to-end gate
+        run: node test/browser-golden-path.mjs
+      - name: Run browser performance gate
+        run: node test/browser-performance-gate.mjs
+      - name: Run accessibility audit gate
+        run: node test/browser-accessibility-gate.mjs
+      - name: Run keyboard navigation E2E
+        run: node test/browser-keyboard-e2e.mjs
       - name: Run mobile visual polish gate
         run: node test/mobile-visual-polish.mjs
       - name: Run landing mobile UX gate
