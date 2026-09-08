@@ -678,9 +678,9 @@ function renderSkillDetail(state, skill) {
   return `<article class="card sbl-stack" aria-labelledby="skill-title">
     <div class="sbl-card-head"><span class="viz-badge">${escapeHtml(skill.id)}</span>
       <div class="sbl-mode-toggle" role="tablist">
-        <button type="button" class="btn${mode === 'learn' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="learn" aria-pressed="${mode === 'learn'}">${t(state, 'learnMode')}</button>
-        <button type="button" class="btn${mode === 'guided' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="guided" aria-pressed="${mode === 'guided'}">${t(state, 'guidedPractice')}</button>
-        <button type="button" class="btn${mode === 'prove' ? ' btn-primary' : ''}" data-action="set-skill-mode" data-mode="prove" aria-pressed="${mode === 'prove'}">${t(state, 'proveSkill')}</button>
+        <button type="button" class="btn${mode === 'learn' ? ' btn-primary' : ''}" role="tab" data-action="set-skill-mode" data-mode="learn" aria-selected="${mode === 'learn'}">${t(state, 'learnMode')}</button>
+        <button type="button" class="btn${mode === 'guided' ? ' btn-primary' : ''}" role="tab" data-action="set-skill-mode" data-mode="guided" aria-selected="${mode === 'guided'}">${t(state, 'guidedPractice')}</button>
+        <button type="button" class="btn${mode === 'prove' ? ' btn-primary' : ''}" role="tab" data-action="set-skill-mode" data-mode="prove" aria-selected="${mode === 'prove'}">${t(state, 'proveSkill')}</button>
       </div></div>
     <h2 id="skill-title">${local(skill.title, state.locale)}</h2>
     ${state.progress[skill.id]?.nextReview && new Date(state.progress[skill.id].nextReview) <= renderNow(state) ? `<div class="sbl-review-badge">${state.locale === 'de' ? 'Wiederholung fällig' : state.locale === 'en' ? 'Review due' : 'Repaso vencido'}</div>` : ''}
@@ -742,7 +742,7 @@ function renderSimulator(state) {
   const step = steps[state.processStep] || steps[0];
   const effectRow = (label, value) => `<div class="sbl-effect"><span class="text-small">${label}</span><strong>${local(value, state.locale)}</strong></div>`;
   return `<section class="sbl-stack" aria-labelledby="sim-title"><h2 id="sim-title">${t(state, 'simulatorTitle')}</h2><p class="text-muted">${t(state, 'chainExplorer')}</p><div class="sbl-toolbar">${keys.map(key => `<button type="button" class="btn${state.process === key ? ' btn-primary' : ''}" data-action="select-process" data-process="${key}" aria-pressed="${state.process === key}">${t(state, labelKeys[key])}</button>`).join('')}</div>
-  <div class="sbl-process" role="list">${steps.map((item, index) => `<button type="button" class="btn sbl-process-stage" data-action="select-process-step" data-index="${index}" aria-current="${index === state.processStep ? 'step' : 'false'}"><span>${index + 1}. ${local(item.labels, state.locale)}</span><span class="sbl-process-mark" aria-hidden="true"></span></button>`).join('')}</div>
+  <div class="sbl-process" role="list">${steps.map((item, index) => `<button type="button" class="btn sbl-process-stage" role="listitem" data-action="select-process-step" data-index="${index}" aria-current="${index === state.processStep ? 'step' : 'false'}"><span>${index + 1}. ${local(item.labels, state.locale)}</span><span class="sbl-process-mark" aria-hidden="true"></span></button>`).join('')}</div>
   <div class="card sbl-stack"><strong>${local(step.labels, state.locale)}</strong>
     <div class="sbl-checks">${trList(step.checks, state.locale).map(c => `<span class="viz-badge">${escapeHtml(c)}</span>`).join('')}</div>
     <div class="sbl-effects-grid">

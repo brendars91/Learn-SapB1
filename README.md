@@ -10,8 +10,6 @@
 
 ### ➡️ [**ABRIR LA APLICACIÓN**](https://brendars91.github.io/Learn-SapB1/)
 
-[Handbuch der Belegkette](https://brendars91.github.io/Learn-SapB1/scroll/) · la portada larga: la cadena documental se arma mientras lees y el margen te escribe el libro mayor de tu visita
-
 </div>
 
 ---
@@ -63,22 +61,19 @@ La interfaz permite **Español, English y Deutsch**. La versión web aplica una 
 ```bash
 npm run build                 →  reconstruye el standalone desde src/
 npm test                      →  ejecuta la suite completa e imprime el recuento
-npm run test:browser:local    →  recorre las 8 vistas y 72 competencias × 3 modos en
-                                 Chromium, en los tres idiomas
+npm run test:browser:local    →  smoke test en Chromium: 8 vistas + 72 skills × 3 modos en ES,
+                                 muestra representativa en EN/DE, validación de puerta de idioma
 ```
 
 La cifra de tests no se fija aquí a mano: la imprime `npm test`. Un número escrito en el README
 envejece en silencio y acaba mintiendo.
 
-**Estado actual declarado:** `test/coverage.test.mjs` mantiene en rojo, de forma deliberada, los
-defectos de contenido pendientes (fichas MASTERCLASS ausentes, rutas de configuración de un solo
-paso, señuelos repetidos y desequilibrio de formatos). Son detectores, no regresiones: el plan de
-producción los repara por fases y cada reparación apaga su propio test. Ver
-[`docs/PLAN-PRODUCCION-v8.md`](docs/PLAN-PRODUCCION-v8.md).
-
-Incluye test **anti-plantilla** (falla si dos competencias comparten texto de evaluación) y
-**puerta de idioma**: `i18n-coverage` falla si algún texto no tiene inglés o alemán, e
-`i18n-render` falla si al elegir inglés o alemán se cuela una frase en español.
+**Garantías automatizadas:** La suite incluye controles de contenido (`coverage.test.mjs`) que
+verifican que cada competencia tenga ficha MASTERCLASS completa (anchor, path, worked example),
+rutas de configuración multi-paso, diversidad de señuelos, balance de formatos y evaluaciones
+únicas. También incluye test **anti-plantilla** (falla si dos competencias comparten texto de
+evaluación) y **puerta de idioma**: `i18n-coverage` falla si algún texto no tiene inglés o alemán,
+e `i18n-render` falla si al elegir inglés o alemán se cuela una frase en español.
 
 ### Estructura del repositorio
 
@@ -134,22 +129,19 @@ Synthetic-only learning data (`SYN-*`), progress stays in browser `localStorage`
 ```bash
 npm run build                 →  rebuilds the standalone from src/
 npm test                      →  runs the full suite and prints the count
-npm run test:browser:local    →  exercises the 8 views and 72 skills × 3 modes in
-                                 Chromium, across the three languages
+npm run test:browser:local    →  Chromium smoke test: 8 views + 72 skills × 3 modes in ES,
+                                 representative sample in EN/DE, language boundary validation
 ```
 
 The test count is not hard-coded here: `npm test` prints it. A number written into a README
 ages silently and ends up lying.
 
-**Declared current state:** `test/coverage.test.mjs` deliberately keeps the outstanding content
-defects red (missing MASTERCLASS cards, single-step configuration paths, repeated decoys and
-format imbalance). These are detectors, not regressions: the production plan repairs them in
-phases and each repair turns off its own test. See
-[`docs/PLAN-PRODUCCION-v8.md`](docs/PLAN-PRODUCCION-v8.md).
-
-Includes an **anti-template test** (fails if two skills share assessment text) and a
-**language gate**: `i18n-coverage` fails if any text lacks English or German, and
-`i18n-render` fails if a Spanish sentence surfaces when English or German is selected.
+**Automated guarantees:** The suite includes content controls (`coverage.test.mjs`) that verify
+every skill has a complete MASTERCLASS card (anchor, path, worked example), multi-step
+configuration paths, diverse decoys, balanced formats, and unique assessments. It also includes an
+**anti-template test** (fails if two skills share assessment text) and a **language gate**:
+`i18n-coverage` fails if any text lacks English or German, and `i18n-render` fails if a Spanish
+sentence surfaces when English or German is selected.
 
 ### Sources
 

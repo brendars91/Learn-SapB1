@@ -8,5 +8,9 @@
     "build": "node scripts/build.mjs",
     "sanitize:standalone": "node scripts/sanitize-standalone.mjs",
     "test:browser:local": "node test/browser-smoke-local.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "@axe-core/playwright": "^4.10.0"
   }
 }
