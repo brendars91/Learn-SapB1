@@ -14,7 +14,7 @@ const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
 const VIEWS = ['home', 'career', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence'];
 // Sibling web of the SapMentor suite (receipt-backed checks + corpus excerpts).
 // Production domain of the `web` project; a constant, never built from input.
-export const SUITE_SAPMENTOR_URL = 'https://web-brendas-projects-272ede03.vercel.app/';
+export const SUITE_SAPMENTOR_URL = 'https://chatgptsapb1.vercel.app/';
 
 export function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, character => ({
