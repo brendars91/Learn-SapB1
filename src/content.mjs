@@ -7,6 +7,7 @@ import { L3, L4 } from './content/l34.mjs';
 import { L5, L6 } from './content/l56.mjs';
 import { L7, L8 } from './content/l78.mjs';
 import { DEEP } from './content/deep.mjs';
+import { IMPORTED_CASES } from './generated-cases.mjs';
 
 export { I18N, translate, EVIDENCE, PROCESS_STEPS, LEVELS };
 const BASE_SKILLS = [...L0, ...L1, ...L2, ...L3, ...L4, ...L5, ...L6, ...L7, ...L8];
@@ -19,7 +20,7 @@ export const SKILLS = BASE_SKILLS.map(s => {
   return { ...s, anchor: { g, es: anchorEs, en: anchorEn }, path: pathArray, example: ex ? { q: ex.q, show: ex.show, a: { es: ex.a, en: ex.a } } : undefined };
 });
 
-export const CASES = [
+const STATIC_CASES = [
   decision('SYN-CASE-01', 0, {
     q: { es: 'Un usuario dice que una factura «desapareció». ¿Qué haces primero?', en: 'A user says an invoice «disappeared». What first?', de: 'Ein Benutzer sagt, eine Rechnung sei „verschwunden“. Was zuerst?' },
     opts: { es: ['Crear otra factura', 'Buscar por número, socio, fechas, estado y documentos relacionados', 'Modificar la base de datos'], en: ['Create another invoice', 'Search by number, partner, dates, status, related documents', 'Modify the database'], de: ['Neue Rechnung anlegen', 'Suchen nach Nummer, Partner, Daten, Status', 'Datenbank ändern'] },
@@ -153,6 +154,10 @@ export const CASES = [
     hints: { es: '¿Quién escribió esa orden y con qué autoridad?' }
   })
 ];
+
+// Imported cases are validated and projected at build time. They intentionally use a
+// separate renderer contract: no reviewer identity or execution receipt enters this module.
+export const CASES = [...STATIC_CASES, ...IMPORTED_CASES];
 
 export const INCIDENTS = [
   decision('SYN-INC-01', 2, { q: { es: 'El pedido no puede copiarse completamente a entrega.', en: 'The order cannot be copied completely to a delivery.', de: 'Auftrag nicht vollständig kopierbar.' },

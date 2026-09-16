@@ -464,6 +464,9 @@ a.btn {
 .sbl-node.is-learning .sbl-node-status { color: var(--accent); }
 .sbl-node.is-mastered { border-color: color-mix(in srgb, var(--good) 65%, var(--rule)); background: color-mix(in srgb, var(--paper) 92%, var(--good)); }
 .sbl-node.is-mastered .sbl-node-status { color: var(--good); }
+/* dominio acreditado cuya aptitud actual está suspendida: el logro se ve, la acreditación no */
+.sbl-node.is-suspended { border-color: color-mix(in srgb, var(--bad) 45%, var(--rule)); border-left: 3px solid var(--bad); }
+.sbl-node.is-suspended .sbl-node-status { color: var(--bad); }
 
 /* entrada iluminada — clímax editorial, no gamificación infantil */
 .sbl-mastery-veil {
@@ -630,3 +633,4 @@ a.btn {
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+.sbl-scope-note{margin:var(--sbl-space-2,8px) 0 0;color:var(--sbl-muted,inherit)}

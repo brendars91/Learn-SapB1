@@ -1,11 +1,16 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { generateImportedCases } from './import-case-bundles.mjs';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(projectRoot, 'dist');
 const fragmentPath = path.join(outDir, 'sap-b1-mastery-lab.html');
 const standalonePath = path.join(outDir, 'SAP-Business-One-Mastery-Lab-Standalone.html');
+
+// Validate and project every delivered case before any source is bundled. A malformed or
+// altered package aborts the build; an empty cases/ directory is a valid zero-import state.
+await generateImportedCases();
 
 const [shell, styles, contentSource, domainSource, appSource] = await Promise.all([
   readFile(path.join(projectRoot, 'src/fragment.html'), 'utf8'),
@@ -25,6 +30,7 @@ const l34 = await readFile(path.join(projectRoot, 'src/content/l34.mjs'), 'utf8'
 const l56 = await readFile(path.join(projectRoot, 'src/content/l56.mjs'), 'utf8');
 const l78 = await readFile(path.join(projectRoot, 'src/content/l78.mjs'), 'utf8');
 const deep = await readFile(path.join(projectRoot, 'src/content/deep.mjs'), 'utf8');
+const importedCases = await readFile(path.join(projectRoot, 'src/generated-cases.mjs'), 'utf8');
 const uib1 = await readFile(path.join(projectRoot, 'src/ui-b1.mjs'), 'utf8');
 const mcSource = await readFile(path.join(projectRoot, 'src/masterclass.mjs'), 'utf8');
 const mcd1 = await readFile(path.join(projectRoot, 'src/masterclass-data-1.mjs'), 'utf8');
@@ -43,7 +49,7 @@ const strip = source => source
   .replace(/^import[^;]+;\s*$/gm, '')
   .replace(/^export\s+/gm, '');
 
-const contentBundle = [terms, i18n, base, l0, l1, l2, l34, l56, l78, deep, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, advanced, career, contentSource].map(strip).join('\n\n');
+const contentBundle = [terms, i18n, base, l0, l1, l2, l34, l56, l78, deep, importedCases, uib1, mcd1, mcd2, mcd3, mcd4, mcd5, mcd6, mcSource, activities, advanced, career, contentSource].map(strip).join('\n\n');
 const uib1Css = await readFile(path.join(projectRoot, 'src/ui-b1.css'), 'utf8');
 const vizSource = await readFile(path.join(projectRoot, 'src/viz.mjs'), 'utf8');
 const vizRenderSource = await readFile(path.join(projectRoot, 'src/viz-render.mjs'), 'utf8');

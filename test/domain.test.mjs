@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  calculateMastery,
+  evaluateSkill,
+  SUSTAINED_CORRECT,
   recommendNext,
   scanSensitiveInput,
   lintPrompt,
@@ -9,13 +10,20 @@ import {
 } from '../src/domain.mjs';
 
 test('mastery requires knowledge/application 80 and verification/risk 90', () => {
-  assert.equal(calculateMastery({ knowledge: 80, application: 80, verification: 90, risk: 90 }).mastered, true);
-  assert.equal(calculateMastery({ knowledge: 100, application: 100, verification: 89, risk: 100 }).mastered, false);
-  assert.equal(calculateMastery({ knowledge: 100, application: 100, verification: 100, risk: 89 }).mastered, false);
+  const sustained = { streak: SUSTAINED_CORRECT };
+  assert.equal(evaluateSkill({ knowledge: 80, application: 80, verification: 90, risk: 90, ...sustained }).mastered, true);
+  assert.equal(evaluateSkill({ knowledge: 100, application: 100, verification: 89, risk: 100, ...sustained }).mastered, false);
+  assert.equal(evaluateSkill({ knowledge: 100, application: 100, verification: 100, risk: 89, ...sustained }).mastered, false);
+});
+
+test('mastery needs the thresholds AND a sustained streak', () => {
+  const perfect = { knowledge: 100, application: 100, verification: 100, risk: 100 };
+  assert.equal(evaluateSkill({ ...perfect, streak: SUSTAINED_CORRECT - 1 }).mastered, false);
+  assert.equal(evaluateSkill({ ...perfect, streak: SUSTAINED_CORRECT - 1 }).reason, 'not-sustained');
 });
 
 test('mastery score cannot hide a failed safety gate', () => {
-  const result = calculateMastery({ knowledge: 100, application: 100, verification: 100, risk: 100 }, false);
+  const result = evaluateSkill({ knowledge: 100, application: 100, verification: 100, risk: 100, streak: SUSTAINED_CORRECT, safetyGatePassed: false });
   assert.equal(result.mastered, false);
   assert.equal(result.reason, 'safety-gate');
 });
@@ -102,10 +110,10 @@ test('progress import validates nested skill records and settings strictly', () 
 });
 
 test('progress import derives mastery from evidence dimensions and rejects impossible claims', () => {
-  const base = { schemaVersion: 1, classification: 'synthetic-progress', locale: 'es', track: 'dual' };
+  const base = { schemaVersion: 2, classification: 'synthetic-progress', locale: 'es', track: 'dual' };
   const mastered = {
     knowledge: 90, application: 95, verification: 100, risk: 95, mastery: 95,
-    mastered: true, explored: true, streak: 3, correctAttempts: 3, safetyGatePassed: true,
+    mastered: true, everMastered: true, explored: true, streak: 3, correctAttempts: 3, safetyGatePassed: true,
     lastPractised: '2026-08-22T00:00:00.000Z', nextReview: '2026-09-05T00:00:00.000Z'
   };
   assert.equal(validateProgressImport({ ...base, progress: { 'SYN-SK-L0-01': mastered } }).valid, true);
