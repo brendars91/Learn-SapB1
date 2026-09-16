@@ -46,13 +46,42 @@ La interfaz permite **Español, English y Deutsch**. La versión web aplica una 
 
 - **Dominio ≠ acierto único.** Se exigen umbrales distintos por dimensión: conocimiento y aplicación ≥ 80, verificación y riesgo ≥ 90.
 - **Safety gate:** ninguna competencia se domina sin pasar la puerta de seguridad.
-- **3 aciertos sostenidos** para dominar; un fallo reinicia la racha.
+- **3 aciertos sostenidos** para acreditar por primera vez; un fallo reinicia la racha.
+- **Logro histórico y aptitud actual son cosas distintas.** `everMastered` registra que la competencia
+  llegó a acreditarse y nunca retrocede. `mastered` es la aptitud de hoy y se deriva por completo del
+  propio registro: umbrales + acreditación + puerta de seguridad. Fallar la puerta la suspende y volver
+  a superarla la restituye; un fallo ordinario reinicia la racha sin revocar lo acreditado.
+- **Cada superficie enseña una de las dos cosas, a propósito.** Los marcadores agregados —portada,
+  barras de nivel, porcentaje por ruta, registro de carrera— cuentan el logro acreditado, así que
+  nunca bajan por una suspensión. El mapa muestra el estado por competencia, que es donde la
+  suspensión sirve de algo: la competencia aparece como *Suspendida*, no como nueva.
+- **Registrar lectura o práctica no es aprobar una evaluación.** Sube las dimensiones hasta un suelo
+  y mantiene viva la competencia, pero no toca la puerta de seguridad: si está fallada, solo una
+  evaluación que vuelva a superarla restituye la aptitud.
 - **El error enseña:** el feedback identifica qué elemento falló y qué debía verificarse.
+- **El contrato de una actividad está cerrado por los dos lados.** Un tipo no soportado, una actividad
+  sin material que corregir, una respuesta incompleta y una respuesta con campos que la actividad no
+  tiene fallan cerrado: no se corrigen ignorando lo que sobra. Los importes se comparan por valor
+  —`1.190,00`, `1190.00` y `1,190.00` son el mismo importe— y lo ambiguo se rechaza en vez de adivinarse.
+- Estos umbrales son un criterio pedagógico explícito del laboratorio, no una medición psicométrica
+  validada ni una certificación de competencia profesional en SAP Business One.
 
 ### Privacidad y modo offline
 
 - Todos los datos de aprendizaje son sintéticos y marcados `SYN-*`.
 - El progreso permanece en `localStorage` de tu navegador; la exportación contiene solo IDs, puntuaciones y fechas.
+- **Contrato de progreso `schemaVersion: 2`.** Los valores derivados (`mastery`, `mastered`) se recalculan
+  al importar. Un fichero manipulado no consigue así aptitud que la evidencia guardada no sostenga:
+  la declaración se neutraliza en lugar de creerse, y una acreditación declarada sin dimensiones que
+  la respalden tampoco se conserva como historia.
+  Una exportación `schemaVersion: 1` se migra al vuelo; si nunca guardó los intentos, el registro queda
+  marcado `legacy` en lugar de inventarle un historial.
+- **Un fichero inválido nunca sustituye tu progreso.** La importación se valida con la misma regla
+  desde la carga local, el selector de fichero y el reducer: si no pasa, el progreso vigente sigue
+  intacto y se avisa del rechazo.
+- **Si el navegador no puede guardar** (cuota agotada, almacenamiento bloqueado), la sesión sigue
+  funcionando en memoria y se avisa de que no se ha persistido. No se confirma un guardado que no
+  ha ocurrido.
 - El texto libre de trabajo no se persiste en la exportación de progreso.
 - **Cero telemetría.** Los enlaces a fuentes oficiales solo se abren si los pulsas.
 

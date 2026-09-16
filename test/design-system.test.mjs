@@ -82,14 +82,17 @@ test('T1.1 class-coverage: every rendered class exists in styles.css or whitelis
   const states = [];
   // estado vacío
   states.push(createInitialState());
-  // estado con progreso mixto: explorada, mastered, vencida de repaso
+  // estado con progreso mixto: explorada, mastered, vencida de repaso.
+  // El payload es un export válido del contrato vigente: IMPORT_STATE valida antes de sustituir
+  // el estado, así que un fixture incompleto renderizaría un mapa vacío sin avisar.
   const withProgress = reduceState(createInitialState(), { type: 'IMPORT_STATE', value: {
-    locale: 'es', view: 'home',
+    schemaVersion: 2, classification: 'synthetic-progress', locale: 'es', track: 'dual',
     progress: {
-      'SYN-SK-L0-01': { knowledge: 80, application: 80, verification: 90, risk: 90, mastery: 85, mastered: true, explored: true, streak: 3, correctAttempts: 3, lastPractised: '2026-08-20T10:00:00.000Z', nextReview: '2026-08-21T10:00:00.000Z' },
-      'SYN-SK-L0-02': { knowledge: 60, application: 50, verification: 40, risk: 50, mastery: 50, mastered: false, explored: true, streak: 0, lastPractised: '2026-02-20T10:00:00.000Z', nextReview: '2026-02-21T10:00:00.00Z'.replace('00Z','00.000Z') }
+      'SYN-SK-L0-01': { knowledge: 80, application: 80, verification: 90, risk: 90, mastery: 85, mastered: true, everMastered: true, explored: true, streak: 3, correctAttempts: 3, safetyGatePassed: true, lastPractised: '2026-08-20T10:00:00.000Z', nextReview: '2026-08-21T10:00:00.000Z' },
+      'SYN-SK-L0-02': { knowledge: 60, application: 50, verification: 40, risk: 50, mastery: 50, mastered: false, everMastered: false, explored: true, streak: 0, correctAttempts: 0, safetyGatePassed: true, lastPractised: '2026-02-20T10:00:00.000Z', nextReview: '2026-02-21T10:00:00.000Z' }
     }
   } });
+  assert.equal(Object.keys(withProgress.progress).length, 2, 'el fixture de progreso mixto debe haber entrado');
   states.push(withProgress);
   for (const locale of ['en', 'de']) states.push(reduceState(states[0], { type: 'SET_LOCALE', locale }));
 

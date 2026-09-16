@@ -86,7 +86,7 @@ test('serialized progress excludes prompt text and declares synthetic classifica
   const state = createInitialState({ promptDraft: 'private free text', promptResult: { score: 50 } });
   const payload = serializeProgress(state, '2026-08-22T12:00:00.000Z');
   assert.equal(payload.classification, 'synthetic-progress');
-  assert.equal(payload.schemaVersion, 1);
+  assert.equal(payload.schemaVersion, 2);
   assert.equal('promptDraft' in payload, false);
   assert.equal(JSON.stringify(payload).includes('private free text'), false);
 });

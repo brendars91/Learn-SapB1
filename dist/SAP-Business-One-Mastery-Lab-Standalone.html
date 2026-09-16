@@ -482,6 +482,9 @@ a.btn {
 .sbl-node.is-learning .sbl-node-status { color: var(--accent); }
 .sbl-node.is-mastered { border-color: color-mix(in srgb, var(--good) 65%, var(--rule)); background: color-mix(in srgb, var(--paper) 92%, var(--good)); }
 .sbl-node.is-mastered .sbl-node-status { color: var(--good); }
+/* dominio acreditado cuya aptitud actual está suspendida: el logro se ve, la acreditación no */
+.sbl-node.is-suspended { border-color: color-mix(in srgb, var(--bad) 45%, var(--rule)); border-left: 3px solid var(--bad); }
+.sbl-node.is-suspended .sbl-node-status { color: var(--bad); }
 
 /* entrada iluminada — clímax editorial, no gamificación infantil */
 .sbl-mastery-veil {
@@ -648,6 +651,7 @@ a.btn {
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+.sbl-scope-note{margin:var(--sbl-space-2,8px) 0 0;color:var(--sbl-muted,inherit)}
 /* ============================================================
    ui-b1.css — Mockups fieles de ventanas SAP Business One.
    Replica el cliente clásico: chrome gris perla, titlebar azul
@@ -5108,10 +5112,10 @@ const I18N = {
     appLabel: 'Laboratorio de dominio SAP Business One', navHome: 'Inicio', navCareer: 'Carrera', navMap: 'Mapa', navCases: 'Casos', navIncidents: 'Incidentes', navSimulator: 'Cadena', navAI: 'Consola avanzada', navEvidence: 'Fuentes',
     language: 'Idioma', track: 'Ruta', trackFunctional: 'Funcional', trackTechnical: 'Técnica + IA', trackDual: 'Doble ruta',
     startDiagnostic: 'Iniciar diagnóstico', resume: 'Continuar', reset: 'Reiniciar progreso', export: 'Exportar progreso', import: 'Importar progreso',
-    mastery: 'Dominio', dueReview: 'Repasos', skillsExplored: 'Competencias', recommended: 'Siguiente misión', begin: 'Comenzar',
+    mastery: 'Dominio', masteryScope: 'Cuenta logros acreditados, no aptitud del momento: una puerta de seguridad fallada suspende la competencia sin borrar el logro. No es certificación profesional.', dueReview: 'Repasos', skillsExplored: 'Competencias', recommended: 'Siguiente misión', begin: 'Comenzar',
     diagnosticTitle: 'Diagnóstico adaptativo', diagnosticIntro: 'Seis decisiones para calibrar tu punto de entrada. No concede dominio automático.',
     question: 'Pregunta', next: 'Siguiente', finish: 'Terminar', correct: 'Decisión sólida', incorrect: 'Revisa el razonamiento',
-    level: 'Nivel', allLevels: 'Todos los niveles', allTracks: 'Todas las rutas', status: 'Estado', newStatus: 'Nueva', learningStatus: 'En práctica', masteredStatus: 'Dominada',
+    level: 'Nivel', allLevels: 'Todos los niveles', allTracks: 'Todas las rutas', status: 'Estado', newStatus: 'Nueva', learningStatus: 'En práctica', masteredStatus: 'Dominada', suspendedStatus: 'Suspendida',
     objective: 'Objetivo', concept: 'Concepto', practice: 'Práctica', verify: 'Verificación', risk: 'Riesgo', evidence: 'Evidencia',
     learnMode: 'Entender', proveSkill: 'Demostrar dominio', mindsetLabel: 'Mentalidad', tipsLabel: 'Tips de experto', pitfallLabel: 'Trampa típica', anchorLabel: 'El ancla', pathLabel: 'Ruta en pantalla', exampleLabel: 'Ejemplo trabajado', coverTitle: 'Learn-SapB1', coverSub: 'El laboratorio para dominar SAP Business One como un consultor senior: entender los documentos, razonar las decisiones y verificar antes de actuar.',
     seniorLabel: 'Cómo razona un senior', whyOptions: 'Por qué cada opción', hintLabel: 'Pista', commitPrinciple: '¿Qué principio aplicas?',
@@ -5129,7 +5133,7 @@ const I18N = {
     bossTitle: 'Retos finales', locked: 'Primero demuestra los prerrequisitos', answer: 'Responder', close: 'Cerrar',
     sourceOfficial: 'Fuente oficial', verifiedAt: 'Verificado', applicability: 'Aplicabilidad', openSource: 'Abrir fuente',
     syntheticNotice: 'Entorno educativo: todos los datos son ficticios y están marcados SYN.', localOnly: 'El progreso permanece en este navegador.',
-    importError: 'Archivo rechazado por esquema o privacidad.', importOk: 'Progreso sintético importado.', exportOk: 'Progreso exportado.', resetConfirm: 'El progreso local se ha reiniciado.', resetAsk: '¿Reiniciar TODO el progreso? Esta acción no se puede deshacer.',
+    importError: 'Archivo rechazado por esquema o privacidad.', importOk: 'Progreso sintético importado.', exportOk: 'Progreso exportado.', resetConfirm: 'El progreso local se ha reiniciado.', storageError: 'No se ha podido guardar en este navegador: exporta tu progreso o se perderá al cerrar.', resetAsk: '¿Reiniciar TODO el progreso? Esta acción no se puede deshacer.',
     noNetwork: 'Modo offline', selectSkill: 'Selecciona una competencia del mapa.', dimensionKnowledge: 'Conocimiento', dimensionApplication: 'Aplicación', dimensionVerification: 'Verificación', dimensionRisk: 'Riesgo',
     promptFieldRole: 'Rol', promptFieldGoal: 'Objetivo', promptFieldContext: 'Contexto', promptFieldEvidence: 'Evidencia', promptFieldUncertainty: 'Incertidumbre', promptFieldOutput: 'Formato de salida', promptFieldHumanGate: 'Revisión humana', promptFieldSyntheticContext: 'Caso sintético',
     mcTitle: 'Masterclass', mcConfig: 'Configuración exacta', mcE2E: 'Proceso end-to-end', mcBestPractices: 'Buenas prácticas senior',
@@ -5161,10 +5165,10 @@ const I18N = {
     appLabel: 'SAP Business One mastery lab', navHome: 'Home', navCareer: 'Career', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'Advanced console', navEvidence: 'Sources',
     language: 'Language', track: 'Path', trackFunctional: 'Functional', trackTechnical: 'Technical + AI', trackDual: 'Dual path',
     startDiagnostic: 'Start diagnostic', resume: 'Continue', reset: 'Reset progress', export: 'Export progress', import: 'Import progress',
-    mastery: 'Mastery', dueReview: 'Reviews', skillsExplored: 'Skills', recommended: 'Next mission', begin: 'Begin',
+    mastery: 'Mastery', masteryScope: 'Counts credited achievements, not momentary aptitude: a failed safety gate suspends the skill without erasing the achievement. Not a professional certification.', dueReview: 'Reviews', skillsExplored: 'Skills', recommended: 'Next mission', begin: 'Begin',
     diagnosticTitle: 'Adaptive diagnostic', diagnosticIntro: 'Six decisions calibrate your entry point. It does not grant automatic mastery.',
     question: 'Question', next: 'Next', finish: 'Finish', correct: 'Sound decision', incorrect: 'Review the reasoning',
-    level: 'Level', allLevels: 'All levels', allTracks: 'All paths', status: 'Status', newStatus: 'New', learningStatus: 'Practising', masteredStatus: 'Mastered',
+    level: 'Level', allLevels: 'All levels', allTracks: 'All paths', status: 'Status', newStatus: 'New', learningStatus: 'Practising', masteredStatus: 'Mastered', suspendedStatus: 'Suspended',
     objective: 'Objective', concept: 'Concept', practice: 'Practice', verify: 'Verification', risk: 'Risk', evidence: 'Evidence',
     learnMode: 'Understand', proveSkill: 'Prove mastery', mindsetLabel: 'Mindset', tipsLabel: 'Expert tips', pitfallLabel: 'Common trap', anchorLabel: 'The anchor', pathLabel: 'Screen route', exampleLabel: 'Worked example', coverTitle: 'Learn-SapB1', coverSub: 'The lab to master SAP Business One as a senior consultant: understand the documents, reason the decisions, verify before acting.',
     seniorLabel: 'How a senior reasons', whyOptions: 'Why each option', hintLabel: 'Hint', commitPrinciple: 'Which principle applies?',
@@ -5182,7 +5186,7 @@ const I18N = {
     bossTitle: 'Boss battles', locked: 'Demonstrate the prerequisites first', answer: 'Answer', close: 'Close',
     sourceOfficial: 'Official source', verifiedAt: 'Verified', applicability: 'Applicability', openSource: 'Open source',
     syntheticNotice: 'Training environment: all data is fictional and marked SYN.', localOnly: 'Progress remains in this browser.',
-    importError: 'File rejected by schema or privacy policy.', importOk: 'Synthetic progress imported.', exportOk: 'Progress exported.', resetConfirm: 'Local progress has been reset.', resetAsk: 'Reset ALL progress? This cannot be undone.',
+    importError: 'File rejected by schema or privacy policy.', importOk: 'Synthetic progress imported.', exportOk: 'Progress exported.', resetConfirm: 'Local progress has been reset.', storageError: 'Nothing could be saved in this browser: export your progress or it will be lost on exit.', resetAsk: 'Reset ALL progress? This cannot be undone.',
     noNetwork: 'Offline mode', selectSkill: 'Select a skill on the map.', dimensionKnowledge: 'Knowledge', dimensionApplication: 'Application', dimensionVerification: 'Verification', dimensionRisk: 'Risk',
     promptFieldRole: 'Role', promptFieldGoal: 'Goal', promptFieldContext: 'Context', promptFieldEvidence: 'Evidence', promptFieldUncertainty: 'Uncertainty', promptFieldOutput: 'Output format', promptFieldHumanGate: 'Human review', promptFieldSyntheticContext: 'Synthetic case',
     mcTitle: 'Masterclass', mcConfig: 'Exact configuration', mcE2E: 'End-to-end process', mcBestPractices: 'Senior best practices',
@@ -5214,10 +5218,10 @@ const I18N = {
     appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Start', navCareer: 'Karriere', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
     language: 'Sprache', track: 'Lernpfad', trackFunctional: 'Funktional', trackTechnical: 'Technik + KI', trackDual: 'Doppelpfad',
     startDiagnostic: 'Diagnose starten', resume: 'Fortsetzen', reset: 'Fortschritt löschen', export: 'Fortschritt exportieren', import: 'Fortschritt importieren',
-    mastery: 'Beherrschung', dueReview: 'Wiederholungen', skillsExplored: 'Kompetenzen', recommended: 'Nächste Mission', begin: 'Starten',
+    mastery: 'Beherrschung', masteryScope: 'Zählt belegte Leistungen, nicht momentane Eignung: Ein verfehltes Sicherheits-Gate setzt die Kompetenz aus, ohne die Leistung zu löschen. Keine professionelle Zertifizierung.', dueReview: 'Wiederholungen', skillsExplored: 'Kompetenzen', recommended: 'Nächste Mission', begin: 'Starten',
     diagnosticTitle: 'Adaptive Diagnose', diagnosticIntro: 'Sechs Entscheidungen bestimmen den Einstieg. Sie vergeben keine automatische Beherrschung.',
     question: 'Frage', next: 'Weiter', finish: 'Abschließen', correct: 'Solide Entscheidung', incorrect: 'Begründung prüfen',
-    level: 'Stufe', allLevels: 'Alle Stufen', allTracks: 'Alle Pfade', status: 'Status', newStatus: 'Neu', learningStatus: 'In Übung', masteredStatus: 'Beherrscht',
+    level: 'Stufe', allLevels: 'Alle Stufen', allTracks: 'Alle Pfade', status: 'Status', newStatus: 'Neu', learningStatus: 'In Übung', masteredStatus: 'Beherrscht', suspendedStatus: 'Ausgesetzt',
     objective: 'Ziel', concept: 'Konzept', practice: 'Übung', verify: 'Prüfung', risk: 'Risiko', evidence: 'Nachweis',
     learnMode: 'Verstehen', proveSkill: 'Beherrschung nachweisen', mindsetLabel: 'Mentales Modell', tipsLabel: 'Expertentipps', pitfallLabel: 'Typische Falle', anchorLabel: 'Der Anker', pathLabel: 'Bildschirmroute', exampleLabel: 'Durchgerechnetes Beispiel', coverTitle: 'Learn-SapB1', coverSub: 'Das Labor zur Beherrschung von SAP Business One wie ein Senior-Berater: Dokumente verstehen, Entscheidungen begründen, vor dem Handeln prüfen.',
     seniorLabel: 'Wie ein Senior denkt', whyOptions: 'Warum jede Option', hintLabel: 'Hinweis', commitPrinciple: 'Welches Prinzip gilt?',
@@ -5235,7 +5239,7 @@ const I18N = {
     bossTitle: 'Boss-Aufgaben', locked: 'Zuerst die Voraussetzungen nachweisen', answer: 'Antworten', close: 'Schließen',
     sourceOfficial: 'Offizielle Quelle', verifiedAt: 'Geprüft', applicability: 'Gültigkeit', openSource: 'Quelle öffnen',
     syntheticNotice: 'Lernumgebung: Alle Daten sind fiktiv und mit SYN markiert.', localOnly: 'Der Fortschritt bleibt in diesem Browser.',
-    importError: 'Datei wegen Schema oder Datenschutz abgelehnt.', importOk: 'Synthetischer Fortschritt importiert.', exportOk: 'Fortschritt exportiert.', resetConfirm: 'Lokaler Fortschritt wurde gelöscht.', resetAsk: 'Gesamten Fortschritt zurücksetzen? Kann nicht rückgängig gemacht werden.',
+    importError: 'Datei wegen Schema oder Datenschutz abgelehnt.', importOk: 'Synthetischer Fortschritt importiert.', exportOk: 'Fortschritt exportiert.', resetConfirm: 'Lokaler Fortschritt wurde gelöscht.', storageError: 'Speichern im Browser nicht möglich: exportiere deinen Fortschritt, sonst geht er beim Schließen verloren.', resetAsk: 'Gesamten Fortschritt zurücksetzen? Kann nicht rückgängig gemacht werden.',
     noNetwork: 'Offline-Modus', selectSkill: 'Wähle eine Kompetenz auf der Karte.', dimensionKnowledge: 'Wissen', dimensionApplication: 'Anwendung', dimensionVerification: 'Prüfung', dimensionRisk: 'Risiko',
     promptFieldRole: 'Rolle', promptFieldGoal: 'Ziel', promptFieldContext: 'Kontext', promptFieldEvidence: 'Nachweise', promptFieldUncertainty: 'Unsicherheit', promptFieldOutput: 'Ausgabeformat', promptFieldHumanGate: 'Menschliche Prüfung', promptFieldSyntheticContext: 'Synthetischer Fall',
     mcTitle: 'Masterclass', mcConfig: 'Exakte Konfiguration', mcE2E: 'End-to-End-Prozess', mcBestPractices: 'Senior-Praxisregeln',
@@ -7400,6 +7404,10 @@ const DEEP = {
 };
 
 
+// Generated by scripts/import-case-bundles.mjs; do not edit.
+const IMPORTED_CASES = [];
+
+
 // ui-b1.mjs — Renderizador de mockups fieles de ventanas SAP Business One.
 // Replica la identidad visual real del cliente B1: chrome gris, barra de título azul clásica,
 // campos amarillos para entrada, blancos para sistema, tabs de carpeta, grid con totales.
@@ -9437,9 +9445,9 @@ const LABELS = {
 };
 
 const FEEDBACK = {
-  es: { mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe', qOpen:'«', qClose:'»' },
-  en: { mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount', qOpen:'“', qClose:'”' },
-  de: { mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag', qOpen:'„', qClose:'“' }
+  es: { unsupported:'Tipo de actividad no soportado: no se puede corregir', incomplete:'Actividad incompleta: no hay nada que corregir', unexpected:'La respuesta trae campos que esta actividad no tiene', badAmount:'Importe no interpretable o ambiguo', mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe', qOpen:'«', qClose:'»' },
+  en: { unsupported:'Unsupported activity type: it cannot be graded', incomplete:'Incomplete activity: there is nothing to grade', unexpected:'The answer carries fields this activity does not have', badAmount:'Amount cannot be read, or is ambiguous', mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount', qOpen:'“', qClose:'”' },
+  de: { unsupported:'Nicht unterstützter Aktivitätstyp: keine Bewertung möglich', incomplete:'Unvollständige Aktivität: nichts zu bewerten', unexpected:'Die Antwort enthält Felder, die diese Aufgabe nicht hat', badAmount:'Betrag nicht lesbar oder mehrdeutig', mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag', qOpen:'„', qClose:'“' }
 };
 
 const JOURNAL_BLUEPRINTS = {
@@ -9565,7 +9573,7 @@ const CONFIG_ROUTES = {
     de: ['Administration','Definition','Geschäftspartner','Zahlungsbedingungen']
   },
   'SYN-SK-L1-08': {
-    es: ['Administración','Autorizaciones','Autorizaciones generales'],
+    es: ['Administración','Inicialización del sistema','Autorizaciones','Autorizaciones generales'],
     en: ['Administration','System Initialization','Authorizations','General Authorizations'],
     de: ['Administration','Systeminitialisierung','Berechtigungen','Allgemeine Berechtigungen']
   },
@@ -9743,11 +9751,119 @@ function mapAnswerToLocale(value, oldOptions, newOptions) {
   return newOptions[index];
 }
 
+/**
+ * Traduce una respuesta de simulador entre idiomas por ROL, no por posición. Las listas
+ * de opciones pueden tener cardinalidad distinta por locale (pools de señuelos derivados
+ * de contenido localizado); el mapeo posicional puro corregía entonces una respuesta
+ * correcta como incorrecta. El rol exacto (expected) se traduce siempre; un literal
+ * compartido (identificador técnico) se conserva; el posicional queda como último
+ * recurso solo si las cardinalidades coinciden.
+ */
+function mapSimulatorAnswer(value, oldTarget, newTarget) {
+  if (!oldTarget || !newTarget) return value;
+  if (value === oldTarget.expected) return newTarget.expected;
+  const newOptions = newTarget.options || [];
+  if (newOptions.includes(value)) return value;
+  const oldOptions = oldTarget.options || [];
+  const index = oldOptions.indexOf(value);
+  if (oldOptions.length === newOptions.length && index >= 0) return newOptions[index];
+  return value;
+}
+
+/**
+ * Traduce un paso de secuencia config/consequence entre idiomas por ROL. Un paso que era
+ * parte de la ruta/cadena correcta se traduce por su índice exacto. Un señuelo no se
+ * traduce posicionalmente: con cardinalidades desincronizadas eso convertía respuestas
+ * correctas en incorrectas. Un señuelo sin equivalente compartido se conserva tal cual:
+ * sigue siendo una respuesta equivocada y el validador la juzga como tal — nunca cambia
+ * el veredicto de una respuesta correcta.
+ */
+function translateSequenceValue(value, oldActivity, newActivity, position = null) {
+  const oldChain = oldActivity?.route || oldActivity?.chain || [];
+  const newChain = newActivity?.route || newActivity?.chain || [];
+  // El rol de un paso lo fija su POSICIÓN en la respuesta, no su texto. Una ruta puede repetir
+  // el mismo rótulo en dos niveles; entonces buscar por texto devuelve siempre la primera
+  // aparición y una respuesta correcta se traduce al paso equivocado. Con la posición conocida,
+  // el paso correcto j viaja al paso correcto j sin depender de qué dice la traducción.
+  if (Number.isInteger(position) && position >= 0 && position < newChain.length
+      && oldChain[position] === value) {
+    return newChain[position];
+  }
+  const index = oldChain.indexOf(value);
+  if (index >= 0 && index < newChain.length) return newChain[index];
+  return value;
+}
+
+/**
+ * Interpreta un importe escrito en cualquiera de las tres convenciones de la app y devuelve
+ * céntimos enteros, o null si no es interpretable sin adivinar. Reglas deterministas:
+ * el último separador manda cuando hay de los dos; un separador único seguido de exactamente
+ * tres cifras es de millares; los grupos de millares deben ser de tres cifras. La comparación
+ * educativa es de VALOR, nunca de cadena: '1000,00', '1.000,00' y '1000.00' son el mismo importe.
+ */
+function parseAmountCents(value) {
+  const text = String(value ?? '').replace(/[\s  ]/g, '');
+  if (!text || !/^-?[\d.,]+$/.test(text)) return null;
+  const negative = text.startsWith('-');
+  const body = negative ? text.slice(1) : text;
+  if (!/^\d/.test(body) || !/\d$/.test(body)) return null;
+  const dots = (body.match(/\./g) || []).length;
+  const commas = (body.match(/,/g) || []).length;
+  let decimalSeparator = null;
+  let groupSeparator = null;
+  if (dots && commas) {
+    decimalSeparator = body.lastIndexOf('.') > body.lastIndexOf(',') ? '.' : ',';
+    groupSeparator = decimalSeparator === '.' ? ',' : '.';
+  } else if (dots || commas) {
+    const separator = dots ? '.' : ',';
+    const decimals = body.length - body.lastIndexOf(separator) - 1;
+    if ((dots || commas) > 1 || decimals === 3) groupSeparator = separator;
+    else decimalSeparator = separator;
+  }
+  const cut = decimalSeparator ? body.lastIndexOf(decimalSeparator) : body.length;
+  const integerPart = body.slice(0, cut);
+  const decimalPart = decimalSeparator ? body.slice(cut + 1) : '';
+  if (!/^\d{1,2}$/.test(decimalPart) && decimalSeparator) return null;
+  const groups = groupSeparator ? integerPart.split(groupSeparator) : [integerPart];
+  if (groups.some(group => !/^\d+$/.test(group))) return null;
+  if (groups.length > 1 && (groups[0].length > 3 || groups.slice(1).some(group => group.length !== 3))) return null;
+  const cents = Number(groups.join('')) * 100 + Number((decimalPart + '00').slice(0, 2));
+  // Un importe tan grande que ya no cabe entero se rechaza: perder dígitos en silencio
+  // sería exactamente el fallo de formato-frente-a-valor que este lector viene a cerrar.
+  if (!Number.isSafeInteger(cents)) return null;
+  return negative ? -cents : cents;
+}
+
+const hasEntries = value => Array.isArray(value) && value.length > 0;
+
+/**
+ * Claves de respuesta que admite cada formato. Lo que no aparece aquí no forma parte del
+ * contrato de la actividad: una respuesta que trae campos de más no se corrige ignorándolos,
+ * porque entonces bastaría con acertar lo que se mira para aprobar lo que se envía.
+ */
+function allowedAnswerKeys(activity) {
+  if (activity.type === 'simulator') return activity.targets.map((_, index) => `sim-${index}`);
+  if (activity.type === 'bughunt') return activity.clues.map((_, index) => `clue-${index}`);
+  if (activity.type === 'forensic') return ['broken'];
+  if (activity.type === 'journal') return activity.lines.flatMap((_, index) => [`side-${index}`, `amount-${index}`]);
+  return [];
+}
+
 function validateActivityDetailed(activity, answers, sequence) {
   const A = answers || {};
   const seq = sequence || [];
   const details = [];
-  const f = FEEDBACK[activity.locale || 'es'];
+  const f = FEEDBACK[activity.locale] || FEEDBACK.es;
+  // Una actividad sin material que corregir no puede aprobarse por omisión.
+  const graded = { simulator: activity.targets, bughunt: activity.clues, forensic: activity.evidence, journal: activity.lines, config: activity.route || activity.chain, consequence: activity.route || activity.chain };
+  if (!Object.hasOwn(graded, activity.type)) return { correct: false, details: [{ item: f.unsupported, ok: false, expected: Object.keys(graded).join(', '), got: String(activity.type ?? '—') }] };
+  if (!hasEntries(graded[activity.type])) return { correct: false, details: [{ item: f.incomplete, ok: false, expected: f.expected, got: '—' }] };
+  // Contrato cerrado también por el lado de la respuesta: campos ajenos y secuencias que este
+  // formato no pide se rechazan en lugar de descartarse en silencio.
+  const allowed = allowedAnswerKeys(activity);
+  const ordered = activity.type === 'config' || activity.type === 'consequence';
+  const extraneous = [...Object.keys(A).filter(key => !allowed.includes(key)), ...(ordered ? [] : seq.map(String))];
+  if (extraneous.length) return { correct: false, details: [{ item: f.unexpected, ok: false, expected: allowed.join(', ') || '—', got: extraneous.join(', ') }] };
   let correct = true;
   if (activity.type === 'simulator') {
     activity.targets.forEach((field,i)=>{ const ok=A['sim-'+i]===field.expected; if(!ok) correct=false; details.push({item:field.label,ok,expected:field.expected,got:A['sim-'+i]||'—'}); });
@@ -9758,9 +9874,11 @@ function validateActivityDetailed(activity, answers, sequence) {
   } else if (activity.type === 'config' || activity.type === 'consequence') {
     const ref=activity.route||activity.chain;
     ref.forEach((step,i)=>{ const ok=seq[i]===step; if(!ok) correct=false; details.push({item:`${f.step} ${i+1}: ${f.expected} ${f.qOpen}${String(step).slice(0,40)}${f.qClose}`,ok,expected:step,got:seq[i]||'—'}); });
-    if(activity.tokens&&seq.length>ref.length){ correct=false; details.push({item:f.decoys,ok:false,expected:`${ref.length} ${f.exact}`,got:`${seq.length} ${f.steps}`}); }
+    // El exceso de pasos se rechaza siempre: que la actividad traiga o no banco de fichas es
+    // presentación, no contrato. Una ruta más larga que la de referencia no es la misma ruta.
+    if(seq.length>ref.length){ correct=false; details.push({item:f.decoys,ok:false,expected:`${ref.length} ${f.exact}`,got:`${seq.length} ${f.steps}`}); }
   } else if (activity.type === 'journal') {
-    activity.lines.forEach((line,i)=>{ const sideOk=journalSideKey(A[`side-${i}`])===journalSideKey(line[1]); const amountOk=String(A[`amount-${i}`]||'').replace(/\s/g,'')===line[2]; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A[`side-${i}`]||'—'} ${A[`amount-${i}`]||'—'}`}); });
+    activity.lines.forEach((line,i)=>{ const sideOk=journalSideKey(A[`side-${i}`])===journalSideKey(line[1]); const given=parseAmountCents(A[`amount-${i}`]); const expectedCents=parseAmountCents(line[2]); const amountOk=given!==null&&expectedCents!==null&&given===expectedCents; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A[`side-${i}`]||'—'} ${given===null&&A[`amount-${i}`]?f.badAmount:(A[`amount-${i}`]||'—')}`}); });
   }
   return { correct, details };
 }
@@ -10182,6 +10300,7 @@ function activeCaseFile(skills, progress, mcIndex, locale = 'es', levelsMeta, re
 
 
 
+
 { I18N, translate, EVIDENCE, PROCESS_STEPS, LEVELS };
 const BASE_SKILLS = [...L0, ...L1, ...L2, ...L3, ...L4, ...L5, ...L6, ...L7, ...L8];
 // Enriquecer cada skill con su ancla, ruta de pantalla y ejemplo trabajado.
@@ -10193,7 +10312,7 @@ const SKILLS = BASE_SKILLS.map(s => {
   return { ...s, anchor: { g, es: anchorEs, en: anchorEn }, path: pathArray, example: ex ? { q: ex.q, show: ex.show, a: { es: ex.a, en: ex.a } } : undefined };
 });
 
-const CASES = [
+const STATIC_CASES = [
   decision('SYN-CASE-01', 0, {
     q: { es: 'Un usuario dice que una factura «desapareció». ¿Qué haces primero?', en: 'A user says an invoice «disappeared». What first?', de: 'Ein Benutzer sagt, eine Rechnung sei „verschwunden“. Was zuerst?' },
     opts: { es: ['Crear otra factura', 'Buscar por número, socio, fechas, estado y documentos relacionados', 'Modificar la base de datos'], en: ['Create another invoice', 'Search by number, partner, dates, status, related documents', 'Modify the database'], de: ['Neue Rechnung anlegen', 'Suchen nach Nummer, Partner, Daten, Status', 'Datenbank ändern'] },
@@ -10327,6 +10446,10 @@ const CASES = [
     hints: { es: '¿Quién escribió esa orden y con qué autoridad?' }
   })
 ];
+
+// Imported cases are validated and projected at build time. They intentionally use a
+// separate renderer contract: no reviewer identity or execution receipt enters this module.
+const CASES = [...STATIC_CASES, ...IMPORTED_CASES];
 
 const INCIDENTS = [
   decision('SYN-INC-01', 2, { q: { es: 'El pedido no puede copiarse completamente a entrega.', en: 'The order cannot be copied completely to a delivery.', de: 'Auftrag nicht vollständig kopierbar.' },
@@ -10725,13 +10848,39 @@ const VIZ_RENDERERS = {
 
 
 const SCORE_FIELDS = ['knowledge', 'application', 'verification', 'risk'];
+const MASTERY_THRESHOLDS = { knowledge: 80, application: 80, verification: 90, risk: 90 };
 
-function calculateMastery(scores = {}, safetyGatePassed = true) {
-  const normalized = Object.fromEntries(SCORE_FIELDS.map(field => [field, Math.max(0, Math.min(100, Number(scores[field]) || 0))]));
-  const score = Math.round((normalized.knowledge + normalized.application + normalized.verification + normalized.risk) / 4);
-  if (!safetyGatePassed) return { score, mastered: false, reason: 'safety-gate', dimensions: normalized };
-  const mastered = normalized.knowledge >= 80 && normalized.application >= 80 && normalized.verification >= 90 && normalized.risk >= 90;
-  return { score, mastered, reason: mastered ? 'mastered' : 'threshold', dimensions: normalized };
+/** Persisted progress contract. v2 splits historical achievement from current aptitude. */
+const PROGRESS_SCHEMA_VERSION = 2;
+/** Consecutive correct answers required for current aptitude; one failure resets the streak. */
+const SUSTAINED_CORRECT = 3;
+
+function normalizeDimensions(scores = {}) {
+  return Object.fromEntries(SCORE_FIELDS.map(field => [field, Math.max(0, Math.min(100, Number(scores[field]) || 0))]));
+}
+
+/**
+ * Single source of truth for the mastery rules. The reducer, the UI and the import
+ * validator all derive from here; none of them may re-implement a part of it.
+ * `mastered` is CURRENT aptitude; `everMastered` is the separate historical achievement,
+ * which never regresses. The sustained streak is what EARNS aptitude the first time; after
+ * that, a plain miss only resets the streak, while a failed safety gate suspends aptitude
+ * without erasing the achievement.
+ */
+function evaluateSkill(record = {}) {
+  const dimensions = normalizeDimensions(record);
+  const score = Math.round(SCORE_FIELDS.reduce((total, field) => total + dimensions[field], 0) / SCORE_FIELDS.length);
+  const thresholdMet = SCORE_FIELDS.every(field => dimensions[field] >= MASTERY_THRESHOLDS[field]);
+  const safetyGatePassed = record.safetyGatePassed !== false;
+  const sustained = (Number(record.streak) || 0) >= SUSTAINED_CORRECT;
+  // Una acreditación previa sólo sigue valiendo si los aciertos que la sostienen están
+  // registrados. Así un registro heredado sin historial de intentos conserva la historia
+  // (`everMastered`) pero tiene que volver a ganarse la aptitud, y ningún fichero manipulado
+  // consigue aptitud con menos evidencia de la que siempre se exigió.
+  const credited = sustained || (record.everMastered === true && (Number(record.correctAttempts) || 0) >= SUSTAINED_CORRECT);
+  const mastered = thresholdMet && credited && safetyGatePassed;
+  const reason = mastered ? 'mastered' : !safetyGatePassed ? 'safety-gate' : !thresholdMet ? 'threshold' : 'not-sustained';
+  return { score, dimensions, thresholdMet, sustained, credited, safetyGatePassed, mastered, reason };
 }
 
 function recommendNext(skills, progress = {}, now = new Date(), options = {}) {
@@ -10845,48 +10994,111 @@ function lintPrompt(value = '') {
   return { score, present, missing, privacy };
 }
 
-function validateProgressImport(value) {
-  const allowed = ['schemaVersion', 'classification', 'locale', 'track', 'progress', 'settings', 'exportedAt'];
-  const allowedRecord = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'lastPractised', 'nextReview'];
-  const requiredRecord = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'lastPractised', 'nextReview'];
-  const allowedSettings = ['diagnosticCompleted', 'diagnosticScore', 'recommendedLevel', 'selectedSkillId'];
-  const validSkillId = value => /^SYN-SK-L[0-8]-0[1-8]$/.test(value);
-  const validDate = value => typeof value === 'string'
-    && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)
-    && !Number.isNaN(Date.parse(value));
-  const scoreFields = ['knowledge', 'application', 'verification', 'risk', 'mastery'];
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return { valid: false, reason: 'object-required' };
-  const unknown = Object.keys(value).filter(key => !allowed.includes(key));
+const ALLOWED_TOP_LEVEL = ['schemaVersion', 'classification', 'locale', 'track', 'progress', 'settings', 'exportedAt'];
+const ALLOWED_SETTINGS = ['diagnosticCompleted', 'diagnosticScore', 'recommendedLevel', 'selectedSkillId'];
+const V1_RECORD_FIELDS = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'lastPractised', 'nextReview'];
+const V1_REQUIRED_RECORD = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'lastPractised', 'nextReview'];
+const RECORD_FIELDS = [...V1_RECORD_FIELDS, 'everMastered', 'legacy'];
+const REQUIRED_RECORD = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'everMastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'lastPractised', 'nextReview'];
+const SCORE_RANGE_FIELDS = ['knowledge', 'application', 'verification', 'risk', 'mastery'];
+const BOOLEAN_FIELDS = ['mastered', 'everMastered', 'explored', 'safetyGatePassed', 'legacy'];
+const COUNTER_FIELDS = ['streak', 'correctAttempts'];
+const isSkillId = value => /^SYN-SK-L[0-8]-0[1-8]$/.test(value);
+const isTimestamp = value => typeof value === 'string'
+  && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)
+  && !Number.isNaN(Date.parse(value));
+
+/**
+ * Lift a v1 payload to v2 without inventing evidence. Derived values (mastery, mastered)
+ * are recomputed from the stored dimensions, so a forged claim cannot take effect; it is
+ * neutralized rather than trusted. A record that never stored `correctAttempts` cannot have
+ * its attempt history reconstructed, so it is flagged `legacy` instead of being given one.
+ * Structural defects (unknown fields, bad ids, missing v1 fields) still reject the payload.
+ */
+function migrateProgressPayload(value) {
+  const unknown = Object.keys(value).filter(key => !ALLOWED_TOP_LEVEL.includes(key));
+  if (unknown.length) return { ok: false, reason: 'unknown-fields', fields: unknown };
+  if (!value.progress || typeof value.progress !== 'object' || Array.isArray(value.progress)) return { ok: false, reason: 'progress' };
+  const progress = {};
+  for (const [skillId, record] of Object.entries(value.progress)) {
+    if (!isSkillId(skillId) || !record || typeof record !== 'object' || Array.isArray(record)) return { ok: false, reason: 'progress-record' };
+    if (Object.keys(record).some(key => !V1_RECORD_FIELDS.includes(key))) return { ok: false, reason: 'progress-fields' };
+    if (V1_REQUIRED_RECORD.some(key => !Object.hasOwn(record, key))) return { ok: false, reason: 'progress-required' };
+    // Los booleanos del v1 se comprueban aquí: el registro migrado ya no los lleva tal cual,
+    // así que si no se validan ahora, `mastered: 'yes'` entraría por la puerta de atrás.
+    if (typeof record.mastered !== 'boolean' || typeof record.explored !== 'boolean') return { ok: false, reason: 'progress-type' };
+    if (Object.hasOwn(record, 'safetyGatePassed') && typeof record.safetyGatePassed !== 'boolean') return { ok: false, reason: 'progress-type' };
+    const reconstructable = Object.hasOwn(record, 'correctAttempts');
+    const declared = evaluateSkill(record);
+    // El logro histórico se decide primero y alimenta la aptitud, para que el registro migrado
+    // sea internamente consistente cuando el validador lo vuelva a derivar.
+    const candidate = {
+      knowledge: record.knowledge, application: record.application, verification: record.verification, risk: record.risk,
+      everMastered: declared.thresholdMet ? record.mastered || declared.mastered : declared.mastered,
+      explored: record.explored,
+      streak: record.streak,
+      correctAttempts: reconstructable ? record.correctAttempts : record.streak,
+      safetyGatePassed: record.safetyGatePassed !== false,
+      lastPractised: record.lastPractised,
+      nextReview: record.nextReview,
+      ...(reconstructable ? {} : { legacy: true })
+    };
+    const evaluation = evaluateSkill(candidate);
+    progress[skillId] = { ...candidate, mastery: evaluation.score, mastered: evaluation.mastered };
+  }
+  return { ok: true, value: { ...value, schemaVersion: PROGRESS_SCHEMA_VERSION, progress } };
+}
+
+function validateCurrentPayload(value) {
+  const unknown = Object.keys(value).filter(key => !ALLOWED_TOP_LEVEL.includes(key));
   if (unknown.length) return { valid: false, reason: 'unknown-fields', fields: unknown };
-  if (value.schemaVersion !== 1 || value.classification !== 'synthetic-progress') return { valid: false, reason: 'classification' };
+  if (value.schemaVersion !== PROGRESS_SCHEMA_VERSION || value.classification !== 'synthetic-progress') return { valid: false, reason: 'classification' };
   if (!['es', 'en', 'de'].includes(value.locale)) return { valid: false, reason: 'locale' };
   if (!['functional', 'technical', 'dual'].includes(value.track)) return { valid: false, reason: 'track' };
   if (!value.progress || typeof value.progress !== 'object' || Array.isArray(value.progress)) return { valid: false, reason: 'progress' };
   for (const [skillId, record] of Object.entries(value.progress)) {
-    if (!validSkillId(skillId) || !record || typeof record !== 'object' || Array.isArray(record)) return { valid: false, reason: 'progress-record' };
-    if (Object.keys(record).some(key => !allowedRecord.includes(key))) return { valid: false, reason: 'progress-fields' };
-    if (requiredRecord.some(key => !Object.hasOwn(record, key))) return { valid: false, reason: 'progress-required' };
+    if (!isSkillId(skillId) || !record || typeof record !== 'object' || Array.isArray(record)) return { valid: false, reason: 'progress-record' };
+    if (Object.keys(record).some(key => !RECORD_FIELDS.includes(key))) return { valid: false, reason: 'progress-fields' };
+    if (REQUIRED_RECORD.some(key => !Object.hasOwn(record, key))) return { valid: false, reason: 'progress-required' };
     for (const [key, fieldValue] of Object.entries(record)) {
-      if (['mastered', 'explored', 'safetyGatePassed'].includes(key) && typeof fieldValue !== 'boolean') return { valid: false, reason: 'progress-type' };
-      if (scoreFields.includes(key) && (typeof fieldValue !== 'number' || !Number.isFinite(fieldValue) || fieldValue < 0 || fieldValue > 100)) return { valid: false, reason: 'progress-range' };
-      if (['streak', 'correctAttempts'].includes(key) && (!Number.isInteger(fieldValue) || fieldValue < 0 || fieldValue > 1000)) return { valid: false, reason: 'progress-range' };
-      if (['lastPractised', 'nextReview'].includes(key) && !validDate(fieldValue)) return { valid: false, reason: 'progress-date' };
+      if (BOOLEAN_FIELDS.includes(key) && typeof fieldValue !== 'boolean') return { valid: false, reason: 'progress-type' };
+      if (SCORE_RANGE_FIELDS.includes(key) && (typeof fieldValue !== 'number' || !Number.isFinite(fieldValue) || fieldValue < 0 || fieldValue > 100)) return { valid: false, reason: 'progress-range' };
+      if (COUNTER_FIELDS.includes(key) && (!Number.isInteger(fieldValue) || fieldValue < 0 || fieldValue > 1000)) return { valid: false, reason: 'progress-range' };
+      if (['lastPractised', 'nextReview'].includes(key) && !isTimestamp(fieldValue)) return { valid: false, reason: 'progress-date' };
     }
-    const derived = calculateMastery(record, record.safetyGatePassed !== false);
-    if (record.mastery !== derived.score || record.explored !== true) return { valid: false, reason: 'progress-consistency' };
-    if (record.mastered && (!derived.mastered || !record.safetyGatePassed || (record.correctAttempts || 0) < 3)) return { valid: false, reason: 'progress-mastery' };
+    // A run of correct answers cannot exceed the total ever answered correctly.
+    if (record.correctAttempts < record.streak) return { valid: false, reason: 'progress-attempts' };
+    const evaluation = evaluateSkill(record);
+    if (record.mastery !== evaluation.score || record.explored !== true) return { valid: false, reason: 'progress-consistency' };
+    // Current aptitude is fully derivable, so a claimed value that disagrees is a forgery.
+    if (record.mastered !== evaluation.mastered) return { valid: false, reason: 'progress-mastery' };
+    if (record.mastered && !record.everMastered) return { valid: false, reason: 'progress-history' };
+    // `legacy` sólo exime de justificar la HISTORIA: un registro migrado pudo acreditarse sin
+    // que se guardaran los intentos. La aptitud actual no se exime nunca (ver evaluateSkill).
+    if (record.everMastered && !record.legacy && record.correctAttempts < SUSTAINED_CORRECT) return { valid: false, reason: 'progress-history' };
     if (Date.parse(record.nextReview) <= Date.parse(record.lastPractised)) return { valid: false, reason: 'progress-review-date' };
   }
   if (value.settings !== undefined) {
     if (!value.settings || typeof value.settings !== 'object' || Array.isArray(value.settings)) return { valid: false, reason: 'settings' };
-    if (Object.keys(value.settings).some(key => !allowedSettings.includes(key))) return { valid: false, reason: 'settings-fields' };
+    if (Object.keys(value.settings).some(key => !ALLOWED_SETTINGS.includes(key))) return { valid: false, reason: 'settings-fields' };
     if (value.settings.diagnosticCompleted !== undefined && typeof value.settings.diagnosticCompleted !== 'boolean') return { valid: false, reason: 'settings-type' };
     if (value.settings.diagnosticScore !== undefined && (!Number.isInteger(value.settings.diagnosticScore) || value.settings.diagnosticScore < 0 || value.settings.diagnosticScore > 6)) return { valid: false, reason: 'settings-range' };
     if (value.settings.recommendedLevel !== undefined && (!Number.isInteger(value.settings.recommendedLevel) || value.settings.recommendedLevel < 0 || value.settings.recommendedLevel > 8)) return { valid: false, reason: 'settings-range' };
-    if (value.settings.selectedSkillId !== undefined && !validSkillId(value.settings.selectedSkillId)) return { valid: false, reason: 'settings-skill' };
+    if (value.settings.selectedSkillId !== undefined && !isSkillId(value.settings.selectedSkillId)) return { valid: false, reason: 'settings-skill' };
   }
-  if (value.exportedAt !== undefined && !validDate(value.exportedAt)) return { valid: false, reason: 'export-date' };
+  if (value.exportedAt !== undefined && !isTimestamp(value.exportedAt)) return { valid: false, reason: 'export-date' };
   return { valid: true, value };
+}
+
+function validateProgressImport(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { valid: false, reason: 'object-required' };
+  if (value.schemaVersion === 1) {
+    const migrated = migrateProgressPayload(value);
+    if (!migrated.ok) return { valid: false, reason: migrated.reason, ...(migrated.fields ? { fields: migrated.fields } : {}) };
+    const result = validateCurrentPayload(migrated.value);
+    return result.valid ? { ...result, migratedFrom: 1 } : result;
+  }
+  return validateCurrentPayload(value);
 }
 
 function seededOrder(items, seed = 20260822) {
@@ -10962,6 +11174,24 @@ function createInitialState(saved = {}) {
   };
 }
 
+/**
+ * Traduce el contrato de progreso exportado (ajustes anidados) a la forma plana que espera
+ * createInitialState. Es la ÚNICA traducción: el reducer, la carga local y la importación de
+ * fichero pasan por aquí, de modo que un ajuste nuevo no puede rehidratarse en un sitio y
+ * perderse en otro.
+ */
+function stateFromPayload(payload = {}) {
+  return {
+    locale: payload.locale,
+    track: payload.track,
+    progress: payload.progress,
+    diagnosticCompleted: payload.settings?.diagnosticCompleted,
+    diagnosticScore: payload.settings?.diagnosticScore,
+    recommendedLevel: payload.settings?.recommendedLevel,
+    selectedSkillId: payload.settings?.selectedSkillId
+  };
+}
+
 function updateSkill(progress, skillId, change) {
   return { ...progress, [skillId]: { ...(progress[skillId] || {}), ...change } };
 }
@@ -10986,12 +11216,12 @@ function reduceState(state, action) {
           if (activity.type === 'simulator' && oldActivity?.type === 'simulator') {
             activityAnswers = Object.fromEntries(Object.entries(activityAnswers).map(([key, value]) => {
               const index = Number(key.replace('sim-', ''));
-              const oldOptions = oldActivity.targets[index]?.options || [];
-              const newOptions = activity.targets[index]?.options || [];
-              return [key, mapAnswerToLocale(value, oldOptions, newOptions)];
+              // Traducción por rol (expected/options compartidos): el mapeo posicional puro
+              // rompía respuestas correctas cuando las cardinalidades difieren por idioma.
+              return [key, mapSimulatorAnswer(value, oldActivity.targets[index], activity.targets[index])];
             }));
           } else if ((activity.type === 'config' || activity.type === 'consequence')) {
-            activitySequence = activitySequence.map(value => mapAnswerToLocale(value, oldActivity?.tokens || [], activity.tokens || []));
+            activitySequence = activitySequence.map((value, index) => translateSequenceValue(value, oldActivity, activity, index));
           } else if (activity.type === 'journal') {
             activityAnswers = Object.fromEntries(Object.entries(activityAnswers).map(([key, value]) => {
               if (!key.startsWith('side-')) return [key, value];
@@ -11053,8 +11283,11 @@ function reduceState(state, action) {
       const now = new Date(action.now || Date.now());
       const existing = state.progress[action.skillId] || {};
       const dimensions = { knowledge: Math.max(existing.knowledge || 0, 60), application: Math.max(existing.application || 0, 50), verification: Math.max(existing.verification || 0, 40), risk: Math.max(existing.risk || 0, 50) };
-      const mastery = calculateMastery(dimensions);
-      return { ...state, progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: mastery.score, mastered: mastery.mastered, explored: true, streak: existing.streak || 0, lastPractised: now.toISOString(), nextReview: nextReviewDate(existing.streak || 0, now) }), toast: 'practice-recorded' };
+      const streak = existing.streak || 0;
+      const safetyGatePassed = existing.safetyGatePassed !== false;
+      const correctAttempts = existing.correctAttempts || 0;
+      const evaluation = evaluateSkill({ ...dimensions, streak, correctAttempts, safetyGatePassed, everMastered: Boolean(existing.everMastered) });
+      return { ...state, progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: evaluation.score, mastered: evaluation.mastered, everMastered: Boolean(existing.everMastered) || evaluation.mastered, explored: true, streak, correctAttempts, safetyGatePassed, lastPractised: now.toISOString(), nextReview: nextReviewDate(streak, now) }), toast: 'practice-recorded' };
     }
     case 'ASSESS_SKILL': {
       const now = new Date(action.now || Date.now());
@@ -11063,18 +11296,21 @@ function reduceState(state, action) {
       const dimensions = action.correct
         ? { knowledge: increment('knowledge', 10), application: increment('application', 15), verification: increment('verification', 20), risk: increment('risk', 15) }
         : { knowledge: increment('knowledge', 5), application: Number(existing.application) || 0, verification: Number(existing.verification) || 0, risk: Number(existing.risk) || 0 };
+      // El bonus de principio es evidencia, no adorno: entra en las dimensiones ANTES de derivar
+      // el resultado. Aplicarlo después dejaba una puntuación guardada que su propio validador
+      // de importación rechazaba.
+      if (action.principleCorrect) { dimensions.verification = Math.min(100, dimensions.verification + 5); }
       const safetyGatePassed = action.safetyGatePassed !== false;
-      const mastery = calculateMastery(dimensions, safetyGatePassed);
       const streak = action.correct ? (existing.streak || 0) + 1 : 0;
       const correctAttempts = action.correct ? (existing.correctAttempts || 0) + 1 : (existing.correctAttempts || 0);
-      const principleBonus = action.principleCorrect ? 5 : 0;
-      if (principleBonus) { dimensions.verification = Math.min(100, dimensions.verification + principleBonus); }
-      // Mastery is monotonic: later practice may reset the streak, never erase an earned competency.
-      const mastered = Boolean(existing.mastered || (action.correct && mastery.mastered && correctAttempts >= 3));
-      const masteryMoment = !existing.mastered && mastered ? { skillId: action.skillId, achievedAt: now.toISOString() } : null;
+      const evaluation = evaluateSkill({ ...dimensions, streak, correctAttempts, safetyGatePassed, everMastered: Boolean(existing.everMastered) });
+      // Aptitud actual (derivable y verificable) frente a logro histórico (monótono): un fallo de
+      // seguridad suspende la primera sin borrar el segundo.
+      const everMastered = Boolean(existing.everMastered) || evaluation.mastered;
+      const masteryMoment = !existing.everMastered && everMastered ? { skillId: action.skillId, achievedAt: now.toISOString() } : null;
       return {
         ...state,
-        progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: mastery.score, mastered, explored: true, streak, correctAttempts, safetyGatePassed, lastPractised: now.toISOString(), nextReview: nextReviewDate(streak, now) }),
+        progress: updateSkill(state.progress, action.skillId, { ...dimensions, mastery: evaluation.score, mastered: evaluation.mastered, everMastered, explored: true, streak, correctAttempts, safetyGatePassed, lastPractised: now.toISOString(), nextReview: nextReviewDate(streak, now) }),
         assessmentResult: { kind: 'skill', correct: action.correct, safetyGatePassed, principleCorrect: action.principleCorrect },
         masteryMoment
       };
@@ -11091,7 +11327,14 @@ function reduceState(state, action) {
     case 'SELECT_PROCESS': return Object.hasOwn(PROCESS_STEPS, action.process) ? { ...state, process: action.process, processStep: 0 } : state;
     case 'SELECT_PROCESS_STEP': return { ...state, processStep: Math.max(0, Number(action.index) || 0) };
     case 'PROMPT_RESULT': return { ...state, promptDraft: action.prompt, promptResult: action.result };
-    case 'IMPORT_STATE': return { ...createInitialState(action.value), toast: 'import-ok' };
+    case 'IMPORT_STATE': {
+      // La misma regla determinista que usan la carga local y el selector de fichero. Validar
+      // solo en el sitio de llamada dejaba abierta la puerta de atrás: un progreso que el
+      // validador rechaza no puede sustituir al vigente ni anunciarse como importado.
+      const validation = validateProgressImport(action.value);
+      if (!validation.valid) return { ...state, toast: 'import-error' };
+      return { ...createInitialState(stateFromPayload(validation.value)), toast: 'import-ok' };
+    }
     case 'RESET': return { ...createInitialState(), toast: 'reset-ok' };
     case 'CLEAR_TOAST': return { ...state, toast: '' };
     default: return state;
@@ -11103,11 +11346,11 @@ function serializeProgress(state, exportedAt = new Date().toISOString()) {
   for (const [skillId, record] of Object.entries(state.progress || {})) {
     if (!/^SYN-SK-L[0-8]-0[1-8]$/.test(skillId) || !record || typeof record !== 'object') continue;
     progress[skillId] = Object.fromEntries(Object.entries(record).filter(([key, value]) =>
-      ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'lastPractised', 'nextReview'].includes(key)
+      ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'everMastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'legacy', 'lastPractised', 'nextReview'].includes(key)
       && ['number', 'boolean', 'string'].includes(typeof value)));
   }
   return {
-    schemaVersion: 1, classification: 'synthetic-progress',
+    schemaVersion: PROGRESS_SCHEMA_VERSION, classification: 'synthetic-progress',
     locale: state.locale, track: state.track, progress,
     settings: {
       diagnosticCompleted: Boolean(state.diagnosticCompleted),
@@ -11252,7 +11495,7 @@ function svgRadar(record, state, level = 0) {
 function renderHeatmap(state) {
   const cells = LEVELS.map(level => {
     const levelSkills = SKILLS.filter(s => s.level === level.id);
-    const mastered = levelSkills.filter(s => state.progress[s.id]?.mastered).length;
+    const mastered = levelSkills.filter(s => isCredited(state.progress[s.id])).length;
     const pct = Math.round((mastered / levelSkills.length) * 100);
     const heat = pct === 0 ? ' sbl-heat-0' : pct < 34 ? ' sbl-heat-1' : pct < 67 ? ' sbl-heat-2' : pct < 100 ? ' sbl-heat-3' : ' sbl-heat-4';
     const label = local(level.title, state.locale);
@@ -11269,7 +11512,7 @@ function renderLedgerSpine(state) {
   const intro = state.locale === 'de' ? 'Jeder Knoten ist ein Kapitel. Öffne ein Niveau, um seine Kompetenzen zu sehen.' : state.locale === 'en' ? 'Each node is a chapter. Open a level to inspect its competencies.' : 'Cada nodo es un capítulo. Abre un nivel para inspeccionar sus competencias.';
   const nodes = LEVELS.map(level => {
     const skills = SKILLS.filter(skill => skill.level === level.id);
-    const mastered = skills.filter(skill => state.progress[skill.id]?.mastered).length;
+    const mastered = skills.filter(skill => isCredited(state.progress[skill.id])).length;
     const explored = skills.filter(skill => state.progress[skill.id]?.explored).length;
     const pct = Math.round(mastered / Math.max(1, skills.length) * 100);
     const status = pct === 100 ? 'is-complete' : explored > 0 ? 'is-progress' : 'is-new';
@@ -11319,7 +11562,28 @@ function renderDistractorPanel(state, entry) {
   return `<div class="sbl-distractors"><h4>${t(state, 'whyOptions')}</h4><ul>${items}</ul></div>`;
 }
 
+function renderImportedCase(state, entry) {
+  const copy = {
+    es: { badge: 'Caso importado · revisión guiada', objective: 'Objetivo', task: 'Tarea', questions: 'Preguntas de diagnóstico', rubric: 'Rúbrica', reference: 'Solución de referencia', source: 'Trazabilidad', note: 'Esta actividad no otorga dominio automáticamente: requiere respuesta y revisión humana.' },
+    en: { badge: 'Imported case · guided review', objective: 'Objective', task: 'Task', questions: 'Diagnostic questions', rubric: 'Rubric', reference: 'Reference solution', source: 'Traceability', note: 'This activity does not award mastery automatically: it requires an answer and human review.' },
+    de: { badge: 'Importierter Fall · geführte Prüfung', objective: 'Ziel', task: 'Aufgabe', questions: 'Diagnosefragen', rubric: 'Rubrik', reference: 'Referenzlösung', source: 'Rückverfolgbarkeit', note: 'Diese Aktivität vergibt Beherrschung nicht automatisch: Antwort und menschliche Prüfung sind erforderlich.' }
+  }[state.locale];
+  return `<section class="card sbl-stack" aria-labelledby="decision-title" data-imported-case="${escapeHtml(entry.id)}">
+    <div class="sbl-card-head"><span class="viz-badge">${copy.badge}</span><span class="text-small">${t(state, 'level')} ${entry.level}</span></div>
+    <h2 id="decision-title">${escapeHtml(entry.statement)}</h2>
+    <h3>${copy.objective}</h3><p>${escapeHtml(entry.objective)}</p>
+    <h3>${copy.task}</h3><p>${escapeHtml(entry.task)}</p>
+    <h3>${copy.questions}</h3><ol>${entry.questions.map(question => `<li>${escapeHtml(question)}</li>`).join('')}</ol>
+    <h3>${copy.rubric}</h3><dl>${entry.rubric.map(row => `<div><dt>${escapeHtml(row.criterion)}</dt><dd>${escapeHtml(row.expected)}</dd></div>`).join('')}</dl>
+    <details><summary>${copy.reference}</summary><p>${escapeHtml(entry.referenceResolution)}</p></details>
+    <p class="text-muted">${copy.note}</p>
+    <p class="text-small"><strong>${copy.source}:</strong> ${escapeHtml(entry.source.caseId)} · ${escapeHtml(entry.source.contentSha256)}</p>
+    <div class="sbl-actions"><button type="button" class="btn btn-primary" data-action="next-decision" data-kind="case">${t(state, 'next')}</button></div>
+  </section>`;
+}
+
 function renderDecision(state, entry, kind) {
+  if (entry.imported) return renderImportedCase(state, entry);
   const answered = state.assessmentResult?.kind === kind;
   return `<section class="card sbl-stack" aria-labelledby="decision-title">
     <div class="sbl-card-head"><span class="viz-badge">${escapeHtml(entry.id)}</span><span class="text-small">${t(state, 'level')} ${entry.level}</span></div>
@@ -11352,7 +11616,7 @@ function renderNow(state) { return state.__renderNow instanceof Date ? state.__r
 function progressStats(state) {
   const records = Object.values(state.progress);
   const explored = records.filter(record => record.explored).length;
-  const mastered = records.filter(record => record.mastered).length;
+  const mastered = records.filter(record => isCredited(record)).length;
   const due = deriveDueReviews(state.progress, renderNow(state)).length;
   return { explored, mastered, due, percent: Math.round((mastered / SKILLS.length) * 100) };
 }
@@ -11371,7 +11635,7 @@ function renderHome(state) {
     de: { title: 'Dein heutiger Schreibtisch', due: 'Heutige Wiederholungen', clear: 'Heute ist nichts fällig', streak: 'Serie', days: 'Tage', next: 'Als Nächstes empfohlen', continue: 'Weiter' }
   }[state.locale];
   const byTrack = trackId => SKILLS.filter(s => s.track === trackId || s.track === 'dual');
-  const trackPct = list => Math.round(list.filter(s => state.progress[s.id]?.mastered).length / Math.max(1, list.length) * 100);
+  const trackPct = list => Math.round(list.filter(s => isCredited(state.progress[s.id])).length / Math.max(1, list.length) * 100);
   const funcPct = trackPct(byTrack('functional'));
   const techPct = trackPct(byTrack('dual').concat(byTrack('technical')));
   const virgin = stats.explored === 0;
@@ -11407,7 +11671,7 @@ function renderHome(state) {
         <div class="card viz-stat"><span class="text-muted">${t(state, 'skillsExplored')}</span><span class="viz-stat-value">${stats.explored}</span><span class="text-small">72</span></div>
         <div class="card viz-stat"><span class="text-muted">${state.locale === 'de' ? 'Funktionale Spur' : state.locale === 'en' ? 'Functional track' : 'Ruta funcional'}</span><span class="viz-stat-value">${funcPct}%</span><span class="text-small">L0-L5</span></div>
         <div class="card viz-stat"><span class="text-muted">${t(state, 'techTrackLabel')}</span><span class="viz-stat-value">${techPct}%</span><span class="text-small">L6-L8</span></div>
-      </div>`}
+      </div><p class="text-small sbl-scope-note">${t(state, 'masteryScope')}</p>`}
       ${!virgin ? renderCareerStrip(state) : ''}
     </section>
     ${renderLedgerSpine(state)}
@@ -11421,21 +11685,32 @@ function renderLevelBars(state) {
     <h2 id="lvl-bars">${state.locale === 'de' ? 'Fortschritt nach Niveau' : state.locale === 'en' ? 'Progress by level' : 'Progreso por nivel'}</h2>
     <div class="csl-levelbars">${LEVELS.map(level => {
       const list = SKILLS.filter(s => s.level === level.id);
-      const pct = Math.round(list.filter(s => state.progress[s.id]?.mastered).length / Math.max(1, list.length) * 100);
+      const pct = Math.round(list.filter(s => isCredited(state.progress[s.id])).length / Math.max(1, list.length) * 100);
       return `<div class="csl-lvlrow"><span class="csl-lvlname">L${level.id} · ${local(level.title, state.locale)}</span><div class="csl-lvltrack"><div class="csl-lvlfill" style="width:${pct}%"></div></div><span class="csl-lvlpct">${pct}%</span></div>`;
     }).join('')}</div>
   </section>`;
 }
+/**
+ * Logro acreditado, que nunca retrocede. Los agregados (portada, niveles, rutas, carrera)
+ * cuentan esto y no la aptitud actual: una puerta de seguridad fallada suspende la aptitud
+ * de una competencia, no borra el trabajo hecho ni hace bajar el marcador sin explicación.
+ * El estado por competencia —donde la suspensión sí es accionable— lo da skillStatusKey.
+ * El `?? mastered` rehidrata registros anteriores al contrato v2, que no guardaban el campo.
+ */
+function isCredited(record) { return Boolean(record?.everMastered ?? record?.mastered); }
+
 function skillStatusKey(state, skill) {
   const record = state.progress[skill.id];
   if (record?.mastered) return 'mastered';
+  // El trabajo hecho no desaparece: si la aptitud actual decae, se muestra suspendida.
+  if (record?.everMastered) return 'suspended';
   if (record?.explored) return 'learning';
   return 'new';
 }
 
 function skillStatus(state, skill) {
   const key = skillStatusKey(state, skill);
-  return t(state, key === 'mastered' ? 'masteredStatus' : key === 'learning' ? 'learningStatus' : 'newStatus');
+  return t(state, key === 'mastered' ? 'masteredStatus' : key === 'suspended' ? 'suspendedStatus' : key === 'learning' ? 'learningStatus' : 'newStatus');
 }
 
 
@@ -11542,7 +11817,9 @@ function renderActivityBody(state, activity) {
     return `<div class="act-trigger"><strong>${t(state, 'actEventSeen')}</strong><p>${escapeHtml(activity.trigger)}</p></div><div class="act-route-built">${sequence.length?sequence.map((x,i)=>`<span><small>${i+1}</small>${escapeHtml(x)}</span>`).join('<b>→</b>'):`<em>${t(state, 'actBuildCascade')}</em>`}</div><div class="act-token-bank">${tokens.map(x=>`<button type="button" class="btn" data-action="activity-sequence" data-value="${escapeHtml(x)}"${sequence.includes(x)?' disabled':''}>${escapeHtml(x)}</button>`).join('')}</div><button type="button" class="btn btn-small" data-action="activity-undo">↶ ${t(state, 'actUndo')}</button>`;
   }
   if (activity.type === 'journal') {
-    const amount = v => Number(String(v||'0').replace(/\./g,'').replace(',','.')) || 0;
+    // Mismo lector de importes que el corrector: el panel no puede decir «descuadrado»
+    // sobre un asiento que validateActivityDetailed va a dar por bueno.
+    const amount = v => (parseAmountCents(v) ?? 0) / 100;
     // Los lados se guardan y comparan con el texto del locale activo (Debe/Haber,
     // Debit/Credit, Soll/Haben): SET_LOCALE re-mapea las respuestas al cambiar idioma.
     const sides = journalSideTexts(state.locale);
@@ -11631,14 +11908,14 @@ function renderMap(state) {
     </div>
     <div class="sbl-levels">${filtered.length ? LEVELS.filter(level => filtered.some(skill => skill.level === level.id)).map(level => {
       const levelSkills = filtered.filter(skill => skill.level === level.id);
-      const mastered = levelSkills.filter(skill => state.progress[skill.id]?.mastered).length;
+      const mastered = levelSkills.filter(skill => isCredited(state.progress[skill.id])).length;
       const pct = Math.round(mastered / Math.max(1, levelSkills.length) * 100);
       return `<section class="sbl-level-group" aria-labelledby="level-${level.id}">
         <div class="sbl-level-heading"><div><h2 id="level-${level.id}">${t(state, 'level')} ${level.id} · ${local(level.title, state.locale)}</h2><span class="text-small">${mastered}/${levelSkills.length} ${t(state, 'masteredStatus')}</span></div><div class="sbl-level-progress" role="progressbar" aria-label="${local(level.title, state.locale)}" aria-valuemin="0" aria-valuemax="${levelSkills.length}" aria-valuenow="${mastered}"><span style="width:${pct}%"></span></div></div>
         <div class="viz-grid">${levelSkills.map(skill => {
           const statusKey = skillStatusKey(state, skill);
           const status = skillStatus(state, skill);
-          const icon = statusKey === 'mastered' ? '✓' : statusKey === 'learning' ? '◐' : '○';
+          const icon = statusKey === 'mastered' ? '✓' : statusKey === 'suspended' ? '⚠' : statusKey === 'learning' ? '◐' : '○';
           const selectedClass = skill.id === selected.id ? ' is-selected' : '';
           return `<button type="button" class="btn viz-tile sbl-node is-${statusKey}${selectedClass}" data-action="select-skill" data-skill="${skill.id}" aria-pressed="${skill.id === selected.id}" aria-label="${local(skill.title, state.locale)} — ${status}"><span class="sbl-node-title">${local(skill.title, state.locale)}</span><span class="sbl-node-meta"><span class="sbl-node-status" aria-hidden="true">${icon}</span><span class="text-small">${status}</span></span></button>`;
         }).join('')}</div>
@@ -11761,7 +12038,7 @@ function renderCareerStrip(state) {
 function renderCareer(state) {
   const L = state.locale;
   const loc = v => trNode(v, L);
-  const mastered = SKILLS.filter(s => state.progress[s.id]?.mastered).length;
+  const mastered = SKILLS.filter(s => isCredited(state.progress[s.id])).length;
   const cp = careerProgress(mastered, L);
   const kpis = kpiSnapshot(mastered);
   const nextSkill = recommendNext(SKILLS, state.progress, new Date(), { track: state.track, recommendedLevel: state.recommendedLevel }) || SKILLS[0];
@@ -11790,7 +12067,7 @@ function renderCareer(state) {
     </section>` : ''}
     <section class="card sbl-stack">
       <h3>${t(state, 'crTicketLog')}</h3>
-      <div class="cr-log">${SKILLS.filter(s => state.progress[s.id]?.mastered).slice(0, 30).reverse().map(s => {
+      <div class="cr-log">${SKILLS.filter(s => isCredited(state.progress[s.id])).slice(0, 30).reverse().map(s => {
         const mc = MASTERCLASS[s.id];
         const tk = mc ? getTicket(s, mc, L, LEVELS) : null;
         return tk ? `<div class="cr-log-row"><span class="cr-log-id">${tk.id}</span><span>${escapeHtml(tk.subject)}</span><span class="cr-log-ok">✓ ${t(state, 'crResolved')}</span></div>` : '';
@@ -11813,8 +12090,10 @@ function renderView(state) {
 }
 
 function toastText(state) {
-  const map = { 'practice-recorded': 'markPractice', 'import-ok': 'importOk', 'reset-ok': 'resetConfirm', 'import-error': 'importError', 'export-ok': 'exportOk' };
-  return state.toast ? `<div class="sbl-toast" role="status">${t(state, map[state.toast] || state.toast)}</div>` : '';
+  const map = { 'practice-recorded': 'markPractice', 'import-ok': 'importOk', 'reset-ok': 'resetConfirm', 'import-error': 'importError', 'export-ok': 'exportOk', 'storage-error': 'storageError' };
+  // Un aviso de que no se ha guardado nada no es un acuse de recibo: se anuncia como alerta.
+  const failed = state.toast === 'import-error' || state.toast === 'storage-error';
+  return state.toast ? `<div class="sbl-toast" role="${failed ? 'alert' : 'status'}">${t(state, map[state.toast] || state.toast)}</div>` : '';
 }
 
 function renderMasteryMoment(state) {
@@ -11847,18 +12126,15 @@ function loadStored() {
     if (!value) return createInitialState(forced ? { locale: forced } : {});
     const validation = validateProgressImport(value);
     if (!validation.valid) return createInitialState(forced ? { locale: forced } : {});
-    return createInitialState({
-      locale: forced || value.locale, track: value.track, progress: value.progress,
-      diagnosticCompleted: value.settings?.diagnosticCompleted,
-      diagnosticScore: value.settings?.diagnosticScore,
-      recommendedLevel: value.settings?.recommendedLevel,
-      selectedSkillId: value.settings?.selectedSkillId
-    });
+    // validation.value trae el progreso ya migrado al esquema vigente; el crudo se descarta.
+    return createInitialState({ ...stateFromPayload(validation.value), locale: forced || validation.value.locale });
   } catch { return createInitialState(); }
 }
 
+/** Devuelve si el progreso llegó realmente al almacenamiento local. */
 function saveStored(state) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeProgress(state))); } catch { /* local persistence is optional */ }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeProgress(state))); return true; }
+  catch { return false; }
 }
 
 function downloadProgress(state) {
@@ -11880,7 +12156,13 @@ function mountSapB1Lab(root) {
     if (state.masteryMoment) root.querySelector('[data-action="clear-mastery-moment"]')?.focus();
     if (globalThis.lucide?.createIcons) globalThis.lucide.createIcons({ attrs: { width: 16, height: 16 } });
   };
-  const dispatch = action => { state = reduceState(state, action); saveStored(state); render(); };
+  // Cuota agotada o almacenamiento bloqueado no pueden terminar en «práctica registrada»: la
+  // sesión continúa en memoria (salida segura), pero el aviso sustituye a la confirmación.
+  const dispatch = action => {
+    state = reduceState(state, action);
+    if (!saveStored(state)) state = { ...state, toast: 'storage-error' };
+    render();
+  };
 
   root.addEventListener('click', event => {
     const control = event.target.closest('[data-action]');
@@ -11941,7 +12223,10 @@ function mountSapB1Lab(root) {
     } else if (action === 'reset-progress') {
       const label = control.getAttribute('data-confirm') || 'Reset all progress?';
       if (globalThis.confirm && globalThis.confirm(label)) {
-        localStorage.removeItem(STORAGE_KEY); dispatch({ type: 'RESET' });
+        // Si el almacenamiento no responde, el reinicio en memoria sigue siendo válido y el
+        // aviso de dispatch dirá que no se ha persistido; no se interrumpe la sesión.
+        try { localStorage.removeItem(STORAGE_KEY); } catch { /* el aviso lo da el guardado */ }
+        dispatch({ type: 'RESET' });
       }
     }
   });
@@ -11962,13 +12247,7 @@ function mountSapB1Lab(root) {
           const value = JSON.parse(String(reader.result));
           const validation = validateProgressImport(value);
           if (!validation.valid) throw new Error(validation.reason);
-          dispatch({ type: 'IMPORT_STATE', value: {
-            locale: value.locale, track: value.track, progress: value.progress,
-            diagnosticCompleted: value.settings?.diagnosticCompleted,
-            diagnosticScore: value.settings?.diagnosticScore,
-            recommendedLevel: value.settings?.recommendedLevel,
-            selectedSkillId: value.settings?.selectedSkillId
-          } });
+          dispatch({ type: 'IMPORT_STATE', value: validation.value });
         } catch { state = { ...state, toast: 'import-error' }; render(); }
       });
       reader.readAsText(control.files[0]);

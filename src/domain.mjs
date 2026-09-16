@@ -1,11 +1,37 @@
 const SCORE_FIELDS = ['knowledge', 'application', 'verification', 'risk'];
+const MASTERY_THRESHOLDS = { knowledge: 80, application: 80, verification: 90, risk: 90 };
 
-export function calculateMastery(scores = {}, safetyGatePassed = true) {
-  const normalized = Object.fromEntries(SCORE_FIELDS.map(field => [field, Math.max(0, Math.min(100, Number(scores[field]) || 0))]));
-  const score = Math.round((normalized.knowledge + normalized.application + normalized.verification + normalized.risk) / 4);
-  if (!safetyGatePassed) return { score, mastered: false, reason: 'safety-gate', dimensions: normalized };
-  const mastered = normalized.knowledge >= 80 && normalized.application >= 80 && normalized.verification >= 90 && normalized.risk >= 90;
-  return { score, mastered, reason: mastered ? 'mastered' : 'threshold', dimensions: normalized };
+/** Persisted progress contract. v2 splits historical achievement from current aptitude. */
+export const PROGRESS_SCHEMA_VERSION = 2;
+/** Consecutive correct answers required for current aptitude; one failure resets the streak. */
+export const SUSTAINED_CORRECT = 3;
+
+function normalizeDimensions(scores = {}) {
+  return Object.fromEntries(SCORE_FIELDS.map(field => [field, Math.max(0, Math.min(100, Number(scores[field]) || 0))]));
+}
+
+/**
+ * Single source of truth for the mastery rules. The reducer, the UI and the import
+ * validator all derive from here; none of them may re-implement a part of it.
+ * `mastered` is CURRENT aptitude; `everMastered` is the separate historical achievement,
+ * which never regresses. The sustained streak is what EARNS aptitude the first time; after
+ * that, a plain miss only resets the streak, while a failed safety gate suspends aptitude
+ * without erasing the achievement.
+ */
+export function evaluateSkill(record = {}) {
+  const dimensions = normalizeDimensions(record);
+  const score = Math.round(SCORE_FIELDS.reduce((total, field) => total + dimensions[field], 0) / SCORE_FIELDS.length);
+  const thresholdMet = SCORE_FIELDS.every(field => dimensions[field] >= MASTERY_THRESHOLDS[field]);
+  const safetyGatePassed = record.safetyGatePassed !== false;
+  const sustained = (Number(record.streak) || 0) >= SUSTAINED_CORRECT;
+  // Una acreditación previa sólo sigue valiendo si los aciertos que la sostienen están
+  // registrados. Así un registro heredado sin historial de intentos conserva la historia
+  // (`everMastered`) pero tiene que volver a ganarse la aptitud, y ningún fichero manipulado
+  // consigue aptitud con menos evidencia de la que siempre se exigió.
+  const credited = sustained || (record.everMastered === true && (Number(record.correctAttempts) || 0) >= SUSTAINED_CORRECT);
+  const mastered = thresholdMet && credited && safetyGatePassed;
+  const reason = mastered ? 'mastered' : !safetyGatePassed ? 'safety-gate' : !thresholdMet ? 'threshold' : 'not-sustained';
+  return { score, dimensions, thresholdMet, sustained, credited, safetyGatePassed, mastered, reason };
 }
 
 export function recommendNext(skills, progress = {}, now = new Date(), options = {}) {
@@ -119,48 +145,111 @@ export function lintPrompt(value = '') {
   return { score, present, missing, privacy };
 }
 
-export function validateProgressImport(value) {
-  const allowed = ['schemaVersion', 'classification', 'locale', 'track', 'progress', 'settings', 'exportedAt'];
-  const allowedRecord = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'lastPractised', 'nextReview'];
-  const requiredRecord = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'lastPractised', 'nextReview'];
-  const allowedSettings = ['diagnosticCompleted', 'diagnosticScore', 'recommendedLevel', 'selectedSkillId'];
-  const validSkillId = value => /^SYN-SK-L[0-8]-0[1-8]$/.test(value);
-  const validDate = value => typeof value === 'string'
-    && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)
-    && !Number.isNaN(Date.parse(value));
-  const scoreFields = ['knowledge', 'application', 'verification', 'risk', 'mastery'];
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return { valid: false, reason: 'object-required' };
-  const unknown = Object.keys(value).filter(key => !allowed.includes(key));
+const ALLOWED_TOP_LEVEL = ['schemaVersion', 'classification', 'locale', 'track', 'progress', 'settings', 'exportedAt'];
+const ALLOWED_SETTINGS = ['diagnosticCompleted', 'diagnosticScore', 'recommendedLevel', 'selectedSkillId'];
+const V1_RECORD_FIELDS = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'lastPractised', 'nextReview'];
+const V1_REQUIRED_RECORD = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'explored', 'streak', 'lastPractised', 'nextReview'];
+const RECORD_FIELDS = [...V1_RECORD_FIELDS, 'everMastered', 'legacy'];
+const REQUIRED_RECORD = ['knowledge', 'application', 'verification', 'risk', 'mastery', 'mastered', 'everMastered', 'explored', 'streak', 'correctAttempts', 'safetyGatePassed', 'lastPractised', 'nextReview'];
+const SCORE_RANGE_FIELDS = ['knowledge', 'application', 'verification', 'risk', 'mastery'];
+const BOOLEAN_FIELDS = ['mastered', 'everMastered', 'explored', 'safetyGatePassed', 'legacy'];
+const COUNTER_FIELDS = ['streak', 'correctAttempts'];
+const isSkillId = value => /^SYN-SK-L[0-8]-0[1-8]$/.test(value);
+const isTimestamp = value => typeof value === 'string'
+  && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)
+  && !Number.isNaN(Date.parse(value));
+
+/**
+ * Lift a v1 payload to v2 without inventing evidence. Derived values (mastery, mastered)
+ * are recomputed from the stored dimensions, so a forged claim cannot take effect; it is
+ * neutralized rather than trusted. A record that never stored `correctAttempts` cannot have
+ * its attempt history reconstructed, so it is flagged `legacy` instead of being given one.
+ * Structural defects (unknown fields, bad ids, missing v1 fields) still reject the payload.
+ */
+export function migrateProgressPayload(value) {
+  const unknown = Object.keys(value).filter(key => !ALLOWED_TOP_LEVEL.includes(key));
+  if (unknown.length) return { ok: false, reason: 'unknown-fields', fields: unknown };
+  if (!value.progress || typeof value.progress !== 'object' || Array.isArray(value.progress)) return { ok: false, reason: 'progress' };
+  const progress = {};
+  for (const [skillId, record] of Object.entries(value.progress)) {
+    if (!isSkillId(skillId) || !record || typeof record !== 'object' || Array.isArray(record)) return { ok: false, reason: 'progress-record' };
+    if (Object.keys(record).some(key => !V1_RECORD_FIELDS.includes(key))) return { ok: false, reason: 'progress-fields' };
+    if (V1_REQUIRED_RECORD.some(key => !Object.hasOwn(record, key))) return { ok: false, reason: 'progress-required' };
+    // Los booleanos del v1 se comprueban aquí: el registro migrado ya no los lleva tal cual,
+    // así que si no se validan ahora, `mastered: 'yes'` entraría por la puerta de atrás.
+    if (typeof record.mastered !== 'boolean' || typeof record.explored !== 'boolean') return { ok: false, reason: 'progress-type' };
+    if (Object.hasOwn(record, 'safetyGatePassed') && typeof record.safetyGatePassed !== 'boolean') return { ok: false, reason: 'progress-type' };
+    const reconstructable = Object.hasOwn(record, 'correctAttempts');
+    const declared = evaluateSkill(record);
+    // El logro histórico se decide primero y alimenta la aptitud, para que el registro migrado
+    // sea internamente consistente cuando el validador lo vuelva a derivar.
+    const candidate = {
+      knowledge: record.knowledge, application: record.application, verification: record.verification, risk: record.risk,
+      everMastered: declared.thresholdMet ? record.mastered || declared.mastered : declared.mastered,
+      explored: record.explored,
+      streak: record.streak,
+      correctAttempts: reconstructable ? record.correctAttempts : record.streak,
+      safetyGatePassed: record.safetyGatePassed !== false,
+      lastPractised: record.lastPractised,
+      nextReview: record.nextReview,
+      ...(reconstructable ? {} : { legacy: true })
+    };
+    const evaluation = evaluateSkill(candidate);
+    progress[skillId] = { ...candidate, mastery: evaluation.score, mastered: evaluation.mastered };
+  }
+  return { ok: true, value: { ...value, schemaVersion: PROGRESS_SCHEMA_VERSION, progress } };
+}
+
+function validateCurrentPayload(value) {
+  const unknown = Object.keys(value).filter(key => !ALLOWED_TOP_LEVEL.includes(key));
   if (unknown.length) return { valid: false, reason: 'unknown-fields', fields: unknown };
-  if (value.schemaVersion !== 1 || value.classification !== 'synthetic-progress') return { valid: false, reason: 'classification' };
+  if (value.schemaVersion !== PROGRESS_SCHEMA_VERSION || value.classification !== 'synthetic-progress') return { valid: false, reason: 'classification' };
   if (!['es', 'en', 'de'].includes(value.locale)) return { valid: false, reason: 'locale' };
   if (!['functional', 'technical', 'dual'].includes(value.track)) return { valid: false, reason: 'track' };
   if (!value.progress || typeof value.progress !== 'object' || Array.isArray(value.progress)) return { valid: false, reason: 'progress' };
   for (const [skillId, record] of Object.entries(value.progress)) {
-    if (!validSkillId(skillId) || !record || typeof record !== 'object' || Array.isArray(record)) return { valid: false, reason: 'progress-record' };
-    if (Object.keys(record).some(key => !allowedRecord.includes(key))) return { valid: false, reason: 'progress-fields' };
-    if (requiredRecord.some(key => !Object.hasOwn(record, key))) return { valid: false, reason: 'progress-required' };
+    if (!isSkillId(skillId) || !record || typeof record !== 'object' || Array.isArray(record)) return { valid: false, reason: 'progress-record' };
+    if (Object.keys(record).some(key => !RECORD_FIELDS.includes(key))) return { valid: false, reason: 'progress-fields' };
+    if (REQUIRED_RECORD.some(key => !Object.hasOwn(record, key))) return { valid: false, reason: 'progress-required' };
     for (const [key, fieldValue] of Object.entries(record)) {
-      if (['mastered', 'explored', 'safetyGatePassed'].includes(key) && typeof fieldValue !== 'boolean') return { valid: false, reason: 'progress-type' };
-      if (scoreFields.includes(key) && (typeof fieldValue !== 'number' || !Number.isFinite(fieldValue) || fieldValue < 0 || fieldValue > 100)) return { valid: false, reason: 'progress-range' };
-      if (['streak', 'correctAttempts'].includes(key) && (!Number.isInteger(fieldValue) || fieldValue < 0 || fieldValue > 1000)) return { valid: false, reason: 'progress-range' };
-      if (['lastPractised', 'nextReview'].includes(key) && !validDate(fieldValue)) return { valid: false, reason: 'progress-date' };
+      if (BOOLEAN_FIELDS.includes(key) && typeof fieldValue !== 'boolean') return { valid: false, reason: 'progress-type' };
+      if (SCORE_RANGE_FIELDS.includes(key) && (typeof fieldValue !== 'number' || !Number.isFinite(fieldValue) || fieldValue < 0 || fieldValue > 100)) return { valid: false, reason: 'progress-range' };
+      if (COUNTER_FIELDS.includes(key) && (!Number.isInteger(fieldValue) || fieldValue < 0 || fieldValue > 1000)) return { valid: false, reason: 'progress-range' };
+      if (['lastPractised', 'nextReview'].includes(key) && !isTimestamp(fieldValue)) return { valid: false, reason: 'progress-date' };
     }
-    const derived = calculateMastery(record, record.safetyGatePassed !== false);
-    if (record.mastery !== derived.score || record.explored !== true) return { valid: false, reason: 'progress-consistency' };
-    if (record.mastered && (!derived.mastered || !record.safetyGatePassed || (record.correctAttempts || 0) < 3)) return { valid: false, reason: 'progress-mastery' };
+    // A run of correct answers cannot exceed the total ever answered correctly.
+    if (record.correctAttempts < record.streak) return { valid: false, reason: 'progress-attempts' };
+    const evaluation = evaluateSkill(record);
+    if (record.mastery !== evaluation.score || record.explored !== true) return { valid: false, reason: 'progress-consistency' };
+    // Current aptitude is fully derivable, so a claimed value that disagrees is a forgery.
+    if (record.mastered !== evaluation.mastered) return { valid: false, reason: 'progress-mastery' };
+    if (record.mastered && !record.everMastered) return { valid: false, reason: 'progress-history' };
+    // `legacy` sólo exime de justificar la HISTORIA: un registro migrado pudo acreditarse sin
+    // que se guardaran los intentos. La aptitud actual no se exime nunca (ver evaluateSkill).
+    if (record.everMastered && !record.legacy && record.correctAttempts < SUSTAINED_CORRECT) return { valid: false, reason: 'progress-history' };
     if (Date.parse(record.nextReview) <= Date.parse(record.lastPractised)) return { valid: false, reason: 'progress-review-date' };
   }
   if (value.settings !== undefined) {
     if (!value.settings || typeof value.settings !== 'object' || Array.isArray(value.settings)) return { valid: false, reason: 'settings' };
-    if (Object.keys(value.settings).some(key => !allowedSettings.includes(key))) return { valid: false, reason: 'settings-fields' };
+    if (Object.keys(value.settings).some(key => !ALLOWED_SETTINGS.includes(key))) return { valid: false, reason: 'settings-fields' };
     if (value.settings.diagnosticCompleted !== undefined && typeof value.settings.diagnosticCompleted !== 'boolean') return { valid: false, reason: 'settings-type' };
     if (value.settings.diagnosticScore !== undefined && (!Number.isInteger(value.settings.diagnosticScore) || value.settings.diagnosticScore < 0 || value.settings.diagnosticScore > 6)) return { valid: false, reason: 'settings-range' };
     if (value.settings.recommendedLevel !== undefined && (!Number.isInteger(value.settings.recommendedLevel) || value.settings.recommendedLevel < 0 || value.settings.recommendedLevel > 8)) return { valid: false, reason: 'settings-range' };
-    if (value.settings.selectedSkillId !== undefined && !validSkillId(value.settings.selectedSkillId)) return { valid: false, reason: 'settings-skill' };
+    if (value.settings.selectedSkillId !== undefined && !isSkillId(value.settings.selectedSkillId)) return { valid: false, reason: 'settings-skill' };
   }
-  if (value.exportedAt !== undefined && !validDate(value.exportedAt)) return { valid: false, reason: 'export-date' };
+  if (value.exportedAt !== undefined && !isTimestamp(value.exportedAt)) return { valid: false, reason: 'export-date' };
   return { valid: true, value };
+}
+
+export function validateProgressImport(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { valid: false, reason: 'object-required' };
+  if (value.schemaVersion === 1) {
+    const migrated = migrateProgressPayload(value);
+    if (!migrated.ok) return { valid: false, reason: migrated.reason, ...(migrated.fields ? { fields: migrated.fields } : {}) };
+    const result = validateCurrentPayload(migrated.value);
+    return result.valid ? { ...result, migratedFrom: 1 } : result;
+  }
+  return validateCurrentPayload(value);
 }
 
 export function seededOrder(items, seed = 20260822) {

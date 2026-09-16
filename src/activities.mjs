@@ -31,9 +31,9 @@ const LABELS = {
 };
 
 const FEEDBACK = {
-  es: { mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe', qOpen:'«', qClose:'»' },
-  en: { mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount', qOpen:'“', qClose:'”' },
-  de: { mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag', qOpen:'„', qClose:'“' }
+  es: { unsupported:'Tipo de actividad no soportado: no se puede corregir', incomplete:'Actividad incompleta: no hay nada que corregir', unexpected:'La respuesta trae campos que esta actividad no tiene', badAmount:'Importe no interpretable o ambiguo', mark:'Marcar', noMark:'No marcar', marked:'Marcado', unmarked:'Sin marcar', link:'Eslabón señalado', broken:'El eslabón roto real', step:'Paso', expected:'esperaba', decoys:'Incluiste señuelos que no pertenecen a la cadena', exact:'pasos exactos', steps:'pasos', sideAmount:'lado/importe', qOpen:'«', qClose:'»' },
+  en: { unsupported:'Unsupported activity type: it cannot be graded', incomplete:'Incomplete activity: there is nothing to grade', unexpected:'The answer carries fields this activity does not have', badAmount:'Amount cannot be read, or is ambiguous', mark:'Mark', noMark:'Do not mark', marked:'Marked', unmarked:'Not marked', link:'Selected link', broken:'The actual broken link', step:'Step', expected:'expected', decoys:'You included decoys that do not belong to the chain', exact:'exact steps', steps:'steps', sideAmount:'side/amount', qOpen:'“', qClose:'”' },
+  de: { unsupported:'Nicht unterstützter Aktivitätstyp: keine Bewertung möglich', incomplete:'Unvollständige Aktivität: nichts zu bewerten', unexpected:'Die Antwort enthält Felder, die diese Aufgabe nicht hat', badAmount:'Betrag nicht lesbar oder mehrdeutig', mark:'Markieren', noMark:'Nicht markieren', marked:'Markiert', unmarked:'Nicht markiert', link:'Ausgewähltes Glied', broken:'Das tatsächlich gebrochene Glied', step:'Schritt', expected:'erwartet', decoys:'Du hast Köder aufgenommen, die nicht zur Kette gehören', exact:'exakte Schritte', steps:'Schritte', sideAmount:'Seite/Betrag', qOpen:'„', qClose:'“' }
 };
 
 const JOURNAL_BLUEPRINTS = {
@@ -159,7 +159,7 @@ const CONFIG_ROUTES = {
     de: ['Administration','Definition','Geschäftspartner','Zahlungsbedingungen']
   },
   'SYN-SK-L1-08': {
-    es: ['Administración','Autorizaciones','Autorizaciones generales'],
+    es: ['Administración','Inicialización del sistema','Autorizaciones','Autorizaciones generales'],
     en: ['Administration','System Initialization','Authorizations','General Authorizations'],
     de: ['Administration','Systeminitialisierung','Berechtigungen','Allgemeine Berechtigungen']
   },
@@ -337,11 +337,119 @@ export function mapAnswerToLocale(value, oldOptions, newOptions) {
   return newOptions[index];
 }
 
+/**
+ * Traduce una respuesta de simulador entre idiomas por ROL, no por posición. Las listas
+ * de opciones pueden tener cardinalidad distinta por locale (pools de señuelos derivados
+ * de contenido localizado); el mapeo posicional puro corregía entonces una respuesta
+ * correcta como incorrecta. El rol exacto (expected) se traduce siempre; un literal
+ * compartido (identificador técnico) se conserva; el posicional queda como último
+ * recurso solo si las cardinalidades coinciden.
+ */
+export function mapSimulatorAnswer(value, oldTarget, newTarget) {
+  if (!oldTarget || !newTarget) return value;
+  if (value === oldTarget.expected) return newTarget.expected;
+  const newOptions = newTarget.options || [];
+  if (newOptions.includes(value)) return value;
+  const oldOptions = oldTarget.options || [];
+  const index = oldOptions.indexOf(value);
+  if (oldOptions.length === newOptions.length && index >= 0) return newOptions[index];
+  return value;
+}
+
+/**
+ * Traduce un paso de secuencia config/consequence entre idiomas por ROL. Un paso que era
+ * parte de la ruta/cadena correcta se traduce por su índice exacto. Un señuelo no se
+ * traduce posicionalmente: con cardinalidades desincronizadas eso convertía respuestas
+ * correctas en incorrectas. Un señuelo sin equivalente compartido se conserva tal cual:
+ * sigue siendo una respuesta equivocada y el validador la juzga como tal — nunca cambia
+ * el veredicto de una respuesta correcta.
+ */
+export function translateSequenceValue(value, oldActivity, newActivity, position = null) {
+  const oldChain = oldActivity?.route || oldActivity?.chain || [];
+  const newChain = newActivity?.route || newActivity?.chain || [];
+  // El rol de un paso lo fija su POSICIÓN en la respuesta, no su texto. Una ruta puede repetir
+  // el mismo rótulo en dos niveles; entonces buscar por texto devuelve siempre la primera
+  // aparición y una respuesta correcta se traduce al paso equivocado. Con la posición conocida,
+  // el paso correcto j viaja al paso correcto j sin depender de qué dice la traducción.
+  if (Number.isInteger(position) && position >= 0 && position < newChain.length
+      && oldChain[position] === value) {
+    return newChain[position];
+  }
+  const index = oldChain.indexOf(value);
+  if (index >= 0 && index < newChain.length) return newChain[index];
+  return value;
+}
+
+/**
+ * Interpreta un importe escrito en cualquiera de las tres convenciones de la app y devuelve
+ * céntimos enteros, o null si no es interpretable sin adivinar. Reglas deterministas:
+ * el último separador manda cuando hay de los dos; un separador único seguido de exactamente
+ * tres cifras es de millares; los grupos de millares deben ser de tres cifras. La comparación
+ * educativa es de VALOR, nunca de cadena: '1000,00', '1.000,00' y '1000.00' son el mismo importe.
+ */
+export function parseAmountCents(value) {
+  const text = String(value ?? '').replace(/[\s  ]/g, '');
+  if (!text || !/^-?[\d.,]+$/.test(text)) return null;
+  const negative = text.startsWith('-');
+  const body = negative ? text.slice(1) : text;
+  if (!/^\d/.test(body) || !/\d$/.test(body)) return null;
+  const dots = (body.match(/\./g) || []).length;
+  const commas = (body.match(/,/g) || []).length;
+  let decimalSeparator = null;
+  let groupSeparator = null;
+  if (dots && commas) {
+    decimalSeparator = body.lastIndexOf('.') > body.lastIndexOf(',') ? '.' : ',';
+    groupSeparator = decimalSeparator === '.' ? ',' : '.';
+  } else if (dots || commas) {
+    const separator = dots ? '.' : ',';
+    const decimals = body.length - body.lastIndexOf(separator) - 1;
+    if ((dots || commas) > 1 || decimals === 3) groupSeparator = separator;
+    else decimalSeparator = separator;
+  }
+  const cut = decimalSeparator ? body.lastIndexOf(decimalSeparator) : body.length;
+  const integerPart = body.slice(0, cut);
+  const decimalPart = decimalSeparator ? body.slice(cut + 1) : '';
+  if (!/^\d{1,2}$/.test(decimalPart) && decimalSeparator) return null;
+  const groups = groupSeparator ? integerPart.split(groupSeparator) : [integerPart];
+  if (groups.some(group => !/^\d+$/.test(group))) return null;
+  if (groups.length > 1 && (groups[0].length > 3 || groups.slice(1).some(group => group.length !== 3))) return null;
+  const cents = Number(groups.join('')) * 100 + Number((decimalPart + '00').slice(0, 2));
+  // Un importe tan grande que ya no cabe entero se rechaza: perder dígitos en silencio
+  // sería exactamente el fallo de formato-frente-a-valor que este lector viene a cerrar.
+  if (!Number.isSafeInteger(cents)) return null;
+  return negative ? -cents : cents;
+}
+
+const hasEntries = value => Array.isArray(value) && value.length > 0;
+
+/**
+ * Claves de respuesta que admite cada formato. Lo que no aparece aquí no forma parte del
+ * contrato de la actividad: una respuesta que trae campos de más no se corrige ignorándolos,
+ * porque entonces bastaría con acertar lo que se mira para aprobar lo que se envía.
+ */
+function allowedAnswerKeys(activity) {
+  if (activity.type === 'simulator') return activity.targets.map((_, index) => `sim-${index}`);
+  if (activity.type === 'bughunt') return activity.clues.map((_, index) => `clue-${index}`);
+  if (activity.type === 'forensic') return ['broken'];
+  if (activity.type === 'journal') return activity.lines.flatMap((_, index) => [`side-${index}`, `amount-${index}`]);
+  return [];
+}
+
 export function validateActivityDetailed(activity, answers, sequence) {
   const A = answers || {};
   const seq = sequence || [];
   const details = [];
-  const f = FEEDBACK[activity.locale || 'es'];
+  const f = FEEDBACK[activity.locale] || FEEDBACK.es;
+  // Una actividad sin material que corregir no puede aprobarse por omisión.
+  const graded = { simulator: activity.targets, bughunt: activity.clues, forensic: activity.evidence, journal: activity.lines, config: activity.route || activity.chain, consequence: activity.route || activity.chain };
+  if (!Object.hasOwn(graded, activity.type)) return { correct: false, details: [{ item: f.unsupported, ok: false, expected: Object.keys(graded).join(', '), got: String(activity.type ?? '—') }] };
+  if (!hasEntries(graded[activity.type])) return { correct: false, details: [{ item: f.incomplete, ok: false, expected: f.expected, got: '—' }] };
+  // Contrato cerrado también por el lado de la respuesta: campos ajenos y secuencias que este
+  // formato no pide se rechazan en lugar de descartarse en silencio.
+  const allowed = allowedAnswerKeys(activity);
+  const ordered = activity.type === 'config' || activity.type === 'consequence';
+  const extraneous = [...Object.keys(A).filter(key => !allowed.includes(key)), ...(ordered ? [] : seq.map(String))];
+  if (extraneous.length) return { correct: false, details: [{ item: f.unexpected, ok: false, expected: allowed.join(', ') || '—', got: extraneous.join(', ') }] };
   let correct = true;
   if (activity.type === 'simulator') {
     activity.targets.forEach((field,i)=>{ const ok=A['sim-'+i]===field.expected; if(!ok) correct=false; details.push({item:field.label,ok,expected:field.expected,got:A['sim-'+i]||'—'}); });
@@ -352,9 +460,11 @@ export function validateActivityDetailed(activity, answers, sequence) {
   } else if (activity.type === 'config' || activity.type === 'consequence') {
     const ref=activity.route||activity.chain;
     ref.forEach((step,i)=>{ const ok=seq[i]===step; if(!ok) correct=false; details.push({item:`${f.step} ${i+1}: ${f.expected} ${f.qOpen}${String(step).slice(0,40)}${f.qClose}`,ok,expected:step,got:seq[i]||'—'}); });
-    if(activity.tokens&&seq.length>ref.length){ correct=false; details.push({item:f.decoys,ok:false,expected:`${ref.length} ${f.exact}`,got:`${seq.length} ${f.steps}`}); }
+    // El exceso de pasos se rechaza siempre: que la actividad traiga o no banco de fichas es
+    // presentación, no contrato. Una ruta más larga que la de referencia no es la misma ruta.
+    if(seq.length>ref.length){ correct=false; details.push({item:f.decoys,ok:false,expected:`${ref.length} ${f.exact}`,got:`${seq.length} ${f.steps}`}); }
   } else if (activity.type === 'journal') {
-    activity.lines.forEach((line,i)=>{ const sideOk=journalSideKey(A[`side-${i}`])===journalSideKey(line[1]); const amountOk=String(A[`amount-${i}`]||'').replace(/\s/g,'')===line[2]; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A[`side-${i}`]||'—'} ${A[`amount-${i}`]||'—'}`}); });
+    activity.lines.forEach((line,i)=>{ const sideOk=journalSideKey(A[`side-${i}`])===journalSideKey(line[1]); const given=parseAmountCents(A[`amount-${i}`]); const expectedCents=parseAmountCents(line[2]); const amountOk=given!==null&&expectedCents!==null&&given===expectedCents; if(!sideOk||!amountOk) correct=false; details.push({item:`${line[0]} — ${f.sideAmount}`,ok:sideOk&&amountOk,expected:`${line[1]} ${line[2]}`,got:`${A[`side-${i}`]||'—'} ${given===null&&A[`amount-${i}`]?f.badAmount:(A[`amount-${i}`]||'—')}`}); });
   }
   return { correct, details };
 }
