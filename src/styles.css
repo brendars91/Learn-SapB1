@@ -534,6 +534,8 @@ a.btn {
 .sbl-cover .sbl-kicker { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint); }
 .sbl-cover h1 { margin: 0; }
 .sbl-cover .sbl-sub { font-style: italic; color: var(--ink-soft); max-width: 52ch; margin-inline: auto; }
+.sbl-cover .sbl-suite { max-width: 52ch; margin-inline: auto; }
+.sbl-cover .sbl-suite-link { font-weight: 700; }
 .sbl-cover .sbl-rule-orn { color: var(--accent); font-size: var(--step-1); letter-spacing: 0.5em; }
 
 /* path chips */

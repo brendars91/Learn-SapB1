@@ -12,6 +12,9 @@ import { CAREER, getTicket, careerProgress, kpiSnapshot, forensicChain, activeCa
 
 const STORAGE_KEY = 'sap-b1-mastery-lab.v1';
 const VIEWS = ['home', 'career', 'map', 'cases', 'incidents', 'simulator', 'ai', 'evidence'];
+// Sibling web of the SapMentor suite (receipt-backed checks + corpus excerpts).
+// Production domain of the `web` project; a constant, never built from input.
+export const SUITE_SAPMENTOR_URL = 'https://web-brendas-projects-272ede03.vercel.app/';
 
 export function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, character => ({
@@ -524,6 +527,7 @@ function renderHome(state) {
       <span class="sbl-kicker">${t(state, 'kicker')}</span>
       <h1>${t(state, 'coverTitle')}</h1>
       <p class="sbl-sub">${t(state, 'coverSub')}</p>
+      <p class="sbl-suite"><a class="sbl-suite-link" href="${SUITE_SAPMENTOR_URL}" target="_blank" rel="noopener noreferrer" data-testid="suite-sapmentor-link">${t(state, 'suiteSapMentor')} →</a> <span class="text-small">${t(state, 'suiteSapMentorSub')}</span></p>
       <span class="sbl-rule-orn" aria-hidden="true">❦</span>
       ${virgin ? `
       <section class="sbl-opening card" aria-label="${openingCopy.stamp}">

@@ -51,7 +51,9 @@ export const I18N = {
     fbMark: 'Marcar', fbDontMark: 'No marcar', fbMarked: 'Marcado', fbUnmarked: 'Sin marcar',
     fbLinkFlagged: 'Eslabón señalado', fbRealBrokenLink: 'El eslabón roto real', fbStep: 'Paso', fbExpected: 'esperaba',
     fbDecoys: 'Incluiste señuelos que no pertenecen a la cadena', fbExactSteps: 'pasos exactos', fbSteps: 'pasos', fbSideAmount: 'lado/importe',
-    kicker: 'SAP BUSINESS ONE · 9 NIVELES · 72 COMPETENCIAS · NIVEL EXPERTO'
+    kicker: 'SAP BUSINESS ONE · 9 NIVELES · 72 COMPETENCIAS · NIVEL EXPERTO',
+    suiteSapMentor: 'Abrir SapMentor',
+    suiteSapMentorSub: 'Comprobación con recibo y extractos del corpus en la web hermana'
   },
   en: {
     appLabel: 'SAP Business One mastery lab', navHome: 'Home', navCareer: 'Career', navMap: 'Map', navCases: 'Cases', navIncidents: 'Incidents', navSimulator: 'Chain', navAI: 'Advanced console', navEvidence: 'Sources',
@@ -104,7 +106,9 @@ export const I18N = {
     fbMark: 'Flag', fbDontMark: 'Do not flag', fbMarked: 'Flagged', fbUnmarked: 'Not flagged',
     fbLinkFlagged: 'Link flagged', fbRealBrokenLink: 'The actual broken link', fbStep: 'Step', fbExpected: 'expected',
     fbDecoys: 'You included decoys that do not belong to the chain', fbExactSteps: 'exact steps', fbSteps: 'steps', fbSideAmount: 'side/amount',
-    kicker: 'SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · EXPERT LEVEL'
+    kicker: 'SAP BUSINESS ONE · 9 LEVELS · 72 SKILLS · EXPERT LEVEL',
+    suiteSapMentor: 'Open SapMentor',
+    suiteSapMentorSub: 'Receipt-backed checks and corpus excerpts on the sibling web'
   },
   de: {
     appLabel: 'SAP Business One Kompetenzlabor', navHome: 'Start', navCareer: 'Karriere', navMap: 'Karte', navCases: 'Fälle', navIncidents: 'Störungen', navSimulator: 'Kette', navAI: 'Erweiterte Konsole', navEvidence: 'Quellen',
@@ -157,7 +161,9 @@ export const I18N = {
     fbMark: 'Markieren', fbDontMark: 'Nicht markieren', fbMarked: 'Markiert', fbUnmarked: 'Nicht markiert',
     fbLinkFlagged: 'Markiertes Glied', fbRealBrokenLink: 'Das tatsächlich gebrochene Glied', fbStep: 'Schritt', fbExpected: 'erwartet',
     fbDecoys: 'Du hast Köder aufgenommen, die nicht zur Kette gehören', fbExactSteps: 'exakte Schritte', fbSteps: 'Schritte', fbSideAmount: 'Seite/Betrag',
-    kicker: 'SAP BUSINESS ONE · 9 STUFEN · 72 KOMPETENZEN · EXPERTENNIVEAU'
+    kicker: 'SAP BUSINESS ONE · 9 STUFEN · 72 KOMPETENZEN · EXPERTENNIVEAU',
+    suiteSapMentor: 'SapMentor öffnen',
+    suiteSapMentorSub: 'Prüfungen mit Beleg und Korpusauszüge im Schwester-Web'
   }
 };
 
