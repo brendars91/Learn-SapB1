@@ -9,7 +9,7 @@ const EXPECTED_LABEL = {
 };
 
 test('suite link: production SapMentor URL is a constant, never built from input', () => {
-  assert.equal(SUITE_SAPMENTOR_URL, 'https://web-brendas-projects-272ede03.vercel.app/');
+  assert.equal(SUITE_SAPMENTOR_URL, 'https://chatgptsapb1.vercel.app/');
 });
 
 for (const locale of ['es', 'en', 'de']) {
